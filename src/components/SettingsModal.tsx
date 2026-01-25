@@ -39,21 +39,21 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-4 border-b">
-          <DialogTitle>Settings</DialogTitle>
+      <DialogContent className="max-w-md max-h-[90vh] p-0 gap-0 bg-card border-border rounded-3xl">
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle className="text-xl">Settings</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="h-[60vh] px-6">
-          <div className="space-y-6 py-4">
+        <ScrollArea className="h-[55vh] px-6">
+          <div className="space-y-6 pb-4">
             <div className="space-y-2">
-              <Label htmlFor="servingSize">Default Serving Size (g)</Label>
+              <Label className="text-muted-foreground">Default Serving (g)</Label>
               <Input
-                id="servingSize"
                 type="number"
                 value={servingSize}
                 onChange={e => setServingSize(e.target.value)}
                 min="1"
+                className="bg-secondary border-0 rounded-xl"
               />
             </div>
 
@@ -71,10 +71,10 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                         type="number"
                         value={goals[key as keyof NutrientData] ?? ''}
                         onChange={e => updateGoal(key, e.target.value)}
-                        className="w-24 text-right"
+                        className="w-24 text-right bg-secondary border-0 rounded-xl"
                         min="0"
                       />
-                      <span className="text-sm text-muted-foreground w-12">
+                      <span className="text-sm text-muted-foreground w-10">
                         {NUTRIENT_UNITS[key]}
                       </span>
                     </div>
@@ -85,12 +85,12 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
           </div>
         </ScrollArea>
 
-        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex gap-3 p-6 pt-4">
+          <Button variant="secondary" onClick={onClose} className="flex-1 ios-button-secondary">
             Cancel
           </Button>
-          <Button onClick={handleSave}>
-            Save Settings
+          <Button onClick={handleSave} className="flex-1 ios-button-primary">
+            Save
           </Button>
         </div>
       </DialogContent>
