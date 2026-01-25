@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Search, Plus, Edit, Trash2, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FoodItem, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { FoodItem } from '@/types/nutrients';
+import { cn } from '@/lib/utils';
 
 interface FoodDatabaseViewProps {
   foods: FoodItem[];
@@ -34,7 +34,8 @@ export function FoodDatabaseView({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in">
+      {/* Search & Add */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -42,31 +43,32 @@ export function FoodDatabaseView({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search foods..."
-            className="pl-9"
+            className="pl-10 bg-secondary border-0 rounded-xl"
           />
         </div>
-        <Button onClick={onAddFood}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add
+        <Button onClick={onAddFood} className="ios-button-primary">
+          <Plus className="h-4 w-4" />
         </Button>
       </div>
 
+      {/* Export/Import */}
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={onExport}>
+        <Button variant="secondary" size="sm" onClick={onExport} className="rounded-full">
           <Download className="h-4 w-4 mr-2" />
           Export
         </Button>
-        <Button variant="outline" size="sm" onClick={onImport}>
+        <Button variant="secondary" size="sm" onClick={onImport} className="rounded-full">
           <Upload className="h-4 w-4 mr-2" />
           Import
         </Button>
       </div>
 
-      <ScrollArea className="h-[400px]">
+      {/* Food List */}
+      <ScrollArea className="h-[calc(100vh-280px)]">
         <div className="space-y-2 pr-4">
           {filteredFoods.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>No foods in your database yet.</p>
+            <div className="text-center py-16 text-muted-foreground">
+              <p className="text-lg font-medium">No foods yet</p>
               <p className="text-sm mt-1">Add your first food to get started!</p>
             </div>
           ) : (
@@ -98,43 +100,32 @@ function FoodDatabaseCard({
   onLog: () => void;
 }) {
   return (
-    <Card className="p-4 glass-card hover:shadow-md transition-shadow group">
+    <div className="glass-card rounded-2xl p-4 group">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-foreground truncate">{food.name}</h4>
-            {food.brand && (
-              <span className="text-xs text-muted-foreground">({food.brand})</span>
-            )}
-          </div>
-
-          {food.barcode && (
-            <p className="text-xs text-muted-foreground mb-2">
-              Barcode: {food.barcode}
-            </p>
+        <div className="flex-1 min-w-0" onClick={onLog}>
+          <h4 className="font-semibold text-foreground truncate">{food.name}</h4>
+          {food.brand && (
+            <p className="text-xs text-muted-foreground">{food.brand}</p>
           )}
-
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>{food.servingSize}{food.servingUnit} serving</span>
-            <span>•</span>
-            <span>{food.nutrients['energy-kcal'] || 0} kcal/100g</span>
-            <span>•</span>
-            <span>{food.nutrients['proteins'] || 0}g protein</span>
+          <div className="flex flex-wrap gap-2 mt-2 text-xs">
+            <span className="text-muted-foreground">{food.servingSize}{food.servingUnit}</span>
+            <span className="text-primary">{food.nutrients['energy-kcal'] || 0} kcal</span>
+            <span className="text-nutrient-protein">{food.nutrients['proteins'] || 0}g P</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="icon" onClick={onLog} title="Log this food">
+          <Button variant="ghost" size="icon" onClick={onLog} className="rounded-full">
             <Plus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onEdit}>
+          <Button variant="ghost" size="icon" onClick={onEdit} className="rounded-full">
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete} className="hover:text-destructive">
+          <Button variant="ghost" size="icon" onClick={onDelete} className="rounded-full hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

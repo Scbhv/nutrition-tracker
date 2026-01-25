@@ -4,104 +4,58 @@
 
 @layer base {
   :root {
-    /* Fresh Health-Focused Palette */
-    --background: 150 20% 98%;
-    --foreground: 150 25% 10%;
+    /* Dark iOS Fitness App Theme */
+    --background: 120 8% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 150 25% 10%;
+    --card: 120 6% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 150 25% 10%;
+    --popover: 120 6% 14%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 158 64% 42%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 142 76% 46%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 150 20% 94%;
-    --secondary-foreground: 150 25% 20%;
+    --secondary: 120 4% 18%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 150 15% 92%;
-    --muted-foreground: 150 10% 45%;
+    --muted: 120 4% 20%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 158 50% 90%;
-    --accent-foreground: 158 64% 30%;
+    --accent: 280 60% 55%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 20% 88%;
-    --input: 150 20% 88%;
-    --ring: 158 64% 42%;
+    --border: 120 4% 20%;
+    --input: 120 4% 22%;
+    --ring: 142 76% 46%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom nutrition colors */
-    --nutrient-energy: 45 93% 47%;
-    --nutrient-protein: 220 90% 56%;
-    --nutrient-carbs: 25 95% 53%;
-    --nutrient-fat: 340 82% 52%;
-    --nutrient-fiber: 142 71% 45%;
-    --nutrient-vitamin: 280 85% 55%;
-    --nutrient-mineral: 190 80% 45%;
-    --nutrient-water: 200 90% 50%;
+    /* Nutrient colors */
+    --nutrient-energy: 45 100% 50%;
+    --nutrient-protein: 142 76% 46%;
+    --nutrient-carbs: 25 95% 55%;
+    --nutrient-fat: 280 60% 55%;
+    --nutrient-fiber: 142 60% 40%;
+    --nutrient-vitamin: 45 90% 50%;
+    --nutrient-mineral: 200 80% 50%;
+    --nutrient-water: 200 90% 55%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(180 60% 45%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(150 20% 98%) 100%);
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(150 25% 10% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(150 25% 10% / 0.07), 0 2px 4px -2px hsl(150 25% 10% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(150 25% 10% / 0.08), 0 4px 6px -4px hsl(150 25% 10% / 0.05);
-    --shadow-glow: 0 0 20px hsl(158 64% 42% / 0.15);
+    /* Shadows for dark mode */
+    --shadow-glow: 0 0 30px hsl(142 76% 46% / 0.2);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 160 20% 8%;
-    --foreground: 150 15% 95%;
-
-    --card: 160 18% 12%;
-    --card-foreground: 150 15% 95%;
-
-    --popover: 160 18% 12%;
-    --popover-foreground: 150 15% 95%;
-
-    --primary: 158 64% 48%;
-    --primary-foreground: 160 20% 8%;
-
-    --secondary: 160 15% 18%;
-    --secondary-foreground: 150 15% 90%;
-
-    --muted: 160 15% 20%;
-    --muted-foreground: 150 10% 60%;
-
-    --accent: 158 40% 20%;
-    --accent-foreground: 158 64% 70%;
-
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 160 15% 22%;
-    --input: 160 15% 22%;
-    --ring: 158 64% 48%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 120 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 76% 46%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 120 4% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 120 4% 20%;
+    --sidebar-ring: 142 76% 46%;
   }
 }
 
@@ -112,25 +66,55 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
-  .nutrient-bar {
-    @apply h-2 rounded-full overflow-hidden bg-muted;
+  .progress-ring {
+    transform: rotate(-90deg);
   }
 
-  .nutrient-bar-fill {
-    @apply h-full rounded-full transition-all duration-500 ease-out;
+  .progress-ring-circle {
+    transition: stroke-dashoffset 0.5s ease-out;
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 shadow-md;
+    @apply bg-card/90 backdrop-blur-xl border border-border/50 shadow-lg;
   }
 
-  .glow-effect {
-    box-shadow: var(--shadow-glow);
+  .ios-button {
+    @apply rounded-full font-semibold transition-all duration-200 active:scale-95;
+  }
+
+  .ios-button-primary {
+    @apply ios-button bg-primary text-primary-foreground px-6 py-3;
+  }
+
+  .ios-button-secondary {
+    @apply ios-button bg-secondary text-secondary-foreground px-6 py-3;
+  }
+
+  .ios-button-accent {
+    @apply ios-button bg-accent text-accent-foreground px-6 py-3;
+  }
+
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground transition-colors;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-primary;
+  }
+
+  .nutrient-pill {
+    @apply px-3 py-1.5 rounded-full text-xs font-semibold;
   }
 }
 
@@ -147,6 +131,10 @@
     animation: scaleIn 0.2s ease-out;
   }
 
+  .safe-bottom {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -155,7 +143,7 @@
   @keyframes slideUp {
     from { 
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(20px);
     }
     to { 
       opacity: 1;
@@ -172,5 +160,10 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px hsl(142 76% 46% / 0.3); }
+    50% { box-shadow: 0 0 40px hsl(142 76% 46% / 0.5); }
   }
 }

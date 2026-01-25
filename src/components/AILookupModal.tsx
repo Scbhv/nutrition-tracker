@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { NutrientData } from '@/types/nutrients';
 
@@ -23,18 +22,15 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
     setIsLoading(true);
     setResult(null);
 
-    // For now, this is a placeholder. In a real implementation,
-    // you would connect to Lovable Cloud and use AI to look up food data.
     setTimeout(() => {
       setResult(
-        "AI food lookup requires Lovable Cloud to be enabled. Once enabled, you can ask questions like:\n\n" +
-        "• \"100g of cooked oatmeal\"\n" +
+        "Enable Lovable Cloud to use AI food lookup. You can query:\n\n" +
+        "• \"100g cooked oatmeal\"\n" +
         "• \"1 medium banana\"\n" +
-        "• \"Chicken breast grilled, 150g\"\n\n" +
-        "The AI will return accurate nutritional information for your food database."
+        "• \"Grilled chicken breast 150g\""
       );
       setIsLoading(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,14 +40,14 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-card border-border rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI Food Lookup
+            <Sparkles className="h-5 w-5 text-accent" />
+            AI Lookup
           </DialogTitle>
-          <DialogDescription>
-            Describe a food and get its nutritional information
+          <DialogDescription className="text-muted-foreground">
+            Describe a food to get nutrition info
           </DialogDescription>
         </DialogHeader>
 
@@ -59,13 +55,13 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
           <Input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="e.g., 100g cooked brown rice"
-            className="w-full"
+            placeholder="e.g., 100g brown rice cooked"
+            className="bg-secondary border-0 rounded-xl"
           />
 
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full ios-button-accent" 
             disabled={!query.trim() || isLoading}
           >
             {isLoading ? (
@@ -76,23 +72,17 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
             ) : (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Look Up Food
+                Generate
               </>
             )}
           </Button>
 
           {result && (
-            <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground whitespace-pre-wrap">
+            <div className="p-4 bg-secondary rounded-2xl text-sm text-muted-foreground whitespace-pre-wrap">
               {result}
             </div>
           )}
         </form>
-
-        <div className="pt-4 border-t">
-          <p className="text-xs text-muted-foreground text-center">
-            Tip: Be specific about portion size and preparation method for accurate results.
-          </p>
-        </div>
       </DialogContent>
     </Dialog>
   );

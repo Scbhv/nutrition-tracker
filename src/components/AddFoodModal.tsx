@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
 
@@ -38,7 +37,6 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
       nutrients,
     });
 
-    // Reset form
     setName('');
     setBrand('');
     setBarcode('');
@@ -68,108 +66,108 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-4 border-b">
-          <DialogTitle>Add New Food</DialogTitle>
+      <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 bg-card border-border rounded-3xl">
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle className="text-xl">Add Food</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <ScrollArea className="h-[60vh] px-6">
-            <div className="space-y-6 py-4">
+          <ScrollArea className="h-[55vh] px-6">
+            <div className="space-y-5 pb-4">
               {/* Basic Info */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Food Name *</Label>
+                  <Label htmlFor="name" className="text-muted-foreground">Name</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="e.g., Oatmeal"
+                    className="bg-secondary border-0 rounded-xl"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="brand">Brand (optional)</Label>
+                    <Label className="text-muted-foreground">Brand</Label>
                     <Input
-                      id="brand"
                       value={brand}
                       onChange={e => setBrand(e.target.value)}
-                      placeholder="e.g., Quaker"
+                      placeholder="Optional"
+                      className="bg-secondary border-0 rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="barcode">Barcode (optional)</Label>
+                    <Label className="text-muted-foreground">Barcode</Label>
                     <Input
-                      id="barcode"
                       value={barcode}
                       onChange={e => setBarcode(e.target.value)}
-                      placeholder="e.g., 123456789"
+                      placeholder="Optional"
+                      className="bg-secondary border-0 rounded-xl"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="servingSize">Serving Size</Label>
+                    <Label className="text-muted-foreground">Serving Size</Label>
                     <Input
-                      id="servingSize"
                       type="number"
                       value={servingSize}
                       onChange={e => setServingSize(e.target.value)}
                       min="1"
+                      className="bg-secondary border-0 rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="servingUnit">Unit</Label>
+                    <Label className="text-muted-foreground">Unit</Label>
                     <Input
-                      id="servingUnit"
                       value={servingUnit}
                       onChange={e => setServingUnit(e.target.value)}
                       placeholder="g, ml, oz..."
+                      className="bg-secondary border-0 rounded-xl"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Nutrients */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                   Nutrients (per 100g)
                 </h3>
 
                 {Object.entries(NUTRIENT_CATEGORIES).map(([category, nutrientKeys]) => (
-                  <div key={category} className="border rounded-lg overflow-hidden">
+                  <div key={category} className="rounded-2xl overflow-hidden bg-secondary">
                     <button
                       type="button"
                       onClick={() => toggleCategory(category)}
-                      className="w-full flex items-center justify-between p-3 bg-muted/50 hover:bg-muted transition-colors"
+                      className="w-full flex items-center justify-between p-4"
                     >
                       <span className="font-medium capitalize">{category}</span>
                       {expandedCategories.includes(category) ? (
-                        <ChevronUp className="h-4 w-4" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
 
                     {expandedCategories.includes(category) && (
-                      <div className="p-3 grid grid-cols-2 gap-3">
+                      <div className="px-4 pb-4 grid grid-cols-2 gap-3">
                         {nutrientKeys.map(key => (
                           <div key={key} className="space-y-1">
-                            <Label htmlFor={key} className="text-xs">
+                            <Label className="text-xs text-muted-foreground">
                               {NUTRIENT_LABELS[key]} ({NUTRIENT_UNITS[key]})
                             </Label>
                             <Input
-                              id={key}
                               type="number"
                               step="0.01"
                               min="0"
                               value={nutrients[key as keyof NutrientData] ?? ''}
                               onChange={e => updateNutrient(key, e.target.value)}
                               placeholder="0"
-                              className="h-8 text-sm"
+                              className="h-9 bg-muted border-0 rounded-xl text-sm"
                             />
                           </div>
                         ))}
@@ -181,11 +179,20 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
             </div>
           </ScrollArea>
 
-          <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex gap-3 p-6 pt-4">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={onClose}
+              className="flex-1 ios-button-secondary"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button 
+              type="submit" 
+              disabled={!name.trim()}
+              className="flex-1 ios-button-primary"
+            >
               Add Food
             </Button>
           </div>

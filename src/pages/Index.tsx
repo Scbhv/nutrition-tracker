@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react';
-import { Flame, Beef, Wheat, Droplets, Plus, Scan, Sparkles, Database, Apple } from 'lucide-react';
+import { Plus, Scan, Sparkles, Apple, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useFoodDatabase } from '@/hooks/useFoodDatabase';
 import { Header } from '@/components/Header';
+import { BottomNav } from '@/components/BottomNav';
+import { ProgressRing } from '@/components/ProgressRing';
 import { MacroCard } from '@/components/MacroCard';
+import { WeekView } from '@/components/WeekView';
 import { NutrientBar } from '@/components/NutrientBar';
 import { FoodEntryCard } from '@/components/FoodEntryCard';
 import { QuickAddPanel } from '@/components/QuickAddPanel';
@@ -15,7 +17,9 @@ import { AddFoodModal } from '@/components/AddFoodModal';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
-import { NUTRIENT_CATEGORIES, FoodItem, NutrientData } from '@/types/nutrients';
+import { FoodItem, NutrientData } from '@/types/nutrients';
+
+type Tab = 'today' | 'database' | 'trends' | 'profile';
 
 export default function Index() {
   const { toast } = useToast();
@@ -25,7 +29,6 @@ export default function Index() {
     settings,
     isLoading,
     addFood,
-    updateFood,
     deleteFood,
     getFoodByBarcode,
     addFoodEntry,
@@ -37,6 +40,7 @@ export default function Index() {
     updateSettings,
   } = useFoodDatabase();
 
+  const [activeTab, setActiveTab] = useState<Tab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [showAILookup, setShowAILookup] = useState(false);
@@ -47,18 +51,22 @@ export default function Index() {
   const todayLog = getTodayLog();
   const { dailyGoals } = settings;
 
+  const calorieGoal = dailyGoals['energy-kcal'] || 2000;
+  const currentCalories = todayNutrients['energy-kcal'] || 0;
+  const caloriePercentage = Math.round((currentCalories / calorieGoal) * 100);
+
   const handleBarcodeScan = (barcode: string) => {
     const existingFood = getFoodByBarcode(barcode);
     if (existingFood) {
       addFoodEntry(existingFood.id);
       toast({
         title: 'Food logged',
-        description: `Added ${existingFood.name} to today's log`,
+        description: `Added ${existingFood.name}`,
       });
     } else {
       toast({
-        title: 'Food not found',
-        description: `Barcode ${barcode} not in your database. Add it manually.`,
+        title: 'Not found',
+        description: `Barcode ${barcode} not in database`,
         variant: 'destructive',
       });
       setShowAddFood(true);
@@ -71,39 +79,25 @@ export default function Index() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nutritrack-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `nutritrack-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({
-      title: 'Database exported',
-      description: 'Your food database has been downloaded.',
-    });
+    toast({ title: 'Exported', description: 'Database downloaded' });
   };
 
-  const handleImport = () => {
-    fileInputRef.current?.click();
-  };
+  const handleImport = () => fileInputRef.current?.click();
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
-      const content = event.target?.result as string;
-      const success = importDatabase(content);
-      if (success) {
-        toast({
-          title: 'Database imported',
-          description: 'Your food database has been restored.',
-        });
-      } else {
-        toast({
-          title: 'Import failed',
-          description: 'Could not parse the import file.',
-          variant: 'destructive',
-        });
-      }
+      const success = importDatabase(event.target?.result as string);
+      toast({
+        title: success ? 'Imported' : 'Error',
+        description: success ? 'Database restored' : 'Invalid file',
+        variant: success ? 'default' : 'destructive',
+      });
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -113,201 +107,263 @@ export default function Index() {
     const food = foods.find(f => f.id === foodId);
     if (food) {
       addFoodEntry(foodId);
-      toast({
-        title: 'Food logged',
-        description: `Added ${food.name} to today's log`,
-      });
+      toast({ title: 'Added', description: food.name });
     }
   };
 
   const handleAddFood = (foodData: { name: string; barcode?: string; brand?: string; servingSize: number; servingUnit: string; nutrients: NutrientData }) => {
     addFood(foodData);
-    toast({
-      title: 'Food added',
-      description: `${foodData.name} has been added to your database.`,
-    });
+    toast({ title: 'Saved', description: foodData.name });
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your nutrition data...</p>
-        </div>
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header onSettingsClick={() => setShowSettings(true)} />
-
-      <main className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="today" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
-            <TabsTrigger value="today" className="flex items-center gap-2">
-              <Apple className="h-4 w-4" />
-              Today
-            </TabsTrigger>
-            <TabsTrigger value="database" className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Database
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="today" className="space-y-6 animate-fade-in">
-            {/* Macro Overview */}
-            <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <MacroCard
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'today':
+        return (
+          <div className="space-y-6 animate-fade-in">
+            {/* Main Progress Ring */}
+            <section className="flex flex-col items-center py-6">
+              <ProgressRing
+                progress={caloriePercentage}
+                size={240}
+                strokeWidth={14}
                 label="Calories"
-                value={todayNutrients['energy-kcal'] || 0}
-                unit="kcal"
-                goal={dailyGoals['energy-kcal'] || 2000}
-                icon={<Flame className="h-5 w-5 text-nutrient-energy" />}
-                colorClass="bg-nutrient-energy"
+                value={`${caloriePercentage}%`}
+                sublabel={caloriePercentage >= 100 ? 'Complete' : `${Math.round(calorieGoal - currentCalories)} left`}
               />
+              <p className="text-muted-foreground text-sm mt-4">
+                {currentCalories.toFixed(0)} / {calorieGoal} kcal
+              </p>
+            </section>
+
+            {/* Action Buttons */}
+            <section className="flex gap-3 px-1">
+              <Button 
+                onClick={() => setShowAddFood(true)} 
+                className="flex-1 ios-button-secondary h-14 text-base"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Add Food
+              </Button>
+              <Button 
+                onClick={() => setShowAILookup(true)} 
+                className="flex-1 ios-button-accent h-14 text-base"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Generate
+              </Button>
+            </section>
+
+            {/* Week View */}
+            <WeekView />
+
+            {/* Macros Grid */}
+            <section className="grid grid-cols-2 gap-3">
               <MacroCard
                 label="Protein"
                 value={todayNutrients['proteins'] || 0}
                 unit="g"
                 goal={dailyGoals['proteins'] || 50}
-                icon={<Beef className="h-5 w-5 text-nutrient-protein" />}
-                colorClass="bg-nutrient-protein"
+                color="bg-nutrient-protein"
+                icon
               />
               <MacroCard
                 label="Carbs"
                 value={todayNutrients['carbohydrates'] || 0}
                 unit="g"
                 goal={dailyGoals['carbohydrates'] || 300}
-                icon={<Wheat className="h-5 w-5 text-nutrient-carbs" />}
-                colorClass="bg-nutrient-carbs"
+                color="bg-nutrient-carbs"
+                icon
               />
               <MacroCard
                 label="Fat"
                 value={todayNutrients['fat'] || 0}
                 unit="g"
                 goal={dailyGoals['fat'] || 65}
-                icon={<Droplets className="h-5 w-5 text-nutrient-fat" />}
-                colorClass="bg-nutrient-fat"
+                color="bg-nutrient-fat"
+                icon
+              />
+              <MacroCard
+                label="Fiber"
+                value={todayNutrients['fiber'] || 0}
+                unit="g"
+                goal={dailyGoals['fiber'] || 25}
+                color="bg-nutrient-fiber"
+                icon
               />
             </section>
 
-            {/* Action Buttons */}
-            <section className="flex flex-wrap gap-3">
-              <Button onClick={() => setShowAddFood(true)} className="flex-1 sm:flex-none">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Food
-              </Button>
-              <Button variant="outline" onClick={() => setShowScanner(true)} className="flex-1 sm:flex-none">
-                <Scan className="h-4 w-4 mr-2" />
-                Scan Barcode
-              </Button>
-              <Button variant="outline" onClick={() => setShowAILookup(true)} className="flex-1 sm:flex-none">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Lookup
-              </Button>
+            {/* Today's Food */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground px-1">Today's Food</h2>
+              
+              {todayLog.entries.length === 0 ? (
+                <div className="glass-card rounded-2xl p-8 text-center text-muted-foreground">
+                  <Apple className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No food logged yet</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {todayLog.entries.map(entry => {
+                    const food = foods.find(f => f.id === entry.foodId);
+                    if (!food) return null;
+                    return (
+                      <FoodEntryCard
+                        key={entry.id}
+                        food={food}
+                        entry={entry}
+                        onRemove={() => removeFoodEntry(todayLog.date, entry.id)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </section>
 
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Today's Log */}
-              <section className="lg:col-span-2 space-y-4">
-                <h2 className="text-lg font-semibold text-foreground">Today's Food</h2>
-                
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-3 pr-4">
-                    {todayLog.entries.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Apple className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No food logged today.</p>
-                        <p className="text-sm mt-1">Add your first meal to start tracking!</p>
-                      </div>
-                    ) : (
-                      todayLog.entries.map(entry => {
-                        const food = foods.find(f => f.id === entry.foodId);
-                        if (!food) return null;
-                        return (
-                          <FoodEntryCard
-                            key={entry.id}
-                            food={food}
-                            entry={entry}
-                            onRemove={() => removeFoodEntry(todayLog.date, entry.id)}
-                          />
-                        );
-                      })
-                    )}
-                  </div>
-                </ScrollArea>
-              </section>
+            {/* More Nutrients */}
+            <section className="glass-card rounded-2xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground">Vitamins & Minerals</h3>
+              <div className="space-y-4">
+                <NutrientBar
+                  nutrient="vitamin-c"
+                  current={todayNutrients['vitamin-c'] || 0}
+                  goal={dailyGoals['vitamin-c'] || 90}
+                  colorClass="bg-nutrient-vitamin"
+                />
+                <NutrientBar
+                  nutrient="vitamin-d"
+                  current={todayNutrients['vitamin-d'] || 0}
+                  goal={dailyGoals['vitamin-d'] || 20}
+                  colorClass="bg-nutrient-vitamin"
+                />
+                <NutrientBar
+                  nutrient="iron"
+                  current={todayNutrients['iron'] || 0}
+                  goal={dailyGoals['iron'] || 18}
+                  colorClass="bg-nutrient-mineral"
+                />
+                <NutrientBar
+                  nutrient="calcium"
+                  current={todayNutrients['calcium'] || 0}
+                  goal={dailyGoals['calcium'] || 1000}
+                  colorClass="bg-nutrient-mineral"
+                />
+                <NutrientBar
+                  nutrient="water"
+                  current={todayNutrients['water'] || 0}
+                  goal={dailyGoals['water'] || 2500}
+                  colorClass="bg-nutrient-water"
+                />
+              </div>
+            </section>
 
-              {/* Quick Add & Other Nutrients */}
-              <aside className="space-y-6">
-                <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
+            {/* Quick Add */}
+            <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
+          </div>
+        );
 
-                {/* Additional Nutrients */}
-                <div className="glass-card rounded-xl p-4 space-y-4">
-                  <h3 className="font-semibold text-foreground">Minerals & Vitamins</h3>
-                  <div className="space-y-3">
-                    <NutrientBar
-                      nutrient="vitamin-c"
-                      current={todayNutrients['vitamin-c'] || 0}
-                      goal={dailyGoals['vitamin-c'] || 90}
-                      colorClass="bg-nutrient-vitamin"
-                    />
-                    <NutrientBar
-                      nutrient="vitamin-d"
-                      current={todayNutrients['vitamin-d'] || 0}
-                      goal={dailyGoals['vitamin-d'] || 20}
-                      colorClass="bg-nutrient-vitamin"
-                    />
-                    <NutrientBar
-                      nutrient="calcium"
-                      current={todayNutrients['calcium'] || 0}
-                      goal={dailyGoals['calcium'] || 1000}
-                      colorClass="bg-nutrient-mineral"
-                    />
-                    <NutrientBar
-                      nutrient="iron"
-                      current={todayNutrients['iron'] || 0}
-                      goal={dailyGoals['iron'] || 18}
-                      colorClass="bg-nutrient-mineral"
-                    />
-                    <NutrientBar
-                      nutrient="water"
-                      current={todayNutrients['water'] || 0}
-                      goal={dailyGoals['water'] || 2500}
-                      colorClass="bg-nutrient-water"
-                    />
-                  </div>
-                </div>
-              </aside>
+      case 'database':
+        return (
+          <FoodDatabaseView
+            foods={foods}
+            onAddFood={() => setShowAddFood(true)}
+            onEditFood={(food) => {
+              setEditingFood(food);
+              setShowAddFood(true);
+            }}
+            onDeleteFood={(id) => {
+              deleteFood(id);
+              toast({ title: 'Deleted' });
+            }}
+            onLogFood={handleQuickAdd}
+            onExport={handleExport}
+            onImport={handleImport}
+          />
+        );
+
+      case 'trends':
+        return (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground animate-fade-in">
+            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+              <Settings className="h-8 w-8" />
             </div>
-          </TabsContent>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Coming Soon</h2>
+            <p>Track your nutrition trends over time</p>
+          </div>
+        );
 
-          <TabsContent value="database" className="animate-fade-in">
-            <FoodDatabaseView
-              foods={foods}
-              onAddFood={() => setShowAddFood(true)}
-              onEditFood={(food) => {
-                setEditingFood(food);
-                setShowAddFood(true);
-              }}
-              onDeleteFood={(id) => {
-                deleteFood(id);
-                toast({
-                  title: 'Food deleted',
-                  description: 'The food has been removed from your database.',
-                });
-              }}
-              onLogFood={handleQuickAdd}
-              onExport={handleExport}
-              onImport={handleImport}
-            />
-          </TabsContent>
-        </Tabs>
-      </main>
+      case 'profile':
+        return (
+          <div className="space-y-4 animate-fade-in">
+            <Button 
+              onClick={() => setShowSettings(true)} 
+              className="w-full ios-button-secondary h-14 justify-start px-4"
+            >
+              <Settings className="h-5 w-5 mr-3" />
+              Daily Goals & Settings
+            </Button>
+            <Button 
+              onClick={() => setShowScanner(true)} 
+              className="w-full ios-button-secondary h-14 justify-start px-4"
+            >
+              <Scan className="h-5 w-5 mr-3" />
+              Barcode Scanner
+            </Button>
+            <Button 
+              onClick={handleExport} 
+              className="w-full ios-button-secondary h-14 justify-start px-4"
+            >
+              Export Database (JSON)
+            </Button>
+            <Button 
+              onClick={handleImport} 
+              className="w-full ios-button-secondary h-14 justify-start px-4"
+            >
+              Import Database
+            </Button>
+          </div>
+        );
 
-      {/* Hidden file input for import */}
+      default:
+        return null;
+    }
+  };
+
+  const getTitle = () => {
+    switch (activeTab) {
+      case 'today': return 'Nutrition';
+      case 'database': return 'Foods';
+      case 'trends': return 'Trends';
+      case 'profile': return 'Profile';
+      default: return 'NutriTrack';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        title={getTitle()} 
+        onSettingsClick={activeTab === 'today' ? () => setShowSettings(true) : undefined}
+        onAddClick={activeTab === 'today' ? () => setShowAddFood(true) : undefined}
+      />
+
+      <ScrollArea className="h-[calc(100vh-140px)]">
+        <main className="container mx-auto px-5 pb-6 safe-bottom">
+          {renderContent()}
+        </main>
+      </ScrollArea>
+
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -338,11 +394,7 @@ export default function Index() {
         open={showAILookup}
         onClose={() => setShowAILookup(false)}
         onResult={(data) => {
-          addFood({
-            ...data,
-            servingSize: 100,
-            servingUnit: 'g',
-          });
+          addFood({ ...data, servingSize: 100, servingUnit: 'g' });
           setShowAILookup(false);
         }}
       />

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -28,8 +28,8 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch (err) {
-      setError('Camera access denied. Please enter barcode manually.');
+    } catch {
+      setError('Camera access denied');
       setIsScanning(false);
     }
   };
@@ -61,14 +61,14 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-card border-border rounded-3xl">
         <DialogHeader>
           <DialogTitle>Scan Barcode</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Camera View */}
-          <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+          <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden">
             {isScanning ? (
               <>
                 <video
@@ -78,13 +78,13 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-48 h-32 border-2 border-primary rounded-lg opacity-70" />
+                  <div className="w-48 h-32 border-2 border-primary rounded-xl" />
                 </div>
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="icon"
                   onClick={stopCamera}
-                  className="absolute top-2 right-2"
+                  className="absolute top-3 right-3 rounded-full"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -92,7 +92,7 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                 <Camera className="h-12 w-12 text-muted-foreground" />
-                <Button onClick={startCamera}>
+                <Button onClick={startCamera} className="ios-button-secondary">
                   Start Camera
                 </Button>
               </div>
@@ -105,11 +105,11 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or enter manually
+              <span className="bg-card px-3 text-muted-foreground">
+                or enter manually
               </span>
             </div>
           </div>
@@ -118,17 +118,13 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
             <Input
               value={manualBarcode}
               onChange={e => setManualBarcode(e.target.value)}
-              placeholder="Enter barcode number"
-              className="flex-1"
+              placeholder="Barcode number"
+              className="flex-1 bg-secondary border-0 rounded-xl"
             />
-            <Button type="submit" disabled={!manualBarcode.trim()}>
+            <Button type="submit" disabled={!manualBarcode.trim()} className="ios-button-primary">
               Search
             </Button>
           </form>
-
-          <p className="text-xs text-muted-foreground text-center">
-            Note: Full barcode scanning requires the camera API. For now, you can enter barcodes manually or use AI lookup.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
