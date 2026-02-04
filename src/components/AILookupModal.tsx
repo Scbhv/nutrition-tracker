@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, Check, Database, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { NutrientData } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { useToast } from '@/hooks/use-toast';
 
 interface AILookupModalProps {
   open: boolean;
@@ -11,10 +12,21 @@ interface AILookupModalProps {
   onResult: (data: { name: string; nutrients: NutrientData }) => void;
 }
 
+interface LookupResult {
+  source: 'openfoodfacts' | 'ai';
+  name: string;
+  brand?: string;
+  nutrients: NutrientData;
+  barcode?: string;
+}
+
+const FOOD_LOOKUP_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/food-lookup`;
+
 export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<LookupResult | null>(null);
+  const { toast } = useToast();
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -22,15 +34,59 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
     setIsLoading(true);
     setResult(null);
 
-    setTimeout(() => {
-      setResult(
-        "Enable Lovable Cloud to use AI food lookup. You can query:\n\n" +
-        "• \"100g cooked oatmeal\"\n" +
-        "• \"1 medium banana\"\n" +
-        "• \"Grilled chicken breast 150g\""
-      );
+    try {
+      const response = await fetch(FOOD_LOOKUP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ query: query.trim() }),
+      });
+
+      if (response.status === 429) {
+        toast({
+          title: 'Rate limit reached',
+          description: 'Please wait a moment and try again.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (response.status === 402) {
+        toast({
+          title: 'Credits exhausted',
+          description: 'Please add credits to continue using AI lookup.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: 'Lookup failed',
+          description: data.error || 'Could not find nutrition data',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      setResult(data);
+    } catch (error) {
+      console.error('Lookup error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to lookup food. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -38,16 +94,35 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
     handleSearch();
   };
 
+  const handleAddFood = () => {
+    if (result) {
+      onResult({ name: result.name, nutrients: result.nutrients });
+      setResult(null);
+      setQuery('');
+      onClose();
+    }
+  };
+
+  const formatNutrientValue = (key: string, value: number) => {
+    const unit = NUTRIENT_UNITS[key] || '';
+    return `${value.toFixed(1)} ${unit}`;
+  };
+
+  // Get non-zero nutrients for display
+  const displayNutrients = result 
+    ? Object.entries(result.nutrients).filter(([_, v]) => v !== undefined && v > 0)
+    : [];
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-card border-border rounded-3xl">
+      <DialogContent className="max-w-md bg-card border-border rounded-3xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-accent" />
-            AI Lookup
+            AI Food Lookup
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Describe a food to get nutrition info
+            Search Open Food Facts or use AI to estimate nutrition
           </DialogDescription>
         </DialogHeader>
 
@@ -55,8 +130,9 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
           <Input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="e.g., 100g brown rice cooked"
+            placeholder="e.g., 100g brown rice cooked, banana, oatmeal"
             className="bg-secondary border-0 rounded-xl"
+            disabled={isLoading}
           />
 
           <Button 
@@ -72,17 +148,69 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
             ) : (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Generate
+                Search
               </>
             )}
           </Button>
-
-          {result && (
-            <div className="p-4 bg-secondary rounded-2xl text-sm text-muted-foreground whitespace-pre-wrap">
-              {result}
-            </div>
-          )}
         </form>
+
+        {result && (
+          <div className="flex-1 overflow-y-auto space-y-4 mt-4">
+            {/* Source badge */}
+            <div className="flex items-center gap-2">
+              {result.source === 'openfoodfacts' ? (
+                <span className="flex items-center gap-1.5 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+                  <Database className="h-3 w-3" />
+                  Open Food Facts
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">
+                  <Cpu className="h-3 w-3" />
+                  AI Estimated
+                </span>
+              )}
+            </div>
+
+            {/* Food name */}
+            <div className="glass-card rounded-2xl p-4">
+              <h4 className="font-semibold text-foreground">{result.name}</h4>
+              {result.brand && (
+                <p className="text-sm text-muted-foreground">{result.brand}</p>
+              )}
+            </div>
+
+            {/* Nutrients grid */}
+            <div className="glass-card rounded-2xl p-4 space-y-3">
+              <h5 className="text-sm font-medium text-muted-foreground">Per 100g</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {displayNutrients.slice(0, 12).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span className="text-muted-foreground truncate">
+                      {NUTRIENT_LABELS[key] || key}
+                    </span>
+                    <span className="text-foreground font-medium">
+                      {formatNutrientValue(key, value as number)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {displayNutrients.length > 12 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  +{displayNutrients.length - 12} more nutrients
+                </p>
+              )}
+            </div>
+
+            {/* Add button */}
+            <Button 
+              onClick={handleAddFood}
+              className="w-full ios-button-primary"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Add to Database
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
