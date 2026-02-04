@@ -9,9 +9,9 @@ import { BottomNav } from '@/components/BottomNav';
 import { ProgressRing } from '@/components/ProgressRing';
 import { MacroCard } from '@/components/MacroCard';
 import { WeekView } from '@/components/WeekView';
-import { NutrientBar } from '@/components/NutrientBar';
-import { FoodEntryCard } from '@/components/FoodEntryCard';
+import { SwipeableFoodEntry } from '@/components/SwipeableFoodEntry';
 import { QuickAddPanel } from '@/components/QuickAddPanel';
+import { NutrientsSummary } from '@/components/NutrientsSummary';
 import { FoodDatabaseView } from '@/components/FoodDatabaseView';
 import { AddFoodModal } from '@/components/AddFoodModal';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
@@ -216,7 +216,7 @@ export default function Index() {
                     const food = foods.find(f => f.id === entry.foodId);
                     if (!food) return null;
                     return (
-                      <FoodEntryCard
+                      <SwipeableFoodEntry
                         key={entry.id}
                         food={food}
                         entry={entry}
@@ -228,42 +228,11 @@ export default function Index() {
               )}
             </section>
 
-            {/* More Nutrients */}
-            <section className="glass-card rounded-2xl p-4 space-y-4">
-              <h3 className="font-semibold text-foreground">Vitamins & Minerals</h3>
-              <div className="space-y-4">
-                <NutrientBar
-                  nutrient="vitamin-c"
-                  current={todayNutrients['vitamin-c'] || 0}
-                  goal={dailyGoals['vitamin-c'] || 90}
-                  colorClass="bg-nutrient-vitamin"
-                />
-                <NutrientBar
-                  nutrient="vitamin-d"
-                  current={todayNutrients['vitamin-d'] || 0}
-                  goal={dailyGoals['vitamin-d'] || 20}
-                  colorClass="bg-nutrient-vitamin"
-                />
-                <NutrientBar
-                  nutrient="iron"
-                  current={todayNutrients['iron'] || 0}
-                  goal={dailyGoals['iron'] || 18}
-                  colorClass="bg-nutrient-mineral"
-                />
-                <NutrientBar
-                  nutrient="calcium"
-                  current={todayNutrients['calcium'] || 0}
-                  goal={dailyGoals['calcium'] || 1000}
-                  colorClass="bg-nutrient-mineral"
-                />
-                <NutrientBar
-                  nutrient="water"
-                  current={todayNutrients['water'] || 0}
-                  goal={dailyGoals['water'] || 2500}
-                  colorClass="bg-nutrient-water"
-                />
-              </div>
-            </section>
+            {/* Nutrients Summary with Show More */}
+            <NutrientsSummary 
+              todayNutrients={todayNutrients}
+              dailyGoals={dailyGoals}
+            />
 
             {/* Quick Add */}
             <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
