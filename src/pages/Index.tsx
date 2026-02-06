@@ -26,6 +26,7 @@ export default function Index() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     foods,
+    logs,
     settings,
     isLoading,
     addFood,
@@ -38,6 +39,7 @@ export default function Index() {
     exportDatabase,
     importDatabase,
     updateSettings,
+    mergeFoods,
   } = useFoodDatabase();
 
   const [activeTab, setActiveTab] = useState<Tab>('today');
