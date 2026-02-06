@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -191,6 +192,39 @@ serve(async (req) => {
   }
 
   try {
+    // Validate authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Missing or invalid authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return new Response(
+        JSON.stringify({ error: "Server configuration error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error: authError } = await supabaseClient.auth.getUser(token);
+
+    if (authError || !data?.user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired authentication token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { query, useAI = true } = await req.json();
 
     if (!query || typeof query !== "string") {
