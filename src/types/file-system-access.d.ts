@@ -14,16 +14,20 @@ interface WriteParams {
   data?: string | BufferSource | Blob;
 }
 
-interface FileSystemFileHandle {
-  kind: 'file';
+interface FileSystemHandle {
+  kind: 'file' | 'directory';
   name: string;
+  isSameEntry(other: FileSystemHandle): Promise<boolean>;
+}
+
+interface FileSystemFileHandle extends FileSystemHandle {
+  kind: 'file';
   getFile(): Promise<File>;
   createWritable(): Promise<FileSystemWritableFileStream>;
 }
 
-interface FileSystemDirectoryHandle {
+interface FileSystemDirectoryHandle extends FileSystemHandle {
   kind: 'directory';
-  name: string;
   getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
   getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandle>;
   removeEntry(name: string, options?: { recursive?: boolean }): Promise<void>;
@@ -33,8 +37,6 @@ interface FileSystemDirectoryHandle {
   keys(): AsyncIterableIterator<string>;
   values(): AsyncIterableIterator<FileSystemHandle>;
 }
-
-type FileSystemHandle = FileSystemFileHandle | FileSystemDirectoryHandle;
 
 interface DirectoryPickerOptions {
   id?: string;
@@ -63,4 +65,4 @@ declare global {
   }
 }
 
-export {};
+export type { FileSystemDirectoryHandle, FileSystemFileHandle, FileSystemHandle };
