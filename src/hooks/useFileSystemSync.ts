@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
-import '@/types/file-system-access.d.ts';
+
 const AUTO_SAVE_DELAY = 2000; // 2 seconds debounce
 
 interface FileSystemState {
   isSupported: boolean;
   hasPermission: boolean;
-  directoryHandle: FileSystemDirectoryHandle | null;
+  directoryHandle: any | null;
   fileName: string;
   lastSaved: Date | null;
   isAutoSaveEnabled: boolean;
@@ -31,7 +31,7 @@ export function useFileSystemSync() {
   
   const [savedFiles, setSavedFiles] = useState<SavedFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Request directory access
   const requestAccess = useCallback(async (): Promise<boolean> => {
@@ -41,7 +41,10 @@ export function useFileSystemSync() {
     }
 
     try {
-      const dirHandle = await window.showDirectoryPicker({
+      const showDirectoryPicker = (window as any).showDirectoryPicker;
+      if (!showDirectoryPicker) return false;
+      
+      const dirHandle = await showDirectoryPicker({
         mode: 'readwrite',
         startIn: 'documents',
       });
@@ -127,22 +130,24 @@ export function useFileSystemSync() {
     const files: SavedFile[] = [];
 
     try {
-      for await (const entry of handle.values()) {
-        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+      // Use for-await to iterate over directory entries
+      for await (const entry of handle) {
+        const [name, fileHandle] = entry;
+        if (fileHandle.kind === 'file' && name.endsWith('.json')) {
           try {
-            const file = await entry.getFile();
+            const file = await fileHandle.getFile();
             const content = await file.text();
             const validation = validateImportData(content);
             
             if (validation.success && validation.data?.foods) {
               files.push({
-                name: entry.name,
+                name,
                 lastModified: new Date(file.lastModified),
                 foods: validation.data.foods as FoodItem[],
               });
             }
           } catch (e) {
-            console.warn(`Could not read file ${entry.name}:`, e);
+            console.warn(`Could not read file ${name}:`, e);
           }
         }
       }
