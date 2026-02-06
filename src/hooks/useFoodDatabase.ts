@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FoodItem, DailyLog, FoodEntry, UserSettings, NutrientData } from '@/types/nutrients';
-
+import { validateImportData } from '@/lib/schemas/importValidation';
 const STORAGE_KEYS = {
   foods: 'nutrient-tracker-foods',
   logs: 'nutrient-tracker-logs',
@@ -168,17 +168,20 @@ export function useFoodDatabase() {
     return JSON.stringify(data, null, 2);
   }, [foods, logs, settings]);
 
-  const importDatabase = useCallback((jsonString: string) => {
-    try {
-      const data = JSON.parse(jsonString);
-      if (data.foods) setFoods(data.foods);
-      if (data.logs) setLogs(data.logs);
-      if (data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
-      return true;
-    } catch (error) {
-      console.error('Import error:', error);
-      return false;
+  const importDatabase = useCallback((jsonString: string): { success: boolean; errorMessage?: string } => {
+    const validation = validateImportData(jsonString);
+    
+    if (!validation.success) {
+      console.error('Import validation failed:', validation.errorMessage);
+      return { success: false, errorMessage: validation.errorMessage };
     }
+    
+    const data = validation.data!;
+    if (data.foods && data.foods.length > 0) setFoods(data.foods as FoodItem[]);
+    if (data.logs && data.logs.length > 0) setLogs(data.logs as DailyLog[]);
+    if (data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.settings as UserSettings });
+    
+    return { success: true };
   }, []);
 
   const updateSettings = useCallback((updates: Partial<UserSettings>) => {
