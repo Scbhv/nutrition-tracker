@@ -1,13 +1,22 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NutrientBar } from '@/components/NutrientBar';
 import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS } from '@/types/nutrients';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NutrientsSummaryProps {
   todayNutrients: NutrientData;
   dailyGoals: NutrientData;
 }
+
+type SortOption = 'name' | 'progress' | 'amount';
 
 const ALL_VITAMINS_MINERALS = [
   ...NUTRIENT_CATEGORIES.vitamins,
@@ -76,17 +85,15 @@ const DEFAULT_GOALS: Record<string, number> = {
   'water': 2500,
 };
 
+const SORT_LABELS: Record<SortOption, string> = {
+  name: 'Name',
+  progress: 'Progress',
+  amount: 'Amount',
+};
+
 export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummaryProps) {
   const [showMore, setShowMore] = useState(false);
-
-  // Separate tracked (has value > 0) and untracked nutrients
-  const trackedNutrients = ALL_VITAMINS_MINERALS.filter(
-    nutrient => (todayNutrients[nutrient] || 0) > 0
-  );
-  
-  const untrackedNutrients = ALL_VITAMINS_MINERALS.filter(
-    nutrient => (todayNutrients[nutrient] || 0) === 0
-  );
+  const [sortBy, setSortBy] = useState<SortOption>('name');
 
   const getGoal = (nutrient: string) => {
     return dailyGoals[nutrient as keyof NutrientData] || DEFAULT_GOALS[nutrient] || 100;
@@ -96,9 +103,70 @@ export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummar
     return NUTRIENT_COLORS[nutrient] || 'bg-primary';
   };
 
+  const getProgress = (nutrient: string) => {
+    const current = todayNutrients[nutrient] || 0;
+    const goal = getGoal(nutrient);
+    return goal > 0 ? (current / goal) * 100 : 0;
+  };
+
+  const sortNutrients = (nutrients: readonly string[]) => {
+    return [...nutrients].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          const nameA = NUTRIENT_LABELS[a] || a;
+          const nameB = NUTRIENT_LABELS[b] || b;
+          return nameA.localeCompare(nameB);
+        case 'progress':
+          return getProgress(b) - getProgress(a);
+        case 'amount':
+          return (todayNutrients[b] || 0) - (todayNutrients[a] || 0);
+        default:
+          return 0;
+      }
+    });
+  };
+
+  // Separate tracked (has value > 0) and untracked nutrients
+  const { trackedNutrients, untrackedNutrients } = useMemo(() => {
+    const tracked = ALL_VITAMINS_MINERALS.filter(
+      nutrient => (todayNutrients[nutrient] || 0) > 0
+    );
+    const untracked = ALL_VITAMINS_MINERALS.filter(
+      nutrient => (todayNutrients[nutrient] || 0) === 0
+    );
+    return {
+      trackedNutrients: sortNutrients(tracked),
+      untrackedNutrients: sortNutrients(untracked),
+    };
+  }, [todayNutrients, sortBy]);
+
   return (
     <section className="glass-card rounded-2xl p-4 space-y-4">
-      <h3 className="font-semibold text-foreground">Vitamins & Minerals</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-foreground">Vitamins & Minerals</h3>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              <span className="text-xs">{SORT_LABELS[sortBy]}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-card border-border">
+            <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <DropdownMenuRadioItem value="name" className="text-sm">
+                Sort by Name
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="progress" className="text-sm">
+                Sort by Progress
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="amount" className="text-sm">
+                Sort by Amount
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       
       {trackedNutrients.length === 0 && !showMore ? (
         <p className="text-sm text-muted-foreground py-4 text-center">
