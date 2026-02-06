@@ -181,10 +181,11 @@ export function FoodDatabaseView({
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-sm font-medium">Connected</span>
+              {/* Sync Status */}
+              <div className="glass-card rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span className="text-sm font-medium">Connected</span>
                   </div>
                   <Button variant="ghost" size="sm" onClick={fileSystem.disconnect} className="text-destructive">
