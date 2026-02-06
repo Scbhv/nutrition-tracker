@@ -225,5 +225,6 @@ export function useFoodDatabase() {
     exportDatabase,
     importDatabase,
     updateSettings,
+    mergeFoods,
   };
 }

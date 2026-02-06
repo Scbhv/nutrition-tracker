@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
-
-const STORAGE_KEY = 'nutritrack-file-handle';
+import '@/types/file-system-access.d.ts';
 const AUTO_SAVE_DELAY = 2000; // 2 seconds debounce
 
 interface FileSystemState {
