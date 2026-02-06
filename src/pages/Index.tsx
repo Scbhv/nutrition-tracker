@@ -253,6 +253,8 @@ export default function Index() {
         return (
           <FoodDatabaseView
             foods={foods}
+            logs={logs}
+            settings={settings}
             onAddFood={() => setShowAddFood(true)}
             onEditFood={(food) => {
               setEditingFood(food);
@@ -265,6 +267,7 @@ export default function Index() {
             onLogFood={handleQuickAdd}
             onExport={handleExport}
             onImport={handleImport}
+            onImportFoods={handleImportFoods}
           />
         );
 
