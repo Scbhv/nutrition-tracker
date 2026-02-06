@@ -26,6 +26,7 @@ export default function Index() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     foods,
+    logs,
     settings,
     isLoading,
     addFood,
@@ -38,6 +39,7 @@ export default function Index() {
     exportDatabase,
     importDatabase,
     updateSettings,
+    mergeFoods,
   } = useFoodDatabase();
 
   const [activeTab, setActiveTab] = useState<Tab>('today');
@@ -92,15 +94,23 @@ export default function Index() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const success = importDatabase(event.target?.result as string);
+      const result = importDatabase(event.target?.result as string);
       toast({
-        title: success ? 'Imported' : 'Error',
-        description: success ? 'Database restored' : 'Invalid file',
-        variant: success ? 'default' : 'destructive',
+        title: result.success ? 'Imported' : 'Error',
+        description: result.success ? 'Database restored' : result.errorMessage || 'Invalid file',
+        variant: result.success ? 'default' : 'destructive',
       });
     };
     reader.readAsText(file);
     e.target.value = '';
+  };
+
+  const handleImportFoods = (newFoods: FoodItem[]) => {
+    mergeFoods(newFoods);
+    toast({
+      title: 'Imported',
+      description: `Added ${newFoods.length} foods from file`,
+    });
   };
 
   const handleQuickAdd = (foodId: string) => {
@@ -243,6 +253,8 @@ export default function Index() {
         return (
           <FoodDatabaseView
             foods={foods}
+            logs={logs}
+            settings={settings}
             onAddFood={() => setShowAddFood(true)}
             onEditFood={(food) => {
               setEditingFood(food);
@@ -255,6 +267,7 @@ export default function Index() {
             onLogFood={handleQuickAdd}
             onExport={handleExport}
             onImport={handleImport}
+            onImportFoods={handleImportFoods}
           />
         );
 

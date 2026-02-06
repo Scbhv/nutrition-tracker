@@ -188,6 +188,27 @@ export function useFoodDatabase() {
     setSettings(prev => ({ ...prev, ...updates }));
   }, []);
 
+  const mergeFoods = useCallback((newFoods: FoodItem[]) => {
+    setFoods(prev => {
+      const existingIds = new Set(prev.map(f => f.id));
+      const existingBarcodes = new Set(prev.filter(f => f.barcode).map(f => f.barcode));
+      
+      const uniqueNewFoods = newFoods.filter(food => {
+        // Skip if ID already exists
+        if (existingIds.has(food.id)) return false;
+        // Skip if barcode already exists
+        if (food.barcode && existingBarcodes.has(food.barcode)) return false;
+        return true;
+      }).map(food => ({
+        ...food,
+        id: crypto.randomUUID(), // Generate new IDs to avoid conflicts
+        updatedAt: new Date().toISOString(),
+      }));
+      
+      return [...prev, ...uniqueNewFoods];
+    });
+  }, []);
+
   return {
     foods,
     logs,
@@ -204,5 +225,6 @@ export function useFoodDatabase() {
     exportDatabase,
     importDatabase,
     updateSettings,
+    mergeFoods,
   };
 }
