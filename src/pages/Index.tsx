@@ -94,15 +94,23 @@ export default function Index() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const success = importDatabase(event.target?.result as string);
+      const result = importDatabase(event.target?.result as string);
       toast({
-        title: success ? 'Imported' : 'Error',
-        description: success ? 'Database restored' : 'Invalid file',
-        variant: success ? 'default' : 'destructive',
+        title: result.success ? 'Imported' : 'Error',
+        description: result.success ? 'Database restored' : result.errorMessage || 'Invalid file',
+        variant: result.success ? 'default' : 'destructive',
       });
     };
     reader.readAsText(file);
     e.target.value = '';
+  };
+
+  const handleImportFoods = (newFoods: FoodItem[]) => {
+    mergeFoods(newFoods);
+    toast({
+      title: 'Imported',
+      description: `Added ${newFoods.length} foods from file`,
+    });
   };
 
   const handleQuickAdd = (foodId: string) => {
