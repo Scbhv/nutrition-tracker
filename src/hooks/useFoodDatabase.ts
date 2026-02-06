@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FoodItem, DailyLog, FoodEntry, UserSettings, NutrientData } from '@/types/nutrients';
-
+import { validateImportData } from '@/lib/schemas/importValidation';
 const STORAGE_KEYS = {
   foods: 'nutrient-tracker-foods',
   logs: 'nutrient-tracker-logs',
