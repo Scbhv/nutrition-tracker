@@ -17,6 +17,7 @@ import { AddFoodModal } from '@/components/AddFoodModal';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
+import { TrendsView } from '@/components/TrendsView';
 import { FoodItem, NutrientData } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -273,13 +274,11 @@ export default function Index() {
 
       case 'trends':
         return (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground animate-fade-in">
-            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-              <Settings className="h-8 w-8" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Coming Soon</h2>
-            <p>Track your nutrition trends over time</p>
-          </div>
+          <TrendsView
+            foods={foods}
+            logs={logs}
+            dailyGoals={dailyGoals}
+          />
         );
 
       case 'profile':
