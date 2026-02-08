@@ -23,6 +23,9 @@ interface LookupResult {
 
 const FOOD_LOOKUP_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/food-lookup`;
 
+const MIN_QUERY_LENGTH = 2;
+const MAX_QUERY_LENGTH = 200;
+
 export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +33,28 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
   const { toast } = useToast();
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    
+    if (!trimmedQuery) return;
+    
+    // Client-side validation
+    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
+      toast({
+        title: 'Query too short',
+        description: 'Please enter at least 2 characters.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (trimmedQuery.length > MAX_QUERY_LENGTH) {
+      toast({
+        title: 'Query too long',
+        description: `Please enter no more than ${MAX_QUERY_LENGTH} characters.`,
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsLoading(true);
     setResult(null);
@@ -55,7 +79,7 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ query: trimmedQuery }),
       });
 
       if (response.status === 429) {

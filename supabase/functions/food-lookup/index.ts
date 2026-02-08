@@ -80,9 +80,20 @@ function extractNutrients(product: any): NutrientData {
   };
 }
 
+// Sanitize query for AI prompt
+function sanitizeQuery(query: string): string {
+  return query
+    .replace(/[\n\r\t]/g, ' ')  // Remove newlines and tabs
+    .replace(/\s+/g, ' ')       // Collapse multiple spaces
+    .trim()
+    .substring(0, 200);          // Enforce max length as safety net
+}
+
 // Use AI to estimate nutrition for a food description
 async function estimateWithAI(query: string, apiKey: string): Promise<{ name: string; nutrients: NutrientData } | null> {
   try {
+    const sanitizedQuery = sanitizeQuery(query);
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -127,7 +138,7 @@ Only include nutrients you're confident about. Use null for unknown values.`
           },
           {
             role: "user",
-            content: `Estimate nutrition for: ${query}`
+            content: `Estimate nutrition for: ${sanitizedQuery}`
           }
         ],
         temperature: 0.3,
@@ -227,9 +238,29 @@ serve(async (req) => {
 
     const { query, useAI = true } = await req.json();
 
+    // Input validation constants
+    const MAX_QUERY_LENGTH = 200;
+    const MIN_QUERY_LENGTH = 2;
+
     if (!query || typeof query !== "string") {
       return new Response(
-        JSON.stringify({ error: "Query is required" }),
+        JSON.stringify({ error: "Query is required and must be a string" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const trimmedQuery = query.trim();
+
+    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: "Query too short. Please provide a more detailed description." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (trimmedQuery.length > MAX_QUERY_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Query too long. Maximum ${MAX_QUERY_LENGTH} characters allowed.` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -243,7 +274,7 @@ serve(async (req) => {
     }
 
     // First try Open Food Facts
-    const offProduct = await searchOpenFoodFacts(query);
+    const offProduct = await searchOpenFoodFacts(trimmedQuery);
     
     if (offProduct) {
       const nutrients = extractNutrients(offProduct);
@@ -264,7 +295,7 @@ serve(async (req) => {
 
     // Fall back to AI estimation if enabled
     if (useAI) {
-      const aiResult = await estimateWithAI(query, LOVABLE_API_KEY);
+      const aiResult = await estimateWithAI(trimmedQuery, LOVABLE_API_KEY);
       
       if (aiResult) {
         return new Response(
