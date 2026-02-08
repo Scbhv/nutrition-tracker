@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Scan, Sparkles, Apple, Settings } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
@@ -292,13 +292,6 @@ export default function Index() {
               Daily Goals & Settings
             </Button>
             <Button 
-              onClick={() => setShowScanner(true)} 
-              className="w-full ios-button-secondary h-14 justify-start px-4"
-            >
-              <Scan className="h-5 w-5 mr-3" />
-              Barcode Scanner
-            </Button>
-            <Button 
               onClick={handleExport} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
             >
@@ -342,7 +335,13 @@ export default function Index() {
         </main>
       </ScrollArea>
 
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        onAddFood={() => setShowAddFood(true)}
+        onScanBarcode={() => setShowScanner(true)}
+        onAILookup={() => setShowAILookup(true)}
+      />
 
       {/* Hidden file input */}
       <input
