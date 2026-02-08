@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, subDays, parseISO } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ReferenceLine } from 'recharts';
 import { TrendingUp, PieChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -178,6 +178,21 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                   radius={[4, 4, 0, 0]}
                   maxBarSize={40}
                 />
+                {dailyGoals[selectedNutrient as keyof NutrientData] && (
+                  <ReferenceLine 
+                    y={dailyGoals[selectedNutrient as keyof NutrientData]} 
+                    stroke="hsl(var(--accent))" 
+                    strokeWidth={2}
+                    strokeDasharray="6 4"
+                    label={{
+                      value: 'Goal',
+                      position: 'right',
+                      fill: 'hsl(var(--accent))',
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
+                  />
+                )}
               </BarChart>
             </ResponsiveContainer>
           </div>
