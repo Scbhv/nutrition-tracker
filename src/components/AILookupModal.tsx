@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AILookupModalProps {
   open: boolean;
@@ -35,11 +36,24 @@ export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
     setResult(null);
 
     try {
+      // Get authenticated user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: 'Authentication required',
+          description: 'Please sign in to use AI food lookup.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(FOOD_LOOKUP_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ query: query.trim() }),
       });
