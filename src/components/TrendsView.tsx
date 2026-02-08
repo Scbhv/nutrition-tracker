@@ -70,8 +70,11 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
   const isToday = selectedDateStr === format(new Date(), 'yyyy-MM-dd');
 
   // Bar chart data - nutrient over time
-  const barChartData = useMemo(() => {
+  const { barChartData, averageValue } = useMemo(() => {
     const data = [];
+    let total = 0;
+    let daysWithData = 0;
+    
     for (let i = daysToShow - 1; i >= 0; i--) {
       const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
       const nutrients = getNutrientsForDate(date);
@@ -81,8 +84,14 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
         value: Math.round(value * 10) / 10,
         goal: dailyGoals[selectedNutrient as keyof NutrientData] || 0,
       });
+      if (value > 0) {
+        total += value;
+        daysWithData++;
+      }
     }
-    return data;
+    
+    const avg = daysWithData > 0 ? Math.round((total / daysWithData) * 10) / 10 : 0;
+    return { barChartData: data, averageValue: avg };
   }, [logs, foods, selectedNutrient, daysToShow, dailyGoals]);
 
   // Pie chart data - macro calorie distribution for selected date
@@ -184,6 +193,21 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                   radius={[4, 4, 0, 0]}
                   maxBarSize={40}
                 />
+                {averageValue > 0 && (
+                  <ReferenceLine 
+                    y={averageValue} 
+                    stroke="hsl(var(--muted-foreground))" 
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    label={{
+                      value: 'Avg',
+                      position: 'left',
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
+                  />
+                )}
                 {dailyGoals[selectedNutrient as keyof NutrientData] && (
                   <ReferenceLine 
                     y={dailyGoals[selectedNutrient as keyof NutrientData]} 
@@ -204,6 +228,9 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
           </div>
           <p className="text-center text-sm text-muted-foreground mt-2">
             {NUTRIENT_LABELS[selectedNutrient]} ({NUTRIENT_UNITS[selectedNutrient]})
+            {averageValue > 0 && (
+              <span> • Avg: {averageValue} {NUTRIENT_UNITS[selectedNutrient]}</span>
+            )}
             {dailyGoals[selectedNutrient as keyof NutrientData] && (
               <span> • Goal: {dailyGoals[selectedNutrient as keyof NutrientData]} {NUTRIENT_UNITS[selectedNutrient]}</span>
             )}
