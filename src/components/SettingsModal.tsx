@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Trash2, Beaker } from 'lucide-react';
+import { Plus, Trash2, Beaker, Lock } from 'lucide-react';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import { cn } from '@/lib/utils';
 import {
   UserSettings,
@@ -60,7 +61,8 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
   const [newGoal, setNewGoal] = useState('');
   const [customError, setCustomError] = useState('');
   const [showAddCustom, setShowAddCustom] = useState(false);
-
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const goalsLocked = true; // Goals are locked until donation
   const handleSave = () => {
     onSave({
       defaultServingSize: parseFloat(servingSize) || 100,
@@ -208,15 +210,30 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
 
             {/* Default Daily Goals */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                Daily Goals
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                  Daily Goals
+                </h3>
+                {goalsLocked && (
+                  <button
+                    onClick={() => setShowDonationGate(true)}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Lock className="h-3 w-3" />
+                    Unlock
+                  </button>
+                )}
+              </div>
               <div className="space-y-3">
                 {allGoalKeys.map(key => {
                   const isCustom = customNutrients.some(n => n.id === key);
                   return (
-                    <div key={key} className="flex items-center gap-3">
-                      <Label className="flex-1 text-sm truncate">
+                    <div
+                      key={key}
+                      className="flex items-center gap-3"
+                      onClick={goalsLocked ? () => setShowDonationGate(true) : undefined}
+                    >
+                      <Label className={cn("flex-1 text-sm truncate", goalsLocked && "opacity-50")}>
                         {isCustom && (
                           <Beaker className="inline h-3.5 w-3.5 mr-1.5 text-accent opacity-70" />
                         )}
@@ -227,13 +244,17 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                           type="number"
                           value={goals[key as keyof NutrientData] ?? ''}
                           onChange={e => updateGoal(key, e.target.value)}
-                          className="w-24 text-right bg-secondary border-0 rounded-xl"
+                          className={cn(
+                            "w-24 text-right bg-secondary border-0 rounded-xl",
+                            goalsLocked && "opacity-50 cursor-not-allowed"
+                          )}
                           min="0"
+                          disabled={goalsLocked}
                         />
-                        <span className="text-sm text-muted-foreground w-10">
+                        <span className={cn("text-sm text-muted-foreground w-10", goalsLocked && "opacity-50")}>
                           {getUnit(key)}
                         </span>
-                        {isCustom && (
+                        {isCustom && !goalsLocked && (
                           <button
                             onClick={() => removeCustomNutrient(key)}
                             className="p-1 text-muted-foreground hover:text-destructive transition-colors"
@@ -250,7 +271,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
             </div>
 
             {/* Add Custom Nutrient */}
-            <div className="glass-card rounded-2xl p-4 space-y-3">
+            <div className={cn("glass-card rounded-2xl p-4 space-y-3 relative", goalsLocked && "opacity-50")} onClick={goalsLocked ? () => setShowDonationGate(true) : undefined}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
@@ -347,7 +368,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
             </div>
 
             {/* Weekday Goals Toggle */}
-            <div className="glass-card rounded-2xl p-4 space-y-4">
+            <div className={cn("glass-card rounded-2xl p-4 space-y-4 relative", goalsLocked && "opacity-50")} onClick={goalsLocked ? () => setShowDonationGate(true) : undefined}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-sm text-foreground">Weekday-Specific Goals</h3>
@@ -357,7 +378,8 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                 </div>
                 <Switch
                   checked={weekdayEnabled}
-                  onCheckedChange={setWeekdayEnabled}
+                  onCheckedChange={goalsLocked ? () => setShowDonationGate(true) : setWeekdayEnabled}
+                  disabled={goalsLocked}
                 />
               </div>
 
@@ -473,6 +495,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
           </Button>
         </div>
       </DialogContent>
+      <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </Dialog>
   );
 }
