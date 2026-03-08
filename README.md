@@ -116,7 +116,7 @@ Recommended installation method:
 ```bash
 git clone <YOUR_GIT_URL>
 
-**Step 2 — Navigate to the project directory**
+** Step 2 — Navigate to the project directory **
 
 cd <YOUR_PROJECT_NAME>
 
@@ -190,7 +190,7 @@ Setting up a custom domain.
 
 
 
-*Licence :*
+**Licence :**
 
 ## Quellen
 - https://react.dev  
