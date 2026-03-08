@@ -40,6 +40,7 @@ export default function Index() {
     removeFoodEntry,
     getTodayLog,
     getTodayNutrients,
+    getGoalsForDate,
     exportDatabase,
     importDatabase,
     updateSettings,
@@ -55,7 +56,7 @@ export default function Index() {
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
-  const { dailyGoals } = settings;
+  const dailyGoals = getGoalsForDate(); // resolves weekday-specific goals
 
   const calorieGoal = dailyGoals['energy-kcal'] || 2000;
   const currentCalories = todayNutrients['energy-kcal'] || 0;
