@@ -542,30 +542,44 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               <PieChartIcon className="h-5 w-5 text-primary" />
               {isToday ? "Today's" : format(pieChartDate, 'MMM d')} Calorie Sources
             </CardTitle>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "bg-secondary border-0 rounded-xl",
-                    !pieChartDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  {format(pieChartDate, 'MMM d')}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={pieChartDate}
-                  onSelect={(date) => date && setPieChartDate(date)}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
+            {trendsLocked ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-secondary border-0 rounded-xl opacity-50"
+                onClick={() => setShowDonationGate(true)}
+              >
+                <CalendarIcon className="h-4 w-4 mr-2" />
+                Today
+                <Lock className="h-3 w-3 ml-1" />
+              </Button>
+            ) : (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "bg-secondary border-0 rounded-xl",
+                      !pieChartDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    {format(pieChartDate, 'MMM d')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={pieChartDate}
+                    onSelect={(date) => date && setPieChartDate(date)}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
             </Popover>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
