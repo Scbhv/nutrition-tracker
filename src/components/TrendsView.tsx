@@ -580,7 +580,6 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                 </PopoverContent>
               </Popover>
             )}
-            </Popover>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Macronutrient calorie distribution
