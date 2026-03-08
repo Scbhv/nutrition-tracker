@@ -119,8 +119,20 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  /* Apple-style list section headers */
+  h1 {
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  h2, h3 {
+    letter-spacing: -0.02em;
   }
 }
 
@@ -130,15 +142,16 @@
   }
 
   .progress-ring-circle {
-    transition: stroke-dashoffset 0.5s ease-out;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card {
-    @apply bg-card/90 backdrop-blur-xl border border-border/50 shadow-lg;
+    @apply bg-card/80 backdrop-blur-2xl border border-border/30 shadow-sm;
+    border-radius: 16px;
   }
 
   .ios-button {
-    @apply rounded-full font-semibold transition-all duration-200 active:scale-95;
+    @apply rounded-2xl font-semibold transition-all duration-200 active:scale-[0.97];
   }
 
   .ios-button-primary {
@@ -146,7 +159,7 @@
   }
 
   .ios-button-secondary {
-    @apply ios-button bg-secondary text-secondary-foreground px-6 py-3;
+    @apply ios-button bg-secondary/80 text-secondary-foreground px-6 py-3;
   }
 
   .ios-button-accent {
@@ -154,12 +167,12 @@
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50;
+    @apply fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-2xl border-t border-border/30;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
   .bottom-nav-item {
-    @apply flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground transition-colors;
+    @apply flex flex-col items-center gap-0.5 py-2 px-4 text-muted-foreground transition-colors;
   }
 
   .bottom-nav-item.active {
@@ -168,6 +181,15 @@
 
   .nutrient-pill {
     @apply px-3 py-1.5 rounded-full text-xs font-semibold;
+  }
+
+  /* Apple-style grouped list sections */
+  .ios-section {
+    @apply bg-card/80 backdrop-blur-2xl rounded-2xl border border-border/30 overflow-hidden;
+  }
+
+  .ios-section-item {
+    @apply flex items-center justify-between px-4 py-3.5 border-b border-border/20 last:border-b-0;
   }
 }
 
