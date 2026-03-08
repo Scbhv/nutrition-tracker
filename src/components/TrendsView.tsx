@@ -268,6 +268,100 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
         </CardContent>
       </Card>
 
+      {/* Net Calorie Trend */}
+      <Card className="glass-card border-0">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Flame className="h-5 w-5 text-destructive" />
+            Net Calories
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Intake minus exercise burned
+          </p>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={netCalorieData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={50}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  formatter={(value: number, name: string) => {
+                    const labels: Record<string, string> = { eaten: 'Eaten', burned: 'Burned', net: 'Net' };
+                    return [`${value} kcal`, labels[name] || name];
+                  }}
+                />
+                <Bar dataKey="eaten" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={30} name="eaten" />
+                {hasAnyExercise && (
+                  <Bar dataKey="burned" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} maxBarSize={30} name="burned" />
+                )}
+                <Line
+                  type="monotone"
+                  dataKey="net"
+                  stroke="hsl(var(--accent-foreground))"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: 'hsl(var(--accent-foreground))' }}
+                  name="net"
+                />
+                <ReferenceLine
+                  y={netCalorieData[0]?.goal || 2000}
+                  stroke="hsl(var(--accent))"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  label={{
+                    value: 'Goal',
+                    position: 'right',
+                    fill: 'hsl(var(--accent))',
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Legend */}
+          <div className="flex justify-center gap-4 mt-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--primary))' }} />
+              Eaten
+            </span>
+            {hasAnyExercise && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--destructive))' }} />
+                Burned
+              </span>
+            )}
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-2 rounded-sm border" style={{ borderColor: 'hsl(var(--accent-foreground))' }} />
+              Net
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5" style={{ backgroundColor: 'hsl(var(--accent))', display: 'block' }} />
+              Goal
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Macro Calorie Distribution - Pie Chart */}
       <Card className="glass-card border-0">
         <CardHeader className="pb-2">
