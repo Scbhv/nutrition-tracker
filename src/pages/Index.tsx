@@ -401,7 +401,7 @@ export default function Index() {
             {(todayLog.exerciseEntries || []).length > 0 && (
               <section className="space-y-3">
                 <div className="flex items-center justify-between px-1">
-                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <h2 className="text-[17px] font-semibold text-foreground flex items-center gap-2 tracking-tight">
                     <Flame className="h-5 w-5 text-destructive" />
                     Exercise
                   </h2>
