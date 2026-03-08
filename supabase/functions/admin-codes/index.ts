@@ -98,7 +98,7 @@ serve(async (req) => {
       });
     }
 
-    if (body.action === "toggle") {
+    if (resolvedAction === "toggle") {
       const { id, is_active } = body;
       const { error } = await serviceClient
         .from("unlock_codes")
