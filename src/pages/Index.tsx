@@ -271,34 +271,34 @@ export default function Index() {
 
             {/* Net Calorie Summary */}
             {burnedCalories > 0 && (
-              <section className="glass-card rounded-2xl p-4 animate-slide-up">
+              <section className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 border border-border/30 shadow-sm animate-slide-up">
                 <div className="flex items-center gap-2 mb-3">
                   <Flame className="h-4 w-4 text-destructive" />
-                  <h3 className="font-semibold text-sm text-foreground">Net Calories</h3>
+                  <h3 className="font-semibold text-[15px] text-foreground tracking-tight">Net Calories</h3>
                 </div>
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
-                    <p className="text-lg font-bold text-foreground">{currentCalories.toFixed(0)}</p>
-                    <p className="text-xs text-muted-foreground">Eaten</p>
+                    <p className="text-lg font-semibold text-foreground tracking-tight">{currentCalories.toFixed(0)}</p>
+                    <p className="text-[11px] text-muted-foreground/70">Eaten</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-destructive">−{burnedCalories.toFixed(0)}</p>
-                    <p className="text-xs text-muted-foreground">Burned</p>
+                    <p className="text-lg font-semibold text-destructive tracking-tight">−{burnedCalories.toFixed(0)}</p>
+                    <p className="text-[11px] text-muted-foreground/70">Burned</p>
                   </div>
                   <div>
-                    <p className={`text-lg font-bold ${netCalories < 0 ? 'text-destructive' : 'text-primary'}`}>
+                    <p className={`text-lg font-semibold tracking-tight ${netCalories < 0 ? 'text-destructive' : 'text-primary'}`}>
                       {netCalories.toFixed(0)}
                     </p>
-                    <p className="text-xs text-muted-foreground">Net</p>
+                    <p className="text-[11px] text-muted-foreground/70">Net</p>
                   </div>
                 </div>
-                <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+                <div className="mt-3 h-[5px] rounded-full bg-muted/50 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-primary transition-all duration-500"
+                    className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
                     style={{ width: `${Math.max(0, Math.min(100, netPercentage))}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground text-center mt-1.5">
+                <p className="text-[11px] text-muted-foreground/70 text-center mt-1.5">
                   {netCalories > 0
                     ? `${Math.round(calorieGoal - netCalories)} net kcal remaining`
                     : 'Calorie deficit — you burned more than you ate'}
