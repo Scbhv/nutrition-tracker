@@ -18,7 +18,7 @@ interface FoodDatabaseViewProps {
   onAddFood: () => void;
   onEditFood: (food: FoodItem) => void;
   onDeleteFood: (id: string) => void;
-  onLogFood: (foodId: string) => void;
+  onLogFood: (foodId: string, portionGrams: number) => void;
   onExport: () => void;
   onImport: () => void;
   onImportFoods: (foods: FoodItem[]) => void;
