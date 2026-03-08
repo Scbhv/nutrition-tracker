@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Beaker } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS, CustomNutrient } from '@/types/nutrients';
 import { validateFoodName, validateBarcode, validateBrand, validateServingSize, validateServingUnit, validateNutrientValue, sanitizeText } from '@/lib/inputSanitization';
 
 interface AddFoodModalProps {
@@ -14,6 +14,7 @@ interface AddFoodModalProps {
   onAdd: (food: { name: string; barcode?: string; brand?: string; servingSize: number; servingUnit: string; nutrients: NutrientData }) => void;
   initialData?: Partial<NutrientData>;
   initialName?: string;
+  customNutrients?: CustomNutrient[];
 }
 
 export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }: AddFoodModalProps) {
