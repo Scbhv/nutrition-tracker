@@ -561,15 +561,24 @@ export default function Index() {
               Import Database
             </Button>
 
-            {/* Sign Out */}
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              Sign Out
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate('/auth')}
+                className="w-full h-14 justify-start px-4 rounded-2xl"
+              >
+                <LogOut className="h-5 w-5 mr-3 rotate-180" />
+                Log In
+              </Button>
+            )}
 
             {/* Premium Status */}
             {isPremium && (
