@@ -506,14 +506,22 @@ export default function Index() {
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
             </Button>
-            <Button
-              onClick={() => setShowDonationGate(true)}
-              className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
-            >
-              <Heart className="h-5 w-5 mr-3 text-destructive" />
-              Apple Health Export
-              <Lock className="h-3.5 w-3.5 ml-auto" />
-            </Button>
+            {isPremium ? (
+              <HealthKitExport
+                foods={foods}
+                logs={logs}
+                getTodayNutrients={getTodayNutrients}
+              />
+            ) : (
+              <Button
+                onClick={() => setShowDonationGate(true)}
+                className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+              >
+                <Heart className="h-5 w-5 mr-3 text-destructive" />
+                Apple Health Export
+                <Lock className="h-3.5 w-3.5 ml-auto" />
+              </Button>
+            )}
             <Button 
               onClick={handleExport} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
