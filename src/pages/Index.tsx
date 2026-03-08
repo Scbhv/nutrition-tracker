@@ -587,6 +587,7 @@ export default function Index() {
         onScanBarcode={() => setShowScanner(true)}
         onAILookup={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)}
         onImport={handleImport}
+        onLockedTab={() => setShowDonationGate(true)}
       />
 
       {/* Hidden file input */}
