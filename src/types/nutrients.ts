@@ -1,3 +1,10 @@
+export interface CustomNutrient {
+  id: string;       // kebab-case key like "custom-omega-3"
+  label: string;    // Display name like "Omega-3"
+  unit: string;     // "g", "mg", "μg", "IU", "ml", etc.
+  goal: number;     // Daily goal amount
+}
+
 export interface NutrientData {
   // Basic macros
   "energy-kcal"?: number;
