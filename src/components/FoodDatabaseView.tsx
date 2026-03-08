@@ -79,6 +79,21 @@ export function FoodDatabaseView({
     }
   };
 
+  const openPortionDialog = (food: FoodItem) => {
+    setPortionFood(food);
+    setPortionGrams(String(food.servingSize));
+    setTimeout(() => portionInputRef.current?.select(), 100);
+  };
+
+  const confirmPortion = () => {
+    if (!portionFood) return;
+    const grams = parseFloat(portionGrams);
+    if (isNaN(grams) || grams <= 0) return;
+    onLogFood(portionFood.id, grams);
+    setPortionFood(null);
+    setPortionGrams('');
+  };
+
   const handleManualSave = async () => {
     await fileSystem.saveToFile(foods, logs, settings);
   };
