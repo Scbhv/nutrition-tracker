@@ -168,7 +168,7 @@ export function FoodDatabaseView({
                     food={food}
                     onEdit={() => onEditFood(food)}
                     onDelete={() => onDeleteFood(food.id)}
-                    onLog={() => onLogFood(food.id)}
+                    onLog={() => openPortionDialog(food)}
                   />
                 ))
               )}
