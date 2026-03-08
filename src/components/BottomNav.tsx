@@ -59,7 +59,7 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
   };
 
   const lockedTabs = new Set<Tab>(['database']);
-  const databaseLocked = true; // Toggle for paid users
+  const databaseLocked = !isPremium;
 
   const renderTab = (tab: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }) => {
     const Icon = tab.icon;
