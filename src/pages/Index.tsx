@@ -651,11 +651,7 @@ export default function Index() {
           </div>
         </div>
       )}
-      <Header 
-        title={getTitle()} 
-        onSettingsClick={activeTab === 'today' ? () => setShowSettings(true) : undefined}
-        onAddClick={activeTab === 'today' ? () => setShowAddFood(true) : undefined}
-      />
+      <Header title={getTitle()} />
 
       <ScrollArea className="h-[calc(100vh-140px)]">
         <main className="container mx-auto px-5 pb-6 safe-bottom">
