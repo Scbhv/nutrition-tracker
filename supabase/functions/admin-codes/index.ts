@@ -19,6 +19,8 @@ function getCorsHeaders(req: Request) {
 const ADMIN_EMAILS = ["simonstechprojects@gmail.com"]; // Add your admin email(s)
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -134,7 +136,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("Admin error:", e);
     return new Response(JSON.stringify({ error: "Internal error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   }
 });
