@@ -12,6 +12,7 @@ interface BottomNavProps {
   onAILookup: () => void;
   onImport: () => void;
   onLockedTab?: () => void;
+  isPremium?: boolean;
 }
 
 function triggerHaptic(pattern: number | number[] = 8) {
@@ -20,7 +21,7 @@ function triggerHaptic(pattern: number | number[] = 8) {
   }
 }
 
-export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup, onImport, onLockedTab }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup, onImport, onLockedTab, isPremium = false }: BottomNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const leftTabs = [
@@ -58,7 +59,7 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
   };
 
   const lockedTabs = new Set<Tab>(['database']);
-  const databaseLocked = true; // Toggle for paid users
+  const databaseLocked = !isPremium;
 
   const renderTab = (tab: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }) => {
     const Icon = tab.icon;
