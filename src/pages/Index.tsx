@@ -167,14 +167,58 @@ export default function Index() {
               </p>
             </section>
 
+            {/* Net Calorie Summary */}
+            {burnedCalories > 0 && (
+              <section className="glass-card rounded-2xl p-4 animate-slide-up">
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame className="h-4 w-4 text-destructive" />
+                  <h3 className="font-semibold text-sm text-foreground">Net Calories</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-foreground">{currentCalories.toFixed(0)}</p>
+                    <p className="text-xs text-muted-foreground">Eaten</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-destructive">−{burnedCalories.toFixed(0)}</p>
+                    <p className="text-xs text-muted-foreground">Burned</p>
+                  </div>
+                  <div>
+                    <p className={`text-lg font-bold ${netCalories < 0 ? 'text-destructive' : 'text-primary'}`}>
+                      {netCalories.toFixed(0)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Net</p>
+                  </div>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500"
+                    style={{ width: `${Math.max(0, Math.min(100, netPercentage))}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-1.5">
+                  {netCalories > 0
+                    ? `${Math.round(calorieGoal - netCalories)} net kcal remaining`
+                    : 'Calorie deficit — you burned more than you ate'}
+                </p>
+              </section>
+            )}
+
             {/* Action Buttons */}
-            <section className="flex gap-3 px-1">
+            <section className="flex gap-2 px-1">
               <Button 
                 onClick={() => setShowAddFood(true)} 
                 className="flex-1 ios-button-secondary h-14 text-base"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Add Food
+              </Button>
+              <Button 
+                onClick={() => setShowAddExercise(true)} 
+                className="flex-[0.8] ios-button-secondary h-14 text-base"
+              >
+                <Flame className="h-5 w-5 mr-2" />
+                Burn
               </Button>
               <Button 
                 onClick={() => setShowAILookup(true)} 
