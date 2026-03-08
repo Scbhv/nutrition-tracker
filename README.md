@@ -106,34 +106,35 @@ You can work locally using any IDE (for example **VS Code**, **WebStorm**, etc.)
 - **npm**
 
 Recommended installation method:
+---
 **nvm install node**
 
-
+---
 **### Setup Instructions**
 
 **#### Step 1 — Clone the repository**
-
+---
 ```bash
 git clone <YOUR_GIT_URL>
-
+---
 ## Step 2 — Navigate to the project directory 
-
-cd <YOUR_PROJECT_NAME>
-
+---
+cd <nutrient-tracker>
+---
 ##Step 3 — Install dependencies
-
+---
 npm install
-
+---
 ##Step 4 — Start the development server
-
+---
 npm run dev
-
+---
 ##This starts a development server with:
 hot reloading
 instant preview**
 
 ##3. Edit Files Directly in GitHub
-
+---
 You can also edit files directly in the GitHub interface.**
 
 Navigate to the file you want to modify.
@@ -144,7 +145,7 @@ Make your changes.
 
 Commit the changes.
 
-
+---
 
 ##4. Use GitHub Codespaces
 
@@ -160,7 +161,7 @@ Open the Codespaces tab
 Click New codespace
 
 You can then edit, run, and push changes directly from the browser.
-
+---
 ##Technologies Used
 This project is built with:**
 Vite
@@ -169,7 +170,7 @@ React
 shadcn-ui
 Tailwind CSS
 Deployment
-
+---
 ##To deploy the project:**
 Open Lovable
 
@@ -178,7 +179,7 @@ Click Share
 Select Publish
 
 Lovable will automatically build and deploy the application.
-
+---
 ##Custom Domain
 
 You can connect a custom domain to your Lovable project.**
@@ -190,7 +191,7 @@ Further documentation:
 Setting up a custom domain.
 
 
-
+---
 ##Licence :
 
 ## Quellen
