@@ -3,9 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' https://cdn.gpteng.co https://cdn.tailwindcss.com 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: blob: https:;
+      connect-src 'self' https://*.supabase.co https://ai.gateway.lovable.dev https://world.openfoodfacts.org wss://*.supabase.co;
+      frame-ancestors 'self' https://*.lovable.app https://*.lovableproject.com https://*.lovable.dev https://*.gptengineer.app;
+      base-uri 'self';
+      form-action 'self';
+      object-src 'none';
+    " />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <title>NutriTrack - Track Your Nutrition</title>
+    <meta name="description" content="Track your nutrition effortlessly with AI-powered food lookup" />
     <meta name="author" content="Lovable" />
 
     <!-- TODO: Update og:title to match your application name -->
