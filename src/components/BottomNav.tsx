@@ -12,9 +12,9 @@ interface BottomNavProps {
   onAILookup: () => void;
 }
 
-function triggerHaptic() {
+function triggerHaptic(pattern: number | number[] = 8) {
   if (navigator.vibrate) {
-    navigator.vibrate(8);
+    navigator.vibrate(pattern);
   }
 }
 
