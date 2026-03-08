@@ -560,6 +560,16 @@ export default function Index() {
               Import Database
             </Button>
 
+            {/* Sign Out */}
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Sign Out
+            </Button>
+
             {/* Premium Status */}
             {isPremium && (
               <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
