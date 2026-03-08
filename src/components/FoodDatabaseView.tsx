@@ -350,6 +350,7 @@ export function FoodDatabaseView({
               {portionFood?.name}
             </DialogTitle>
             <DialogDescription className="sr-only">Select portion size</DialogDescription>
+          </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="text-center text-sm text-muted-foreground">
               {portionFood?.servingSize}{portionFood?.servingUnit} per serving •{' '}
