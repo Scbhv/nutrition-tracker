@@ -16,13 +16,20 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const ADMIN_EMAILS = ["simonstechprojects@gmail.com"]; // Add your admin email(s)
+function jsonResponse(cors: Record<string, string>, body: object, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
+
+const ADMIN_EMAILS = ["simonstechprojects@gmail.com"];
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+  const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: cors });
   }
 
   try {
@@ -33,9 +40,7 @@ serve(async (req) => {
     // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Unauthorized" }, 401);
     }
 
     const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -44,99 +49,64 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: authError } = await anonClient.auth.getClaims(token);
     if (authError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Unauthorized" }, 401);
     }
 
     const userEmail = claimsData.claims.email as string;
     if (!ADMIN_EMAILS.includes(userEmail)) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Forbidden" }, 403);
     }
 
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-    const url = new URL(req.url);
-    const action = url.searchParams.get("action");
 
-    // For POST requests, parse body and use body.action
+    // Resolve action from query param or POST body
     let body: any = {};
-    if (req.method === "POST") {
-      body = await req.json();
-    }
-
-    const resolvedAction = action || body.action;
+    if (req.method === "POST") body = await req.json();
+    const action = new URL(req.url).searchParams.get("action") || body.action;
 
     // LIST codes
-    if (req.method === "GET" || resolvedAction === "list") {
+    if (req.method === "GET" || action === "list") {
       const { data: codes, error } = await serviceClient
-        .from("unlock_codes")
-        .select("*")
-        .order("created_at", { ascending: false });
-
+        .from("unlock_codes").select("*").order("created_at", { ascending: false });
       if (error) throw error;
 
       const { data: premiumUsers } = await serviceClient
-        .from("premium_users")
-        .select("id, user_id, unlocked_at, unlock_method");
+        .from("premium_users").select("id, user_id, unlocked_at, unlock_method");
 
-      return new Response(JSON.stringify({ codes, premiumUsers: premiumUsers || [] }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { codes, premiumUsers: premiumUsers || [] });
     }
 
-    // POST actions
-    if (resolvedAction === "create") {
+    // CREATE code
+    if (action === "create") {
       const { code, max_uses } = body;
       if (!code || typeof code !== "string" || code.length > 50) {
-        return new Response(JSON.stringify({ error: "Invalid code" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse(cors, { error: "Invalid code" }, 400);
       }
       const { error } = await serviceClient.from("unlock_codes").insert({
-        code: code.trim(),
-        max_uses: max_uses || 1,
-        is_active: true,
+        code: code.trim(), max_uses: max_uses || 1, is_active: true,
       });
-      if (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (error) return jsonResponse(cors, { error: error.message }, 400);
+      return jsonResponse(cors, { success: true });
     }
 
-    if (resolvedAction === "toggle") {
-      const { id, is_active } = body;
+    // TOGGLE code
+    if (action === "toggle") {
       const { error } = await serviceClient
-        .from("unlock_codes")
-        .update({ is_active })
-        .eq("id", id);
+        .from("unlock_codes").update({ is_active: body.is_active }).eq("id", body.id);
       if (error) throw error;
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { success: true });
     }
 
-    if (resolvedAction === "delete") {
-      const { id } = body;
-      const { error } = await serviceClient.from("unlock_codes").delete().eq("id", id);
+    // DELETE code
+    if (action === "delete") {
+      const { error } = await serviceClient.from("unlock_codes").delete().eq("id", body.id);
       if (error) throw error;
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { success: true });
     }
 
-    return new Response(JSON.stringify({ error: "Unknown action" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse(cors, { error: "Unknown action" }, 400);
   } catch (e) {
     console.error("Admin error:", e);
-    return new Response(JSON.stringify({ error: "Internal error" }), {
-      status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-    });
+    return jsonResponse(getCorsHeaders(req), { error: "Internal error" }, 500);
   }
 });
