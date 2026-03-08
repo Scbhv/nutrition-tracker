@@ -27,6 +27,7 @@ type Tab = 'today' | 'database' | 'trends' | 'profile';
 export default function Index() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
     logs,
