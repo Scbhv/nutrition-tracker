@@ -12,9 +12,9 @@ interface BottomNavProps {
   onAILookup: () => void;
 }
 
-function triggerHaptic() {
+function triggerHaptic(pattern: number | number[] = 8) {
   if (navigator.vibrate) {
-    navigator.vibrate(8);
+    navigator.vibrate(pattern);
   }
 }
 
@@ -38,12 +38,18 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
   ];
 
   const toggleMenu = useCallback(() => {
-    triggerHaptic();
+    if (!menuOpen) {
+      // Opening menu: double tap pattern
+      triggerHaptic([10, 20, 10]);
+    } else {
+      // Closing menu: single gentle tap
+      triggerHaptic(6);
+    }
     setMenuOpen(prev => !prev);
-  }, []);
+  }, [menuOpen]);
 
   const handleMenuItemClick = (action: () => void) => {
-    triggerHaptic();
+    triggerHaptic(12);
     action();
     setMenuOpen(false);
   };
@@ -116,14 +122,14 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
           {leftTabs.map(renderTab)}
           
           {/* Center FAB button */}
-          <div className="relative -mt-8">
+           <div className="relative -mt-8">
             <button
               onClick={toggleMenu}
               className={cn(
                 "w-14 h-14 rounded-full flex items-center justify-center shadow-lg",
                 "transition-all duration-300 ease-out active:scale-90",
                 menuOpen 
-                  ? "bg-muted-foreground rotate-[135deg] shadow-none" 
+                  ? "bg-muted-foreground rotate-[135deg] scale-110 shadow-xl" 
                   : "bg-primary hover:bg-primary/90 hover:shadow-glow hover:scale-105"
               )}
             >
@@ -135,7 +141,7 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
             {/* Pulse ring on idle */}
             {!menuOpen && (
               <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping pointer-events-none" 
-                style={{ animationDuration: '3s' }} 
+                style={{ animationDuration: '2s' }} 
               />
             )}
           </div>
