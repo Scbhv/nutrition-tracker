@@ -71,12 +71,21 @@ export interface DailyLog {
   id: string;
   date: string;
   entries: FoodEntry[];
+  exerciseEntries?: ExerciseEntry[];
 }
 
 export interface FoodEntry {
   id: string;
   foodId: string;
   servingAmount: number; // multiplier of serving size
+  timestamp: string;
+}
+
+export interface ExerciseEntry {
+  id: string;
+  name: string;
+  caloriesBurned: number;
+  durationMinutes?: number;
   timestamp: string;
 }
 
