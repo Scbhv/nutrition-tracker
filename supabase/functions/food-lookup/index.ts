@@ -356,6 +356,17 @@ serve(async (req) => {
       return rateLimitResponse(corsHeaders);
     }
 
+    // Server-side premium entitlement check
+    const { data: isPremium, error: premiumError } = await serviceClient.rpc("is_premium", {
+      p_user_id: data.user.id,
+    });
+    if (premiumError || !isPremium) {
+      return new Response(
+        JSON.stringify({ error: "This is a premium feature. Please unlock premium to continue." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse and validate input
     let rawBody: unknown;
     try {
