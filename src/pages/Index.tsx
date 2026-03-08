@@ -498,6 +498,8 @@ export default function Index() {
             <AppearanceSettings
               appearance={appearance}
               onUpdate={updateAppearance}
+              isPremium={isPremium}
+              onShowDonationGate={() => setShowDonationGate(true)}
             />
             <Button 
               onClick={() => setShowSettings(true)} 
