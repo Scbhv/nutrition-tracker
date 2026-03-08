@@ -33,8 +33,25 @@ export default function AdminPanel() {
   const [newMaxUses, setNewMaxUses] = useState('10');
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session?.user);
+      setCheckingAuth(false);
+    };
+    checkAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+      setCheckingAuth(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchData = useCallback(async () => {
+    if (!isAuthenticated) { setLoading(false); return; }
     setLoading(true);
     setError(null);
     try {
@@ -53,7 +70,7 @@ export default function AdminPanel() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -104,6 +121,28 @@ export default function AdminPanel() {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+        <h1 className="text-xl font-bold text-foreground mb-2">Sign In Required</h1>
+        <p className="text-muted-foreground text-sm mb-4">Please sign in with your admin account to access this panel.</p>
+        <Button variant="outline" onClick={() => window.location.href = '/'} className="rounded-2xl">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Go to App
+        </Button>
+      </div>
+    );
+  }
 
   if (error === 'Forbidden') {
     return (

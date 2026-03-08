@@ -49,8 +49,16 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get("action");
 
+    // For POST requests, parse body and use body.action
+    let body: any = {};
+    if (req.method === "POST") {
+      body = await req.json();
+    }
+
+    const resolvedAction = action || body.action;
+
     // LIST codes
-    if (req.method === "GET" || action === "list") {
+    if (req.method === "GET" || resolvedAction === "list") {
       const { data: codes, error } = await serviceClient
         .from("unlock_codes")
         .select("*")
@@ -68,9 +76,7 @@ serve(async (req) => {
     }
 
     // POST actions
-    const body = await req.json();
-
-    if (body.action === "create") {
+    if (resolvedAction === "create") {
       const { code, max_uses } = body;
       if (!code || typeof code !== "string" || code.length > 50) {
         return new Response(JSON.stringify({ error: "Invalid code" }), {
@@ -92,7 +98,7 @@ serve(async (req) => {
       });
     }
 
-    if (body.action === "toggle") {
+    if (resolvedAction === "toggle") {
       const { id, is_active } = body;
       const { error } = await serviceClient
         .from("unlock_codes")
@@ -104,7 +110,7 @@ serve(async (req) => {
       });
     }
 
-    if (body.action === "delete") {
+    if (resolvedAction === "delete") {
       const { id } = body;
       const { error } = await serviceClient.from("unlock_codes").delete().eq("id", id);
       if (error) throw error;
