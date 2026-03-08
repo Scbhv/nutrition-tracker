@@ -14,13 +14,40 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      rate_limits: {
+        Row: {
+          count: number
+          id: string
+          key: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          id?: string
+          key: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          id?: string
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_and_increment_rate_limit: {
+        Args: {
+          p_key: string
+          p_max_requests: number
+          p_window_seconds?: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
