@@ -188,6 +188,19 @@ export function useFoodDatabase() {
     setSettings(prev => ({ ...prev, ...updates }));
   }, []);
 
+  /** Resolve goals for a specific date, merging weekday overrides onto defaults. */
+  const getGoalsForDate = useCallback((date?: Date): NutrientData => {
+    const d = date || new Date();
+    const dayOfWeek = d.getDay() as Weekday;
+    
+    if (!settings.weekdayGoalsEnabled || !settings.weekdayGoals?.[dayOfWeek]) {
+      return settings.dailyGoals;
+    }
+    
+    // Merge: weekday overrides on top of default goals
+    return { ...settings.dailyGoals, ...settings.weekdayGoals[dayOfWeek] };
+  }, [settings]);
+
   const mergeFoods = useCallback((newFoods: FoodItem[]) => {
     setFoods(prev => {
       const existingIds = new Set(prev.map(f => f.id));
@@ -222,6 +235,7 @@ export function useFoodDatabase() {
     removeFoodEntry,
     getTodayLog,
     getTodayNutrients,
+    getGoalsForDate,
     exportDatabase,
     importDatabase,
     updateSettings,
