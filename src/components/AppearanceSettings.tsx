@@ -14,6 +14,8 @@ import {
 interface AppearanceSettingsProps {
   appearance: AppearanceSettingsType;
   onUpdate: (updates: Partial<AppearanceSettingsType>) => void;
+  isPremium?: boolean;
+  onShowDonationGate?: () => void;
 }
 
 const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
@@ -22,11 +24,15 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-const designLocked = true; // Locked until donation
-
-export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsProps) {
+export function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }: AppearanceSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
+  const designLocked = !isPremium;
+
+  const showGate = () => {
+    if (onShowDonationGate) onShowDonationGate();
+    else setShowDonationGate(true);
+  };
 
   const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,21 +47,30 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Theme Mode — FREE */}
-      <div className="glass-card rounded-2xl p-4 space-y-3">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-          Theme
-        </Label>
+      {/* Theme Mode — LOCKED for free */}
+      <div
+        className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
+        onClick={designLocked ? showGate : undefined}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            Theme
+          </Label>
+          {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {THEME_OPTIONS.map(({ mode, icon: Icon, label }) => (
             <button
               key={mode}
-              onClick={() => onUpdate({ themeMode: mode })}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+              disabled={designLocked}
+              onClick={(e) => { e.stopPropagation(); if (!designLocked) onUpdate({ themeMode: mode }); }}
+              className={cn(
+                "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all",
                 appearance.themeMode === mode
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-muted'
-              }`}
+                  : 'bg-secondary text-secondary-foreground',
+                designLocked ? 'cursor-not-allowed' : 'hover:bg-muted'
+              )}
             >
               <Icon className="h-5 w-5" />
               <span className="text-xs font-medium">{label}</span>
@@ -67,7 +82,7 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
       {/* Design Style — LOCKED */}
       <div
         className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
-        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+        onClick={designLocked ? showGate : undefined}
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
@@ -99,7 +114,7 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
       {/* Accent Color — LOCKED */}
       <div
         className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
-        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+        onClick={designLocked ? showGate : undefined}
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
@@ -146,7 +161,7 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
       {/* App Icon — LOCKED */}
       <div
         className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
-        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+        onClick={designLocked ? showGate : undefined}
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">

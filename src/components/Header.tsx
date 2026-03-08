@@ -1,4 +1,4 @@
-import { Calendar, Plus, Settings } from 'lucide-react';
+import { Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
@@ -9,19 +9,19 @@ interface HeaderProps {
 
 export function Header({ title, onSettingsClick, onAddClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl">
-      <div className="flex items-center justify-between px-5 py-4">
-        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
+    <header className="sticky top-0 z-10 bg-background/70 backdrop-blur-2xl">
+      <div className="flex items-center justify-between px-5 py-3">
+        <h1 className="text-[34px] font-bold tracking-tight text-foreground">{title}</h1>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {onSettingsClick && (
             <Button
               variant="ghost"
               size="icon"
               onClick={onSettingsClick}
-              className="rounded-full bg-secondary"
+              className="rounded-full bg-secondary/60 backdrop-blur-sm h-9 w-9"
             >
-              <Calendar className="h-5 w-5" />
+              <Calendar className="h-[18px] w-[18px]" />
             </Button>
           )}
           {onAddClick && (
@@ -29,9 +29,9 @@ export function Header({ title, onSettingsClick, onAddClick }: HeaderProps) {
               variant="ghost"
               size="icon"
               onClick={onAddClick}
-              className="rounded-full bg-secondary"
+              className="rounded-full bg-secondary/60 backdrop-blur-sm h-9 w-9"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-[18px] w-[18px]" />
             </Button>
           )}
         </div>

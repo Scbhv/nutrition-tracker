@@ -108,24 +108,24 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
 
       {/* Floating menu */}
       {menuOpen && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2.5">
           {menuItems.map((item, index) => (
             <button
               key={item.id}
               onClick={() => handleMenuItemClick(item.action)}
-              className="flex items-center gap-3 px-5 py-3 bg-card rounded-2xl shadow-lg border border-border/50 
-                hover:bg-secondary active:scale-95 transition-all duration-150 opacity-0"
+              className="flex items-center gap-3 px-5 py-3.5 bg-card/90 backdrop-blur-2xl rounded-2xl shadow-lg border border-border/30 
+                hover:bg-secondary/80 active:scale-[0.97] transition-all duration-150 opacity-0"
               style={{ 
-                animation: `menuItemIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${(menuItems.length - 1 - index) * 60}ms forwards`,
+                animation: `menuItemIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${(menuItems.length - 1 - index) * 50}ms forwards`,
               }}
             >
               <div className={cn(
                 "p-2 rounded-xl transition-colors",
-                item.id === 'ai' ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
+                item.id === 'ai' ? "bg-accent/15 text-accent" : "bg-primary/15 text-primary"
               )}>
                 <item.icon className="h-5 w-5" />
               </div>
-              <span className="font-medium text-foreground">{item.label}</span>
+              <span className="font-medium text-sm text-foreground">{item.label}</span>
             </button>
           ))}
         </div>
@@ -137,15 +137,15 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
           {leftTabs.map(renderTab)}
           
           {/* Center FAB button */}
-           <div className="relative -mt-8">
+           <div className="relative -mt-7">
             <button
               onClick={toggleMenu}
               className={cn(
-                "w-14 h-14 rounded-full flex items-center justify-center shadow-lg",
-                "transition-all duration-300 ease-out active:scale-90",
+                "w-[52px] h-[52px] rounded-full flex items-center justify-center",
+                "transition-all duration-300 ease-out active:scale-90 shadow-md",
                 menuOpen 
-                  ? "bg-muted-foreground rotate-[135deg] scale-110 shadow-xl" 
-                  : "bg-primary hover:bg-primary/90 hover:shadow-glow hover:scale-105"
+                  ? "bg-muted-foreground rotate-[135deg] scale-105" 
+                  : "bg-primary hover:bg-primary/90"
               )}
             >
               <Plus className={cn(
@@ -153,12 +153,6 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
                 menuOpen ? "text-background" : "text-primary-foreground"
               )} />
             </button>
-            {/* Pulse ring on idle */}
-            {!menuOpen && (
-              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping pointer-events-none" 
-                style={{ animationDuration: '2s' }} 
-              />
-            )}
           </div>
 
           {/* Right tabs */}
