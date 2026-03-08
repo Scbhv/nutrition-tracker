@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload } from 'lucide-react';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -59,6 +59,8 @@ export default function Index() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
@@ -151,16 +153,16 @@ export default function Index() {
     });
   };
 
-  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processJsonFile = useCallback((file: File) => {
+    if (!file.name.endsWith('.json')) {
+      toast({ title: 'Error', description: 'Only .json files are supported', variant: 'destructive' });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const jsonString = event.target?.result as string;
         const parsed = JSON.parse(jsonString);
-
-        // Detect format: flat nutrient JSON vs full database export
         if (isFlatNutrientJSON(parsed)) {
           importFlatNutrientJSON(parsed, file.name);
         } else {
@@ -172,16 +174,46 @@ export default function Index() {
           });
         }
       } catch {
-        toast({
-          title: 'Error',
-          description: 'Invalid JSON file',
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: 'Invalid JSON file', variant: 'destructive' });
       }
     };
     reader.readAsText(file);
+  }, [importDatabase, mergeFoods, toast]);
+
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processJsonFile(file);
     e.target.value = '';
   };
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items?.length) setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) processJsonFile(file);
+  }, [processJsonFile]);
 
   const handleImportFoods = (newFoods: FoodItem[]) => {
     mergeFoods(newFoods);
@@ -504,7 +536,23 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drop overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+          <div className="border-2 border-dashed border-primary rounded-3xl p-12 text-center animate-scale-in">
+            <Upload className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <p className="text-xl font-semibold text-foreground">Drop JSON file to import</p>
+            <p className="text-sm text-muted-foreground mt-2">Food nutrients or full database export</p>
+          </div>
+        </div>
+      )}
       <Header 
         title={getTitle()} 
         onSettingsClick={activeTab === 'today' ? () => setShowSettings(true) : undefined}
