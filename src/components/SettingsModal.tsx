@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -192,6 +192,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
       <DialogContent className="max-w-md max-h-[90vh] p-0 gap-0 bg-card border-border rounded-3xl">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-xl">Settings</DialogTitle>
+          <DialogDescription className="sr-only">Configure daily goals and app settings</DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[55vh] px-6">

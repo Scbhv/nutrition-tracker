@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Heart, ExternalLink, KeyRound, Loader2, Check } from 'lucide-react';
@@ -81,6 +81,9 @@ export function DonationGateModal({ open, onClose, onUnlocked }: DonationGateMod
           <DialogTitle className="text-lg">
             {unlocked ? 'Unlocked!' : 'Support This App'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {unlocked ? 'All premium features unlocked' : 'Donate to unlock premium features or enter an unlock code'}
+          </DialogDescription>
         </DialogHeader>
 
         {unlocked ? (

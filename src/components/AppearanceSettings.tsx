@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, forwardRef } from 'react';
 import { Sun, Moon, Monitor, Droplets, Palette, Lock } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-export function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }: AppearanceSettingsProps) {
+export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }, ref) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const designLocked = !isPremium;
@@ -212,4 +212,4 @@ export function AppearanceSettings({ appearance, onUpdate, isPremium = false, on
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
-}
+});

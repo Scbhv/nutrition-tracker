@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface BarcodeScannerModalProps {
   open: boolean;
@@ -69,6 +69,7 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
       <DialogContent className="max-w-md bg-card border-border rounded-3xl">
         <DialogHeader>
           <DialogTitle>Scan Barcode</DialogTitle>
+          <DialogDescription className="sr-only">Scan or enter a barcode to look up food</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">

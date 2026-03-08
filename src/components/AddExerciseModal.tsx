@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -64,6 +64,7 @@ export function AddExerciseModal({ open, onClose, onAdd }: AddExerciseModalProps
             <Flame className="h-5 w-5 text-destructive" />
             Log Exercise
           </DialogTitle>
+          <DialogDescription className="sr-only">Log a workout or exercise session</DialogDescription>
         </DialogHeader>
 
         <div className="px-6 pb-6 space-y-5">

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, forwardRef } from 'react';
 import { format, subDays, parseISO } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ReferenceLine, ComposedChart, Line } from 'recharts';
 import { TrendingUp, PieChartIcon, CalendarIcon, Flame, Download, Lock } from 'lucide-react';
@@ -65,7 +65,7 @@ const ALL_NUTRIENTS = [
   ...NUTRIENT_CATEGORIES.other,
 ];
 
-export function TrendsView({ foods, logs, dailyGoals, isPremium = false }: TrendsViewProps) {
+export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function TrendsView({ foods, logs, dailyGoals, isPremium = false }, ref) {
   const [selectedNutrient, setSelectedNutrient] = useState<string>('energy-kcal');
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
@@ -687,4 +687,4 @@ export function TrendsView({ foods, logs, dailyGoals, isPremium = false }: Trend
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
-}
+});
