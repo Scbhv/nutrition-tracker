@@ -6,6 +6,8 @@ interface NutrientBarProps {
   current: number;
   goal: number;
   colorClass?: string;
+  customLabel?: string;
+  customUnit?: string;
 }
 
 export function NutrientBar({ nutrient, current, goal, colorClass = 'bg-primary' }: NutrientBarProps) {
