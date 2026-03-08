@@ -65,7 +65,7 @@ const ALL_NUTRIENTS = [
   ...NUTRIENT_CATEGORIES.other,
 ];
 
-export function TrendsView({ foods, logs, dailyGoals, isPremium = false }: TrendsViewProps) {
+export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function TrendsView({ foods, logs, dailyGoals, isPremium = false }, ref) {
   const [selectedNutrient, setSelectedNutrient] = useState<string>('energy-kcal');
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
