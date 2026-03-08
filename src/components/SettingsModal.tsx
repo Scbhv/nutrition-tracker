@@ -210,15 +210,30 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
 
             {/* Default Daily Goals */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                Daily Goals
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                  Daily Goals
+                </h3>
+                {goalsLocked && (
+                  <button
+                    onClick={() => setShowDonationGate(true)}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Lock className="h-3 w-3" />
+                    Unlock
+                  </button>
+                )}
+              </div>
               <div className="space-y-3">
                 {allGoalKeys.map(key => {
                   const isCustom = customNutrients.some(n => n.id === key);
                   return (
-                    <div key={key} className="flex items-center gap-3">
-                      <Label className="flex-1 text-sm truncate">
+                    <div
+                      key={key}
+                      className="flex items-center gap-3"
+                      onClick={goalsLocked ? () => setShowDonationGate(true) : undefined}
+                    >
+                      <Label className={cn("flex-1 text-sm truncate", goalsLocked && "opacity-50")}>
                         {isCustom && (
                           <Beaker className="inline h-3.5 w-3.5 mr-1.5 text-accent opacity-70" />
                         )}
@@ -229,13 +244,17 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                           type="number"
                           value={goals[key as keyof NutrientData] ?? ''}
                           onChange={e => updateGoal(key, e.target.value)}
-                          className="w-24 text-right bg-secondary border-0 rounded-xl"
+                          className={cn(
+                            "w-24 text-right bg-secondary border-0 rounded-xl",
+                            goalsLocked && "opacity-50 cursor-not-allowed"
+                          )}
                           min="0"
+                          disabled={goalsLocked}
                         />
-                        <span className="text-sm text-muted-foreground w-10">
+                        <span className={cn("text-sm text-muted-foreground w-10", goalsLocked && "opacity-50")}>
                           {getUnit(key)}
                         </span>
-                        {isCustom && (
+                        {isCustom && !goalsLocked && (
                           <button
                             onClick={() => removeCustomNutrient(key)}
                             className="p-1 text-muted-foreground hover:text-destructive transition-colors"
