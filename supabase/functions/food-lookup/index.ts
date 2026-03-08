@@ -1,7 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const securityHeaders = {
+// ─── CORS & Response Helpers ──────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://food-whisperer-health.lovable.app",
+  "https://id-preview--1764e644-44c7-4500-bf0b-0dd59c1a1055.lovable.app",
+  "https://1764e644-44c7-4500-bf0b-0dd59c1a1055.lovableproject.com",
+];
+
+const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "X-XSS-Protection": "1; mode=block",
@@ -10,442 +17,212 @@ const securityHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate",
 };
 
-const ALLOWED_ORIGINS = [
-  "https://food-whisperer-health.lovable.app",
-  "https://id-preview--1764e644-44c7-4500-bf0b-0dd59c1a1055.lovable.app",
-  "https://1764e644-44c7-4500-bf0b-0dd59c1a1055.lovableproject.com",
-];
-
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("Origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-    ...securityHeaders,
+    ...SECURITY_HEADERS,
   };
 }
 
-const OPEN_FOOD_FACTS_API = "https://world.openfoodfacts.org";
-
-// ─── Rate Limiting (Database-backed) ──────────────────────────────────────────
-const IP_MAX_REQUESTS = 20;          // 20 req/min per IP
-const USER_MAX_REQUESTS = 15;        // 15 req/min per user
-const RATE_LIMIT_WINDOW_SECONDS = 60;
-
-async function checkRateLimitDb(
-  supabaseClient: any,
-  key: string,
-  maxRequests: number
-): Promise<boolean> {
-  const { data, error } = await supabaseClient.rpc("check_and_increment_rate_limit", {
-    p_key: key,
-    p_max_requests: maxRequests,
-    p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
+function jsonResponse(cors: Record<string, string>, body: object, status = 200, extra?: Record<string, string>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json", ...extra },
   });
-  if (error) {
-    console.error("Rate limit check failed:", error.message);
-    // Fail open on DB errors to avoid blocking legitimate users
-    return true;
-  }
-  return data === true;
 }
 
-function rateLimitResponse(headers: Record<string, string>) {
-  return new Response(
-    JSON.stringify({ error: "Too many requests. Please try again shortly." }),
-    {
-      status: 429,
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
-        "Retry-After": "60",
-      },
-    }
-  );
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
+const RATE_LIMITS = { ip: 20, user: 15, windowSec: 60 } as const;
+
+async function checkRateLimit(client: any, key: string, max: number): Promise<boolean> {
+  const { data, error } = await client.rpc("check_and_increment_rate_limit", {
+    p_key: key, p_max_requests: max, p_window_seconds: RATE_LIMITS.windowSec,
+  });
+  if (error) { console.error("Rate limit check failed:", error.message); return true; }
+  return data === true;
 }
 
 // ─── Input Validation ─────────────────────────────────────────────────────────
 const ALLOWED_BODY_KEYS = new Set(["query", "useAI"]);
-const MAX_QUERY_LENGTH = 200;
-const MIN_QUERY_LENGTH = 2;
-// Block control characters, script tags, and null bytes
 const DANGEROUS_PATTERN = /[\x00-\x08\x0B\x0C\x0E-\x1F]|<\s*script|javascript:/i;
 
-interface ValidatedInput {
-  query: string;
-  useAI: boolean;
-}
+interface ValidatedInput { query: string; useAI: boolean; }
 
-function validateAndSanitizeInput(body: unknown): { valid: true; data: ValidatedInput } | { valid: false; error: string } {
+function validateInput(body: unknown): { valid: true; data: ValidatedInput } | { valid: false; error: string } {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return { valid: false, error: "Request body must be a JSON object" };
   }
-
   const obj = body as Record<string, unknown>;
 
-  // Reject unexpected fields
   for (const key of Object.keys(obj)) {
-    if (!ALLOWED_BODY_KEYS.has(key)) {
-      return { valid: false, error: `Unexpected field: '${key}'` };
-    }
+    if (!ALLOWED_BODY_KEYS.has(key)) return { valid: false, error: `Unexpected field: '${key}'` };
   }
 
-  // Validate query
-  if (!("query" in obj) || typeof obj.query !== "string") {
-    return { valid: false, error: "Field 'query' is required and must be a string" };
-  }
+  if (typeof obj.query !== "string") return { valid: false, error: "Field 'query' is required and must be a string" };
+  const query = obj.query.trim();
+  if (query.length < 2) return { valid: false, error: "Query too short. Minimum 2 characters." };
+  if (query.length > 200) return { valid: false, error: "Query too long. Maximum 200 characters." };
+  if (DANGEROUS_PATTERN.test(query)) return { valid: false, error: "Query contains invalid characters" };
 
-  const trimmedQuery = obj.query.trim();
+  if ("useAI" in obj && typeof obj.useAI !== "boolean") return { valid: false, error: "Field 'useAI' must be a boolean" };
 
-  if (trimmedQuery.length < MIN_QUERY_LENGTH) {
-    return { valid: false, error: `Query too short. Minimum ${MIN_QUERY_LENGTH} characters.` };
-  }
-
-  if (trimmedQuery.length > MAX_QUERY_LENGTH) {
-    return { valid: false, error: `Query too long. Maximum ${MAX_QUERY_LENGTH} characters.` };
-  }
-
-  if (DANGEROUS_PATTERN.test(trimmedQuery)) {
-    return { valid: false, error: "Query contains invalid characters" };
-  }
-
-  // Validate useAI (optional boolean)
-  let useAI = true;
-  if ("useAI" in obj) {
-    if (typeof obj.useAI !== "boolean") {
-      return { valid: false, error: "Field 'useAI' must be a boolean" };
-    }
-    useAI = obj.useAI;
-  }
-
-  return { valid: true, data: { query: trimmedQuery, useAI } };
+  return { valid: true, data: { query, useAI: (obj.useAI as boolean) ?? true } };
 }
 
-// ─── Nutrient Types & Helpers ─────────────────────────────────────────────────
-interface NutrientData {
-  "energy-kcal"?: number;
-  fat?: number;
-  "saturated-fat"?: number;
-  carbohydrates?: number;
-  sugars?: number;
-  fiber?: number;
-  proteins?: number;
-  salt?: number;
-  sodium?: number;
-  potassium?: number;
-  calcium?: number;
-  magnesium?: number;
-  iron?: number;
-  zinc?: number;
-  "vitamin-a"?: number;
-  "vitamin-c"?: number;
-  "vitamin-d"?: number;
-  "vitamin-e"?: number;
-  "vitamin-b6"?: number;
-  "vitamin-b12"?: number;
-  "vitamin-k"?: number;
-  water?: number;
-}
-
-const VALID_NUTRIENT_KEYS = new Set<string>([
+// ─── Nutrient Helpers ─────────────────────────────────────────────────────────
+const VALID_NUTRIENT_KEYS = new Set([
   "energy-kcal", "fat", "saturated-fat", "carbohydrates", "sugars", "fiber",
   "proteins", "salt", "sodium", "potassium", "calcium", "magnesium", "iron",
   "zinc", "vitamin-a", "vitamin-c", "vitamin-d", "vitamin-e", "vitamin-b6",
   "vitamin-b12", "vitamin-k", "water",
 ]);
 
-async function searchOpenFoodFacts(query: string): Promise<any | null> {
-  try {
-    const searchUrl = `${OPEN_FOOD_FACTS_API}/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=5`;
-    const response = await fetch(searchUrl);
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data.products?.[0] ?? null;
-  } catch {
-    return null;
-  }
-}
+type NutrientData = Partial<Record<string, number>>;
+
+// Conversion multipliers for OFF data (base unit → display unit)
+const OFF_MULTIPLIERS: Record<string, number> = {
+  sodium: 1000, potassium: 1000, calcium: 1000, magnesium: 1000,
+  iron: 1000, zinc: 1000, "vitamin-c": 1000, "vitamin-e": 1000,
+  "vitamin-b6": 1000, "vitamin-a": 1e6, "vitamin-d": 1e6, "vitamin-b12": 1e6,
+};
 
 function extractNutrients(product: any): NutrientData {
   const n = product.nutriments || {};
-  return {
+  const result: NutrientData = {
     "energy-kcal": n["energy-kcal_100g"] || n["energy_100g"] / 4.184,
-    fat: n["fat_100g"],
-    "saturated-fat": n["saturated-fat_100g"],
-    carbohydrates: n["carbohydrates_100g"],
-    sugars: n["sugars_100g"],
-    fiber: n["fiber_100g"],
-    proteins: n["proteins_100g"],
-    salt: n["salt_100g"],
-    sodium: n["sodium_100g"] ? n["sodium_100g"] * 1000 : undefined,
-    potassium: n["potassium_100g"] ? n["potassium_100g"] * 1000 : undefined,
-    calcium: n["calcium_100g"] ? n["calcium_100g"] * 1000 : undefined,
-    magnesium: n["magnesium_100g"] ? n["magnesium_100g"] * 1000 : undefined,
-    iron: n["iron_100g"] ? n["iron_100g"] * 1000 : undefined,
-    zinc: n["zinc_100g"] ? n["zinc_100g"] * 1000 : undefined,
-    "vitamin-a": n["vitamin-a_100g"] ? n["vitamin-a_100g"] * 1000000 : undefined,
-    "vitamin-c": n["vitamin-c_100g"] ? n["vitamin-c_100g"] * 1000 : undefined,
-    "vitamin-d": n["vitamin-d_100g"] ? n["vitamin-d_100g"] * 1000000 : undefined,
-    "vitamin-e": n["vitamin-e_100g"] ? n["vitamin-e_100g"] * 1000 : undefined,
-    "vitamin-b6": n["vitamin-b6_100g"] ? n["vitamin-b6_100g"] * 1000 : undefined,
-    "vitamin-b12": n["vitamin-b12_100g"] ? n["vitamin-b12_100g"] * 1000000 : undefined,
+    fat: n["fat_100g"], "saturated-fat": n["saturated-fat_100g"],
+    carbohydrates: n["carbohydrates_100g"], sugars: n["sugars_100g"],
+    fiber: n["fiber_100g"], proteins: n["proteins_100g"], salt: n["salt_100g"],
   };
+  // Apply unit conversions for micronutrients
+  for (const [key, mult] of Object.entries(OFF_MULTIPLIERS)) {
+    const val = n[`${key}_100g`];
+    if (val != null) result[key] = val * mult;
+  }
+  return result;
 }
 
-function sanitizeQuery(query: string): string {
-  return query
-    .replace(/[\n\r\t]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .substring(0, 200);
+async function searchOpenFoodFacts(query: string): Promise<any | null> {
+  try {
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=5`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return (await res.json()).products?.[0] ?? null;
+  } catch { return null; }
 }
 
 async function estimateWithAI(query: string, apiKey: string): Promise<{ name: string; nutrients: NutrientData } | null> {
-  const sanitizedQuery = sanitizeQuery(query);
+  const sanitized = query.replace(/[\n\r\t]/g, " ").replace(/\s+/g, " ").trim().substring(0, 200);
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "google/gemini-3-flash-preview",
       messages: [
-        {
-          role: "system",
-          content: `You are a nutrition expert. Given a food description, estimate the nutritional values per 100g.
+        { role: "system", content: `You are a nutrition expert. Given a food description, estimate the nutritional values per 100g.
 Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
-{
-  "name": "formatted food name",
-  "nutrients": {
-    "energy-kcal": number,
-    "fat": number (grams),
-    "saturated-fat": number (grams),
-    "carbohydrates": number (grams),
-    "sugars": number (grams),
-    "fiber": number (grams),
-    "proteins": number (grams),
-    "salt": number (grams),
-    "sodium": number (mg),
-    "potassium": number (mg),
-    "calcium": number (mg),
-    "magnesium": number (mg),
-    "iron": number (mg),
-    "zinc": number (mg),
-    "vitamin-a": number (μg),
-    "vitamin-c": number (mg),
-    "vitamin-d": number (μg),
-    "vitamin-e": number (mg),
-    "vitamin-b6": number (mg),
-    "vitamin-b12": number (μg),
-    "vitamin-k": number (μg),
-    "water": number (ml per 100g)
-  }
-}
-Only include nutrients you're confident about. Use null for unknown values.`,
-        },
-        { role: "user", content: `Estimate nutrition for: ${sanitizedQuery}` },
+{"name":"formatted food name","nutrients":{"energy-kcal":number,"fat":number,"saturated-fat":number,"carbohydrates":number,"sugars":number,"fiber":number,"proteins":number,"salt":number,"sodium":number(mg),"potassium":number(mg),"calcium":number(mg),"magnesium":number(mg),"iron":number(mg),"zinc":number(mg),"vitamin-a":number(μg),"vitamin-c":number(mg),"vitamin-d":number(μg),"vitamin-e":number(mg),"vitamin-b6":number(mg),"vitamin-b12":number(μg),"vitamin-k":number(μg),"water":number(ml per 100g)}}
+Only include nutrients you're confident about. Use null for unknown values.` },
+        { role: "user", content: `Estimate nutrition for: ${sanitized}` },
       ],
       temperature: 0.3,
     }),
   });
 
-  if (!response.ok) {
-    if (response.status === 429) throw new Error("Rate limit exceeded. Please try again later.");
-    if (response.status === 402) throw new Error("AI credits exhausted. Please add credits to continue.");
+  if (!res.ok) {
+    if (res.status === 429) throw new Error("Rate limit exceeded. Please try again later.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Please add credits to continue.");
     throw new Error("AI service temporarily unavailable");
   }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
+  const content = (await res.json()).choices?.[0]?.message?.content;
   if (!content) return null;
 
-  let jsonStr = content.trim();
-  if (jsonStr.startsWith("```json")) jsonStr = jsonStr.slice(7);
-  if (jsonStr.startsWith("```")) jsonStr = jsonStr.slice(3);
-  if (jsonStr.endsWith("```")) jsonStr = jsonStr.slice(0, -3);
+  const jsonStr = content.trim().replace(/^```(?:json)?/, "").replace(/```$/, "").trim();
+  const parsed = JSON.parse(jsonStr);
 
-  const parsed = JSON.parse(jsonStr.trim());
+  if (typeof parsed.name !== "string" || parsed.name.length > 200) return null;
 
-  // Validate AI response structure
-  if (typeof parsed.name !== "string" || parsed.name.length > 200) {
-    return null;
+  const nutrients: NutrientData = {};
+  for (const [k, v] of Object.entries(parsed.nutrients || {})) {
+    if (VALID_NUTRIENT_KEYS.has(k) && typeof v === "number" && isFinite(v) && v >= 0) nutrients[k] = v;
   }
-
-  const cleanedNutrients: NutrientData = {};
-  for (const [key, value] of Object.entries(parsed.nutrients || {})) {
-    if (VALID_NUTRIENT_KEYS.has(key) && typeof value === "number" && isFinite(value) && value >= 0) {
-      (cleanedNutrients as any)[key] = value;
-    }
-  }
-
-  return { name: parsed.name, nutrients: cleanedNutrients };
+  return { name: parsed.name, nutrients };
 }
 
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+  const cors = getCorsHeaders(req);
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  // Only allow POST
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return jsonResponse(cors, { error: "Method not allowed" }, 405);
 
   try {
-    // Extract client IP for rate limiting
-    const clientIP =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
-
-    // Validate authentication
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Missing or invalid authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    if (!authHeader?.startsWith("Bearer ")) return jsonResponse(cors, { error: "Unauthorized" }, 401);
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Auth client for user verification
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
+    const serviceClient = createClient(supabaseUrl, serviceKey);
 
-    // Service role client for rate limiting (bypasses RLS)
-    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data, error: authError } = await userClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (authError || !data?.user) return jsonResponse(cors, { error: "Invalid or expired token" }, 401);
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data, error: authError } = await supabaseClient.auth.getUser(token);
+    const userId = data.user.id;
+    const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
 
-    if (authError || !data?.user) {
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired authentication token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Rate limiting
+    if (!await checkRateLimit(serviceClient, `ip:${clientIP}`, RATE_LIMITS.ip) ||
+        !await checkRateLimit(serviceClient, `user:${userId}`, RATE_LIMITS.user)) {
+      return jsonResponse(cors, { error: "Too many requests. Please try again shortly." }, 429, { "Retry-After": "60" });
     }
 
-    // IP-based rate limit (database-backed)
-    const ipAllowed = await checkRateLimitDb(serviceClient, `ip:${clientIP}`, IP_MAX_REQUESTS);
-    if (!ipAllowed) {
-      return rateLimitResponse(corsHeaders);
-    }
+    // Premium check
+    const { data: isPremium } = await serviceClient.rpc("is_premium", { p_user_id: userId });
+    if (!isPremium) return jsonResponse(cors, { error: "This is a premium feature. Please unlock premium to continue." }, 403);
 
-    // User-based rate limit (database-backed)
-    const userAllowed = await checkRateLimitDb(serviceClient, `user:${data.user.id}`, USER_MAX_REQUESTS);
-    if (!userAllowed) {
-      return rateLimitResponse(corsHeaders);
-    }
-
-    // Server-side premium entitlement check
-    const { data: isPremium, error: premiumError } = await serviceClient.rpc("is_premium", {
-      p_user_id: data.user.id,
-    });
-    if (premiumError || !isPremium) {
-      return new Response(
-        JSON.stringify({ error: "This is a premium feature. Please unlock premium to continue." }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Parse and validate input
+    // Parse input
     let rawBody: unknown;
-    try {
-      rawBody = await req.json();
-    } catch {
-      return new Response(
-        JSON.stringify({ error: "Invalid JSON body" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    try { rawBody = await req.json(); } catch { return jsonResponse(cors, { error: "Invalid JSON body" }, 400); }
 
-    const validation = validateAndSanitizeInput(rawBody);
-    if (!validation.valid) {
-      return new Response(
-        JSON.stringify({ error: validation.error }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const validation = validateInput(rawBody);
+    if (!validation.valid) return jsonResponse(cors, { error: validation.error }, 400);
 
     const { query, useAI } = validation.data;
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey) return jsonResponse(cors, { error: "Server configuration error" }, 500);
 
     // Try Open Food Facts first
-    const offProduct = await searchOpenFoodFacts(query);
-
-    if (offProduct) {
-      const nutrients = extractNutrients(offProduct);
-      const name = offProduct.product_name || offProduct.product_name_en || query;
-      const brand = offProduct.brands;
-
-      return new Response(
-        JSON.stringify({ source: "openfoodfacts", name, brand, nutrients, barcode: offProduct.code }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const product = await searchOpenFoodFacts(query);
+    if (product) {
+      return jsonResponse(cors, {
+        source: "openfoodfacts",
+        name: product.product_name || product.product_name_en || query,
+        brand: product.brands,
+        nutrients: extractNutrients(product),
+        barcode: product.code,
+      });
     }
 
     // Fall back to AI
     if (useAI) {
-      const aiResult = await estimateWithAI(query, LOVABLE_API_KEY);
-
-      if (aiResult) {
-        return new Response(
-          JSON.stringify({ source: "ai", name: aiResult.name, nutrients: aiResult.nutrients }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      const result = await estimateWithAI(query, apiKey);
+      if (result) return jsonResponse(cors, { source: "ai", name: result.name, nutrients: result.nutrients });
     }
 
-    return new Response(
-      JSON.stringify({ error: "Could not find nutrition data for this food" }),
-      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse(cors, { error: "Could not find nutrition data for this food" }, 404);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    if (errorMessage.includes("Rate limit")) {
-      return new Response(
-        JSON.stringify({ error: errorMessage }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (errorMessage.includes("credits")) {
-      return new Response(
-        JSON.stringify({ error: errorMessage }),
-        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({ error: "An unexpected error occurred" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    if (msg.includes("Rate limit")) return jsonResponse(cors, { error: msg }, 429);
+    if (msg.includes("credits")) return jsonResponse(cors, { error: msg }, 402);
+    return jsonResponse(cors, { error: "An unexpected error occurred" }, 500);
   }
 });
