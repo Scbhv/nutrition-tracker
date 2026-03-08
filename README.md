@@ -85,7 +85,7 @@ This enables:
 
 ---
 
-# Editing the Application
+##Editing the Application
 
 ## 1. Use Lovable (Recommended)
 The easiest way to edit the application is through **Lovable**.
@@ -116,23 +116,24 @@ Recommended installation method:
 ```bash
 git clone <YOUR_GIT_URL>
 
-** Step 2 — Navigate to the project directory **
+## Step 2 — Navigate to the project directory 
 
 cd <YOUR_PROJECT_NAME>
 
-**Step 3 — Install dependencies**
+##Step 3 — Install dependencies
 
 npm install
 
-**Step 4 — Start the development server**
+##Step 4 — Start the development server
 
 npm run dev
 
-**This starts a development server with:
+##This starts a development server with:
 hot reloading
 instant preview**
 
-**3. Edit Files Directly in GitHub
+##3. Edit Files Directly in GitHub
+
 You can also edit files directly in the GitHub interface.**
 
 Navigate to the file you want to modify.
@@ -145,7 +146,7 @@ Commit the changes.
 
 
 
-**4. Use GitHub Codespaces
+##4. Use GitHub Codespaces
 
 GitHub Codespaces provides a cloud-based development environment.**
 
@@ -160,7 +161,7 @@ Click New codespace
 
 You can then edit, run, and push changes directly from the browser.
 
-**Technologies Used
+##Technologies Used
 This project is built with:**
 Vite
 TypeScript
@@ -169,7 +170,7 @@ shadcn-ui
 Tailwind CSS
 Deployment
 
-**To deploy the project:**
+##To deploy the project:**
 Open Lovable
 
 Click Share
@@ -178,7 +179,7 @@ Select Publish
 
 Lovable will automatically build and deploy the application.
 
-**Custom Domain
+##Custom Domain
 
 You can connect a custom domain to your Lovable project.**
 Steps:
@@ -190,7 +191,7 @@ Setting up a custom domain.
 
 
 
-**Licence :**
+##Licence :
 
 ## Quellen
 - https://react.dev  
