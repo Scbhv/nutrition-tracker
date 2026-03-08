@@ -35,6 +35,7 @@ export default function Index() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
