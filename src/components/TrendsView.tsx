@@ -437,17 +437,13 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               "p-4 rounded-xl border border-border/30",
               averageSummary.avgNet > 0 
                 ? "bg-secondary/50" 
-                : averageSummary.avgNet < 0 
-                ? "bg-green-500/10 border-green-500/30" 
                 : "bg-secondary/50"
             )}>
               <p className="text-xs text-muted-foreground mb-1">Avg Net</p>
               <p className={cn(
                 "text-2xl font-bold",
-                averageSummary.avgNet > 0 
-                  ? "text-foreground" 
-                  : averageSummary.avgNet < 0 
-                  ? "text-green-600 dark:text-green-400" 
+                averageSummary.avgNet < 0 
+                  ? "text-primary" 
                   : "text-foreground"
               )}>
                 {averageSummary.avgNet > 0 ? '+' : ''}{averageSummary.avgNet}
