@@ -26,7 +26,6 @@ const ALL_VITAMINS_MINERALS = [
 ] as const;
 
 const NUTRIENT_COLORS: Record<string, string> = {
-  // Vitamins
   'vitamin-a': 'bg-orange-500',
   'vitamin-b6': 'bg-yellow-500',
   'vitamin-b12': 'bg-red-400',
@@ -39,7 +38,6 @@ const NUTRIENT_COLORS: Record<string, string> = {
   'pantothenic-acid': 'bg-yellow-600',
   'biotin': 'bg-pink-400',
   'folate': 'bg-green-500',
-  // Minerals
   'sodium': 'bg-blue-400',
   'potassium': 'bg-purple-400',
   'calcium': 'bg-slate-400',
@@ -53,7 +51,6 @@ const NUTRIENT_COLORS: Record<string, string> = {
   'chloride': 'bg-cyan-400',
   'selenium': 'bg-rose-400',
   'chrom': 'bg-gray-400',
-  // Other
   'water': 'bg-sky-400',
 };
 
@@ -127,14 +124,12 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
     });
   };
 
-  // Combine built-in + custom nutrient keys
   const allNutrientKeys = useMemo(() => {
     const builtIn = [...ALL_VITAMINS_MINERALS] as string[];
     const customKeys = customNutrients.map(n => n.id);
     return [...builtIn, ...customKeys];
   }, [customNutrients]);
 
-  // Separate tracked (has value > 0) and untracked nutrients
   const { trackedNutrients, untrackedNutrients } = useMemo(() => {
     const tracked = allNutrientKeys.filter(
       nutrient => (todayNutrients[nutrient] || 0) > 0
@@ -149,26 +144,26 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
   }, [todayNutrients, sortBy, allNutrientKeys]);
 
   return (
-    <section className="glass-card rounded-2xl p-4 space-y-4">
+    <section className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 space-y-4 border border-border/30 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground">Vitamins & Minerals</h3>
+        <h3 className="font-semibold text-[15px] text-foreground tracking-tight">Vitamins & Minerals</h3>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground rounded-xl">
               <ArrowUpDown className="h-3.5 w-3.5" />
               <span className="text-xs">{SORT_LABELS[sortBy]}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-card border-border">
+          <DropdownMenuContent align="end" className="bg-card/90 backdrop-blur-2xl border-border/30 rounded-2xl">
             <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <DropdownMenuRadioItem value="name" className="text-sm">
+              <DropdownMenuRadioItem value="name" className="text-[13px] rounded-xl">
                 Sort by Name
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="progress" className="text-sm">
+              <DropdownMenuRadioItem value="progress" className="text-[13px] rounded-xl">
                 Sort by Progress
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="amount" className="text-sm">
+              <DropdownMenuRadioItem value="amount" className="text-[13px] rounded-xl">
                 Sort by Amount
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -177,12 +172,11 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
       </div>
       
       {trackedNutrients.length === 0 && !showMore ? (
-        <p className="text-sm text-muted-foreground py-4 text-center">
+        <p className="text-[13px] text-muted-foreground/70 py-4 text-center">
           No vitamins or minerals tracked today
         </p>
       ) : (
         <div className="space-y-4">
-          {/* Tracked nutrients (always visible) */}
           {trackedNutrients.map(nutrient => {
             const custom = customNutrients.find(n => n.id === nutrient);
             return (
@@ -198,7 +192,6 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
             );
           })}
 
-          {/* Untracked nutrients (behind show more) */}
           {showMore && untrackedNutrients.map(nutrient => {
             const custom = customNutrients.find(n => n.id === nutrient);
             return (
@@ -216,13 +209,12 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
         </div>
       )}
 
-      {/* Show more/less button */}
       {untrackedNutrients.length > 0 && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setShowMore(!showMore)}
-          className="w-full text-muted-foreground hover:text-foreground"
+          className="w-full text-muted-foreground hover:text-foreground rounded-2xl"
         >
           {showMore ? (
             <>

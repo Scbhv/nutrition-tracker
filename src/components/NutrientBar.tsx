@@ -18,19 +18,19 @@ export function NutrientBar({ nutrient, current, goal, colorClass = 'bg-primary'
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-foreground">{label}</span>
+      <div className="flex items-center justify-between text-[13px]">
+        <span className="font-medium text-foreground tracking-tight">{label}</span>
         <span className={cn(
-          "text-muted-foreground tabular-nums",
+          "text-muted-foreground/70 tabular-nums",
           isOver && "text-destructive font-medium"
         )}>
           {current.toFixed(0)} / {goal}{unit}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
+      <div className="h-[5px] rounded-full bg-muted/50 overflow-hidden">
         <div
           className={cn(
-            "h-full rounded-full transition-all duration-500",
+            "h-full rounded-full transition-all duration-700 ease-out",
             isOver ? "bg-destructive" : colorClass
           )}
           style={{ width: `${percentage}%` }}
