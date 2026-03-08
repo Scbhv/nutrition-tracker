@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
 import { useFileSystemSync } from '@/hooks/useFileSystemSync';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,7 @@ interface FoodDatabaseViewProps {
   onAddFood: () => void;
   onEditFood: (food: FoodItem) => void;
   onDeleteFood: (id: string) => void;
-  onLogFood: (foodId: string) => void;
+  onLogFood: (foodId: string, portionGrams: number) => void;
   onExport: () => void;
   onImport: () => void;
   onImportFoods: (foods: FoodItem[]) => void;
@@ -37,6 +38,9 @@ export function FoodDatabaseView({
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSubTab, setActiveSubTab] = useState<'database' | 'files'>('database');
+  const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
+  const [portionGrams, setPortionGrams] = useState('');
+  const portionInputRef = useRef<HTMLInputElement>(null);
   
   const fileSystem = useFileSystemSync();
 
@@ -73,6 +77,21 @@ export function FoodDatabaseView({
     if (result.success && result.data) {
       onImportFoods(result.data.foods);
     }
+  };
+
+  const openPortionDialog = (food: FoodItem) => {
+    setPortionFood(food);
+    setPortionGrams(String(food.servingSize));
+    setTimeout(() => portionInputRef.current?.select(), 100);
+  };
+
+  const confirmPortion = () => {
+    if (!portionFood) return;
+    const grams = parseFloat(portionGrams);
+    if (isNaN(grams) || grams <= 0) return;
+    onLogFood(portionFood.id, grams);
+    setPortionFood(null);
+    setPortionGrams('');
   };
 
   const handleManualSave = async () => {
@@ -149,7 +168,7 @@ export function FoodDatabaseView({
                     food={food}
                     onEdit={() => onEditFood(food)}
                     onDelete={() => onDeleteFood(food.id)}
-                    onLog={() => onLogFood(food.id)}
+                    onLog={() => openPortionDialog(food)}
                   />
                 ))
               )}
@@ -292,7 +311,7 @@ export function FoodDatabaseView({
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => onLogFood(food.id)}
+                              onClick={() => openPortionDialog(food)}
                               className="rounded-full h-8 w-8"
                             >
                               <Plus className="h-4 w-4" />
@@ -308,6 +327,45 @@ export function FoodDatabaseView({
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Portion Dialog */}
+      <Dialog open={!!portionFood} onOpenChange={(open) => !open && setPortionFood(null)}>
+        <DialogContent className="max-w-xs rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {portionFood?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="text-center text-sm text-muted-foreground">
+              {portionFood?.servingSize}{portionFood?.servingUnit} per serving •{' '}
+              {portionFood?.nutrients['energy-kcal'] || 0} kcal/100g
+            </div>
+            <div className="flex items-center gap-3">
+              <Input
+                ref={portionInputRef}
+                type="number"
+                inputMode="decimal"
+                min="1"
+                value={portionGrams}
+                onChange={(e) => setPortionGrams(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && confirmPortion()}
+                className="text-center text-lg font-semibold rounded-xl"
+                placeholder="100"
+              />
+              <span className="text-muted-foreground font-medium shrink-0">grams</span>
+            </div>
+            {portionGrams && parseFloat(portionGrams) > 0 && portionFood && (
+              <div className="text-center text-sm text-muted-foreground">
+                ≈ {Math.round((portionFood.nutrients['energy-kcal'] || 0) * parseFloat(portionGrams) / 100)} kcal
+              </div>
+            )}
+            <Button onClick={confirmPortion} className="w-full rounded-xl">
+              Add to Today
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
