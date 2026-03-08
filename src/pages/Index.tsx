@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Sparkles, Apple, Settings } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell } from 'lucide-react';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -20,6 +20,7 @@ import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { TrendsView } from '@/components/TrendsView';
 import { AppearanceSettings } from '@/components/AppearanceSettings';
+import { AddExerciseModal } from '@/components/AddExerciseModal';
 import { FoodItem, NutrientData } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -38,8 +39,11 @@ export default function Index() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    addExerciseEntry,
+    removeExerciseEntry,
     getTodayLog,
     getTodayNutrients,
+    getTodayBurnedCalories,
     getGoalsForDate,
     exportDatabase,
     importDatabase,
@@ -52,15 +56,19 @@ export default function Index() {
   const [showScanner, setShowScanner] = useState(false);
   const [showAILookup, setShowAILookup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
-  const dailyGoals = getGoalsForDate(); // resolves weekday-specific goals
+  const dailyGoals = getGoalsForDate();
+  const burnedCalories = getTodayBurnedCalories();
 
   const calorieGoal = dailyGoals['energy-kcal'] || 2000;
   const currentCalories = todayNutrients['energy-kcal'] || 0;
+  const netCalories = currentCalories - burnedCalories;
   const caloriePercentage = Math.round((currentCalories / calorieGoal) * 100);
+  const netPercentage = Math.round((netCalories / calorieGoal) * 100);
 
   const handleBarcodeScan = (barcode: string) => {
     const existingFood = getFoodByBarcode(barcode);
@@ -159,14 +167,58 @@ export default function Index() {
               </p>
             </section>
 
+            {/* Net Calorie Summary */}
+            {burnedCalories > 0 && (
+              <section className="glass-card rounded-2xl p-4 animate-slide-up">
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame className="h-4 w-4 text-destructive" />
+                  <h3 className="font-semibold text-sm text-foreground">Net Calories</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-foreground">{currentCalories.toFixed(0)}</p>
+                    <p className="text-xs text-muted-foreground">Eaten</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-destructive">−{burnedCalories.toFixed(0)}</p>
+                    <p className="text-xs text-muted-foreground">Burned</p>
+                  </div>
+                  <div>
+                    <p className={`text-lg font-bold ${netCalories < 0 ? 'text-destructive' : 'text-primary'}`}>
+                      {netCalories.toFixed(0)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Net</p>
+                  </div>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500"
+                    style={{ width: `${Math.max(0, Math.min(100, netPercentage))}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-1.5">
+                  {netCalories > 0
+                    ? `${Math.round(calorieGoal - netCalories)} net kcal remaining`
+                    : 'Calorie deficit — you burned more than you ate'}
+                </p>
+              </section>
+            )}
+
             {/* Action Buttons */}
-            <section className="flex gap-3 px-1">
+            <section className="flex gap-2 px-1">
               <Button 
                 onClick={() => setShowAddFood(true)} 
                 className="flex-1 ios-button-secondary h-14 text-base"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Add Food
+              </Button>
+              <Button 
+                onClick={() => setShowAddExercise(true)} 
+                className="flex-[0.8] ios-button-secondary h-14 text-base"
+              >
+                <Flame className="h-5 w-5 mr-2" />
+                Burn
               </Button>
               <Button 
                 onClick={() => setShowAILookup(true)} 
@@ -242,6 +294,50 @@ export default function Index() {
                 </div>
               )}
             </section>
+
+            {/* Today's Exercise */}
+            {(todayLog.exerciseEntries || []).length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <Flame className="h-5 w-5 text-destructive" />
+                    Exercise
+                  </h2>
+                  <button
+                    onClick={() => setShowAddExercise(true)}
+                    className="text-sm text-primary font-medium"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(todayLog.exerciseEntries || []).map(entry => (
+                    <div key={entry.id} className="glass-card rounded-2xl p-4 flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-destructive/15 text-destructive">
+                          <Dumbbell className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">{entry.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {entry.caloriesBurned} kcal burned
+                            {entry.durationMinutes ? ` • ${entry.durationMinutes} min` : ''}
+                            {' • '}
+                            {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeExerciseEntry(todayLog.date, entry.id)}
+                        className="p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Nutrients Summary with Show More */}
             <NutrientsSummary 
@@ -392,6 +488,16 @@ export default function Index() {
         onClose={() => setShowSettings(false)}
         settings={settings}
         onSave={updateSettings}
+      />
+
+      <AddExerciseModal
+        open={showAddExercise}
+        onClose={() => setShowAddExercise(false)}
+        onAdd={(name, cals, duration) => {
+          addExerciseEntry(name, cals, duration);
+          toast({ title: 'Logged', description: `${name} — ${cals} kcal burned` });
+          setShowAddExercise(false);
+        }}
       />
     </div>
   );
