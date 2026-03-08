@@ -397,6 +397,11 @@ export default function Index() {
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
             </Button>
+            <HealthKitExport
+              foods={foods}
+              logs={logs}
+              getTodayNutrients={getTodayNutrients}
+            />
             <Button 
               onClick={handleExport} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
