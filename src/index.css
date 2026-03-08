@@ -146,8 +146,8 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-2xl border border-border/30 shadow-sm;
-    border-radius: 16px;
+    @apply bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm;
+    border-radius: 20px;
   }
 
   .ios-button {
