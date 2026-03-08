@@ -375,9 +375,9 @@ export default function Index() {
               <h2 className="text-[17px] font-semibold text-foreground px-1 tracking-tight">Today's Food</h2>
               
               {todayLog.entries.length === 0 ? (
-                <div className="glass-card rounded-2xl p-8 text-center text-muted-foreground">
-                  <Apple className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No food logged yet</p>
+                <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-8 text-center text-muted-foreground/70 border border-border/30 shadow-sm">
+                  <Apple className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                  <p className="text-[14px]">No food logged yet</p>
                 </div>
               ) : (
                 <div className="space-y-2">
