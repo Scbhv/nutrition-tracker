@@ -489,6 +489,16 @@ export default function Index() {
         settings={settings}
         onSave={updateSettings}
       />
+
+      <AddExerciseModal
+        open={showAddExercise}
+        onClose={() => setShowAddExercise(false)}
+        onAdd={(name, cals, duration) => {
+          addExerciseEntry(name, cals, duration);
+          toast({ title: 'Logged', description: `${name} — ${cals} kcal burned` });
+          setShowAddExercise(false);
+        }}
+      />
     </div>
   );
 }
