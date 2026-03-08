@@ -183,26 +183,36 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
       ) : (
         <div className="space-y-4">
           {/* Tracked nutrients (always visible) */}
-          {trackedNutrients.map(nutrient => (
-            <NutrientBar
-              key={nutrient}
-              nutrient={nutrient}
-              current={todayNutrients[nutrient] || 0}
-              goal={getGoal(nutrient)}
-              colorClass={getColor(nutrient)}
-            />
-          ))}
+          {trackedNutrients.map(nutrient => {
+            const custom = customNutrients.find(n => n.id === nutrient);
+            return (
+              <NutrientBar
+                key={nutrient}
+                nutrient={nutrient}
+                current={todayNutrients[nutrient] || 0}
+                goal={getGoal(nutrient)}
+                colorClass={getColor(nutrient)}
+                customLabel={custom?.label}
+                customUnit={custom?.unit}
+              />
+            );
+          })}
 
           {/* Untracked nutrients (behind show more) */}
-          {showMore && untrackedNutrients.map(nutrient => (
-            <NutrientBar
-              key={nutrient}
-              nutrient={nutrient}
-              current={0}
-              goal={getGoal(nutrient)}
-              colorClass={getColor(nutrient)}
-            />
-          ))}
+          {showMore && untrackedNutrients.map(nutrient => {
+            const custom = customNutrients.find(n => n.id === nutrient);
+            return (
+              <NutrientBar
+                key={nutrient}
+                nutrient={nutrient}
+                current={0}
+                goal={getGoal(nutrient)}
+                colorClass={getColor(nutrient)}
+                customLabel={custom?.label}
+                customUnit={custom?.unit}
+              />
+            );
+          })}
         </div>
       )}
 
