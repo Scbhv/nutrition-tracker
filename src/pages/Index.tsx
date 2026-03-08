@@ -22,6 +22,7 @@ import { TrendsView } from '@/components/TrendsView';
 import { AppearanceSettings } from '@/components/AppearanceSettings';
 import { AddExerciseModal } from '@/components/AddExerciseModal';
 import { HealthKitExport } from '@/components/HealthKitExport';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -60,6 +61,8 @@ export default function Index() {
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const aiLocked = true; // Toggle to false for paid users
   const dragCounter = useRef(0);
 
   const todayNutrients = getTodayNutrients();
@@ -318,8 +321,8 @@ export default function Index() {
                 Burn
               </Button>
               <Button 
-                onClick={() => setShowAILookup(true)} 
-                className="flex-1 ios-button-accent h-14 text-base"
+                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
+                className={`flex-1 ios-button-accent h-14 text-base ${aiLocked ? 'opacity-50' : ''}`}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
                 Generate
@@ -579,7 +582,7 @@ export default function Index() {
         onTabChange={setActiveTab}
         onAddFood={() => setShowAddFood(true)}
         onScanBarcode={() => setShowScanner(true)}
-        onAILookup={() => setShowAILookup(true)}
+        onAILookup={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)}
         onImport={handleImport}
       />
 
@@ -635,6 +638,11 @@ export default function Index() {
           toast({ title: 'Logged', description: `${name} — ${cals} kcal burned` });
           setShowAddExercise(false);
         }}
+      />
+
+      <DonationGateModal
+        open={showDonationGate}
+        onClose={() => setShowDonationGate(false)}
       />
     </div>
   );
