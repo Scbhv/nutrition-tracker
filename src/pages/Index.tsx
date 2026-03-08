@@ -22,6 +22,7 @@ import { TrendsView } from '@/components/TrendsView';
 import { AppearanceSettings } from '@/components/AppearanceSettings';
 import { AddExerciseModal } from '@/components/AddExerciseModal';
 import { HealthKitExport } from '@/components/HealthKitExport';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
