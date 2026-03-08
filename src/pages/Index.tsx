@@ -614,11 +614,7 @@ export default function Index() {
       default: return 'NutriTrack';
     }
   };
-      case 'trends': return 'Trends';
-      case 'profile': return 'Profile';
-      default: return 'NutriTrack';
-    }
-  };
+
 
   return (
     <div
