@@ -250,13 +250,25 @@
 }
 
 .light.liquid-glass {
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.65);
-  --glass-highlight: rgba(255, 255, 255, 0.8);
-  --glass-shadow: rgba(0, 0, 0, 0.08);
-  --glass-refraction: rgba(255, 255, 255, 0.3);
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: rgba(0, 0, 0, 0.06);
+  --glass-refraction: rgba(255, 255, 255, 0.4);
   --glass-blur: 32px;
-  --glass-saturate: 1.4;
+  --glass-saturate: 1.6;
+}
+
+/* Light mode: tinted background for glass to show through */
+.light.liquid-glass body,
+.light.liquid-glass {
+  background: linear-gradient(
+    160deg,
+    hsl(var(--primary) / 0.06) 0%,
+    hsl(0 0% 96%) 30%,
+    hsl(var(--accent) / 0.04) 70%,
+    hsl(var(--primary) / 0.08) 100%
+  );
 }
 
 /* ── Glass Card — the core surface ────────────────────────────────────────── */
