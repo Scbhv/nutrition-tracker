@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Trash2, Beaker } from 'lucide-react';
+import { Plus, Trash2, Beaker, Lock } from 'lucide-react';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import { cn } from '@/lib/utils';
 import {
   UserSettings,
