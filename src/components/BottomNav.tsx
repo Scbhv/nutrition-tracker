@@ -12,6 +12,7 @@ interface BottomNavProps {
   onAILookup: () => void;
   onImport: () => void;
   onLockedTab?: () => void;
+  isPremium?: boolean;
 }
 
 function triggerHaptic(pattern: number | number[] = 8) {
