@@ -372,7 +372,7 @@ export default function Index() {
 
             {/* Today's Food */}
             <section className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground px-1">Today's Food</h2>
+              <h2 className="text-[17px] font-semibold text-foreground px-1 tracking-tight">Today's Food</h2>
               
               {todayLog.entries.length === 0 ? (
                 <div className="glass-card rounded-2xl p-8 text-center text-muted-foreground">
