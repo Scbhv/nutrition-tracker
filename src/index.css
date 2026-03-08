@@ -331,10 +331,31 @@
 .light.liquid-glass .glass-card::before {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 255, 255, 0.2) 30%,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.25) 30%,
     transparent 100%
   );
+}
+
+/* Light mode: softer chromatic edge */
+.light.liquid-glass .glass-card::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 80, 80, 0.15),
+    rgba(80, 200, 80, 0.15),
+    rgba(80, 80, 255, 0.15),
+    transparent
+  );
+}
+
+/* Light mode: glass card softer outer shadow */
+.light.liquid-glass .glass-card {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 0 0 var(--glass-refraction);
 }
 
 /* ── Header — floating translucent bar ────────────────────────────────────── */
