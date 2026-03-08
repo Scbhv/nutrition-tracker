@@ -137,15 +137,15 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
           {leftTabs.map(renderTab)}
           
           {/* Center FAB button */}
-           <div className="relative -mt-8">
+           <div className="relative -mt-7">
             <button
               onClick={toggleMenu}
               className={cn(
-                "w-14 h-14 rounded-full flex items-center justify-center shadow-lg",
-                "transition-all duration-300 ease-out active:scale-90",
+                "w-[52px] h-[52px] rounded-full flex items-center justify-center",
+                "transition-all duration-300 ease-out active:scale-90 shadow-md",
                 menuOpen 
-                  ? "bg-muted-foreground rotate-[135deg] scale-110 shadow-xl" 
-                  : "bg-primary hover:bg-primary/90 hover:shadow-glow hover:scale-105"
+                  ? "bg-muted-foreground rotate-[135deg] scale-105" 
+                  : "bg-primary hover:bg-primary/90"
               )}
             >
               <Plus className={cn(
@@ -153,12 +153,6 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
                 menuOpen ? "text-background" : "text-primary-foreground"
               )} />
             </button>
-            {/* Pulse ring on idle */}
-            {!menuOpen && (
-              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping pointer-events-none" 
-                style={{ animationDuration: '2s' }} 
-              />
-            )}
           </div>
 
           {/* Right tabs */}
