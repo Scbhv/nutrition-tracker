@@ -114,7 +114,7 @@ export function AppearanceSettings({ appearance, onUpdate, isPremium = false, on
       {/* Accent Color — LOCKED */}
       <div
         className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
-        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+        onClick={designLocked ? showGate : undefined}
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
