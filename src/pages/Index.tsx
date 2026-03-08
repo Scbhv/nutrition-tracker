@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink } from 'lucide-react';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -516,6 +516,15 @@ export default function Index() {
               className="w-full ios-button-secondary h-14 justify-start px-4"
             >
               Import Database
+            </Button>
+            <Button
+              onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
+              variant="ghost"
+              className="w-full h-12 justify-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Heart className="h-4 w-4" />
+              Support this app
+              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
             </Button>
           </div>
         );
