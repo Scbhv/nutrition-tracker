@@ -1,6 +1,8 @@
-import { useRef } from 'react';
-import { Sun, Moon, Monitor, Droplets, Palette } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Sun, Moon, Monitor, Droplets, Palette, Lock } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import {
   type ThemeMode,
   type DesignStyle,
@@ -20,8 +22,11 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
+const designLocked = true; // Locked until donation
+
 export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showDonationGate, setShowDonationGate] = useState(false);
 
   const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,7 +41,7 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Theme Mode */}
+      {/* Theme Mode — FREE */}
       <div className="glass-card rounded-2xl p-4 space-y-3">
         <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
           Theme
@@ -59,11 +64,17 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
         </div>
       </div>
 
-      {/* Design Style */}
-      <div className="glass-card rounded-2xl p-4 space-y-3">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-          Design Style
-        </Label>
+      {/* Design Style — LOCKED */}
+      <div
+        className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
+        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            Design Style
+          </Label>
+          {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
         <div className="grid grid-cols-2 gap-2">
           {([
             { style: 'default' as DesignStyle, icon: Palette, label: 'Default' },
@@ -71,12 +82,12 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
           ]).map(({ style, icon: Icon, label }) => (
             <button
               key={style}
-              onClick={() => onUpdate({ designStyle: style })}
+              disabled={designLocked}
               className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                 appearance.designStyle === style
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-muted'
-              }`}
+                  : 'bg-secondary text-secondary-foreground'
+              } ${designLocked ? 'cursor-not-allowed' : 'hover:bg-muted'}`}
             >
               <Icon className="h-5 w-5" />
               <span className="text-sm font-medium">{label}</span>
@@ -85,27 +96,32 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
         </div>
       </div>
 
-      {/* Accent Color */}
-      <div className="glass-card rounded-2xl p-4 space-y-3">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-          Accent Color
-        </Label>
+      {/* Accent Color — LOCKED */}
+      <div
+        className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
+        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            Accent Color
+          </Label>
+          {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
         <div className="flex flex-wrap gap-3">
           {ACCENT_PRESETS.map(({ hue, label }) => (
             <button
               key={hue}
-              onClick={() => onUpdate({ accentHue: hue })}
+              disabled={designLocked}
               title={label}
               className={`w-10 h-10 rounded-full transition-all border-2 ${
                 appearance.accentHue === hue
                   ? 'border-foreground scale-110'
-                  : 'border-transparent hover:scale-105'
-              }`}
+                  : 'border-transparent'
+              } ${designLocked ? 'cursor-not-allowed' : 'hover:scale-105'}`}
               style={{ backgroundColor: `hsl(${hue}, 76%, 46%)` }}
             />
           ))}
         </div>
-        {/* Custom hue slider */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Custom</span>
@@ -116,8 +132,8 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
             min="0"
             max="360"
             value={appearance.accentHue}
-            onChange={(e) => onUpdate({ accentHue: parseInt(e.target.value) })}
-            className="w-full h-2 rounded-full appearance-none cursor-pointer"
+            disabled={designLocked}
+            className={cn("w-full h-2 rounded-full appearance-none", designLocked ? "cursor-not-allowed" : "cursor-pointer")}
             style={{
               background: `linear-gradient(to right, 
                 hsl(0,76%,46%), hsl(60,76%,46%), hsl(120,76%,46%), 
@@ -127,35 +143,40 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
         </div>
       </div>
 
-      {/* App Icon */}
-      <div className="glass-card rounded-2xl p-4 space-y-3">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-          App Icon
-        </Label>
+      {/* App Icon — LOCKED */}
+      <div
+        className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
+        onClick={designLocked ? () => setShowDonationGate(true) : undefined}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            App Icon
+          </Label>
+          {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
         <div className="flex flex-wrap gap-3">
           {PRESET_ICONS.map(({ id, emoji, label }) => (
             <button
               key={id}
-              onClick={() => onUpdate({ appIcon: id })}
+              disabled={designLocked}
               title={label}
               className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all ${
                 appearance.appIcon === id
                   ? 'bg-primary/20 ring-2 ring-primary scale-110'
-                  : 'bg-secondary hover:bg-muted hover:scale-105'
-              }`}
+                  : 'bg-secondary'
+              } ${designLocked ? 'cursor-not-allowed' : 'hover:bg-muted hover:scale-105'}`}
             >
               {emoji}
             </button>
           ))}
-          {/* Custom upload */}
           <button
-            onClick={() => fileInputRef.current?.click()}
+            disabled={designLocked}
             title="Upload custom icon"
             className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all overflow-hidden ${
               appearance.appIcon.startsWith('data:')
                 ? 'ring-2 ring-primary scale-110'
-                : 'bg-secondary hover:bg-muted hover:scale-105'
-            }`}
+                : 'bg-secondary'
+            } ${designLocked ? 'cursor-not-allowed' : 'hover:bg-muted hover:scale-105'}`}
           >
             {appearance.appIcon.startsWith('data:') ? (
               <img src={appearance.appIcon} alt="Custom" className="w-full h-full object-cover" />
@@ -172,6 +193,8 @@ export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsP
           className="hidden"
         />
       </div>
+
+      <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
 }
