@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { useAppearance } from '@/hooks/useAppearance';
@@ -592,7 +593,7 @@ export default function Index() {
             )}
 
             {/* Footer links */}
-            <div className="flex items-center justify-center gap-4 pt-2 pb-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 pb-4">
               <button
                 onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
                 className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
@@ -616,6 +617,44 @@ export default function Index() {
                   </button>
                 </>
               )}
+              <span className="text-muted-foreground/30">·</span>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-destructive transition-colors">
+                    <Trash2 className="h-3 w-3" />
+                    Delete Account
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-sm rounded-3xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      Delete Account?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your account and all associated data. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        const { error } = await supabase.rpc('delete_own_account' as any);
+                        if (error) {
+                          toast({ title: 'Error', description: 'Could not delete account. Please try again.', variant: 'destructive' });
+                        } else {
+                          await supabase.auth.signOut();
+                          navigate('/auth');
+                          toast({ title: 'Account deleted', description: 'Your account has been permanently removed.' });
+                        }
+                      }}
+                    >
+                      Delete Forever
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         );
