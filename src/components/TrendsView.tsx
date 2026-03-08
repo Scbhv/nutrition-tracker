@@ -350,17 +350,8 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                   width={50}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  formatter={(value: number, name: string) => {
-                    const labels: Record<string, string> = { eaten: 'Eaten', burned: 'Burned', net: 'Net' };
-                    return [`${value} kcal`, labels[name] || name];
-                  }}
+                  content={<NetCalorieTooltip />}
+                  cursor={{ fill: 'hsl(var(--primary) / 0.1)' }}
                 />
                 <Bar dataKey="eaten" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={30} name="eaten" />
                 {hasAnyExercise && (
