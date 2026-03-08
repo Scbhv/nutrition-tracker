@@ -25,16 +25,39 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
   const [nutrients, setNutrients] = useState<NutrientData>(initialData || {});
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['macros']);
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const errors: Record<string, string> = {};
 
+    const nameCheck = validateFoodName(name);
+    if (!nameCheck.valid) errors.name = nameCheck.error!;
+
+    const barcodeCheck = validateBarcode(barcode.trim());
+    if (!barcodeCheck.valid) errors.barcode = barcodeCheck.error!;
+
+    const brandCheck = validateBrand(brand.trim());
+    if (!brandCheck.valid) errors.brand = brandCheck.error!;
+
+    const sizeCheck = validateServingSize(parseFloat(servingSize) || 0);
+    if (!sizeCheck.valid) errors.servingSize = sizeCheck.error!;
+
+    const unitCheck = validateServingUnit(servingUnit);
+    if (!unitCheck.valid) errors.servingUnit = unitCheck.error!;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     onAdd({
-      name: name.trim(),
-      brand: brand.trim() || undefined,
+      name: sanitizeText(name, 200),
+      brand: brand.trim() ? sanitizeText(brand, 100) : undefined,
       barcode: barcode.trim() || undefined,
       servingSize: parseFloat(servingSize) || 100,
-      servingUnit,
+      servingUnit: servingUnit.trim(),
       nutrients,
     });
 
