@@ -368,7 +368,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
             </div>
 
             {/* Weekday Goals Toggle */}
-            <div className="glass-card rounded-2xl p-4 space-y-4">
+            <div className={cn("glass-card rounded-2xl p-4 space-y-4 relative", goalsLocked && "opacity-50")} onClick={goalsLocked ? () => setShowDonationGate(true) : undefined}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-sm text-foreground">Weekday-Specific Goals</h3>
@@ -378,7 +378,8 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                 </div>
                 <Switch
                   checked={weekdayEnabled}
-                  onCheckedChange={setWeekdayEnabled}
+                  onCheckedChange={goalsLocked ? () => setShowDonationGate(true) : setWeekdayEnabled}
+                  disabled={goalsLocked}
                 />
               </div>
 
