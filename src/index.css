@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  .dark {
     /* Dark iOS Fitness App Theme */
     --background: 120 8% 8%;
     --foreground: 0 0% 98%;
@@ -56,6 +57,58 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 120 4% 20%;
     --sidebar-ring: 142 76% 46%;
+  }
+
+  .light {
+    --background: 0 0% 97%;
+    --foreground: 120 8% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 8% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 8% 12%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 4% 92%;
+    --secondary-foreground: 120 8% 12%;
+
+    --muted: 120 4% 90%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 280 60% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 4% 85%;
+    --input: 120 4% 88%;
+    --ring: 142 76% 36%;
+
+    --radius: 1rem;
+
+    --nutrient-energy: 45 100% 45%;
+    --nutrient-protein: 142 76% 36%;
+    --nutrient-carbs: 25 95% 50%;
+    --nutrient-fat: 280 60% 50%;
+    --nutrient-fiber: 142 60% 35%;
+    --nutrient-vitamin: 45 90% 45%;
+    --nutrient-mineral: 200 80% 45%;
+    --nutrient-water: 200 90% 50%;
+
+    --shadow-glow: 0 0 30px hsl(142 76% 36% / 0.15);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 120 8% 12%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 4% 92%;
+    --sidebar-accent-foreground: 120 8% 12%;
+    --sidebar-border: 120 4% 85%;
+    --sidebar-ring: 142 76% 36%;
   }
 }
 
