@@ -536,7 +536,23 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drop overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+          <div className="border-2 border-dashed border-primary rounded-3xl p-12 text-center animate-scale-in">
+            <Upload className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <p className="text-xl font-semibold text-foreground">Drop JSON file to import</p>
+            <p className="text-sm text-muted-foreground mt-2">Food nutrients or full database export</p>
+          </div>
+        </div>
+      )}
       <Header 
         title={getTitle()} 
         onSettingsClick={activeTab === 'today' ? () => setShowSettings(true) : undefined}
