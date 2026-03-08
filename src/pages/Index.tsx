@@ -610,6 +610,11 @@ export default function Index() {
       case 'today': return 'Nutrition';
       case 'database': return 'Foods';
       case 'trends': return 'Trends';
+      case 'profile': return '';
+      default: return 'NutriTrack';
+    }
+  };
+      case 'trends': return 'Trends';
       case 'profile': return 'Profile';
       default: return 'NutriTrack';
     }
