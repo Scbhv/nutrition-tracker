@@ -76,9 +76,7 @@ serve(async (req) => {
     }
 
     // POST actions
-    const body = await req.json();
-
-    if (body.action === "create") {
+    if (resolvedAction === "create") {
       const { code, max_uses } = body;
       if (!code || typeof code !== "string" || code.length > 50) {
         return new Response(JSON.stringify({ error: "Invalid code" }), {
