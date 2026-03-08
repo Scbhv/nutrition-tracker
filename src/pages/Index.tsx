@@ -59,6 +59,8 @@ export default function Index() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
