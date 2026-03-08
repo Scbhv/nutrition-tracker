@@ -452,6 +452,7 @@ export default function Index() {
         onAddFood={() => setShowAddFood(true)}
         onScanBarcode={() => setShowScanner(true)}
         onAILookup={() => setShowAILookup(true)}
+        onImport={handleImport}
       />
 
       {/* Hidden file input */}

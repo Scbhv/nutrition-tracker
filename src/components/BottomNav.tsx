@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed } from 'lucide-react';
+import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -10,6 +10,7 @@ interface BottomNavProps {
   onAddFood: () => void;
   onScanBarcode: () => void;
   onAILookup: () => void;
+  onImport: () => void;
 }
 
 function triggerHaptic(pattern: number | number[] = 8) {
@@ -18,7 +19,7 @@ function triggerHaptic(pattern: number | number[] = 8) {
   }
 }
 
-export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup, onImport }: BottomNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const leftTabs = [
@@ -35,6 +36,7 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
     { id: 'add', label: 'Add Food', icon: UtensilsCrossed, action: onAddFood },
     { id: 'scan', label: 'Scan Barcode', icon: Scan, action: onScanBarcode },
     { id: 'ai', label: 'AI Lookup', icon: Sparkles, action: onAILookup },
+    { id: 'import', label: 'Import JSON', icon: Upload, action: onImport },
   ];
 
   const toggleMenu = useCallback(() => {
