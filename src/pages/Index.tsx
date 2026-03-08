@@ -75,12 +75,12 @@ export default function Index() {
   // Auth gate: redirect to /auth if not logged in
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) navigate('/auth');
-      else setAuthChecked(true);
+      if (!session) { setIsLoggedIn(false); setAuthChecked(true); }
+      else { setIsLoggedIn(true); setAuthChecked(true); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) navigate('/auth');
-      else setAuthChecked(true);
+      setIsLoggedIn(!!session);
+      setAuthChecked(true);
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
