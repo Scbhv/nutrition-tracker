@@ -321,8 +321,8 @@ export default function Index() {
                 Burn
               </Button>
               <Button 
-                onClick={() => setShowAILookup(true)} 
-                className="flex-1 ios-button-accent h-14 text-base"
+                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
+                className={`flex-1 ios-button-accent h-14 text-base ${aiLocked ? 'opacity-50' : ''}`}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
                 Generate
