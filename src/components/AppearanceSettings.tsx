@@ -47,21 +47,30 @@ export function AppearanceSettings({ appearance, onUpdate, isPremium = false, on
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Theme Mode — FREE */}
-      <div className="glass-card rounded-2xl p-4 space-y-3">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-          Theme
-        </Label>
+      {/* Theme Mode — LOCKED for free */}
+      <div
+        className={cn("glass-card rounded-2xl p-4 space-y-3", designLocked && "opacity-50")}
+        onClick={designLocked ? showGate : undefined}
+      >
+        <div className="flex items-center justify-between">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            Theme
+          </Label>
+          {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {THEME_OPTIONS.map(({ mode, icon: Icon, label }) => (
             <button
               key={mode}
-              onClick={() => onUpdate({ themeMode: mode })}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+              disabled={designLocked}
+              onClick={(e) => { e.stopPropagation(); if (!designLocked) onUpdate({ themeMode: mode }); }}
+              className={cn(
+                "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all",
                 appearance.themeMode === mode
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-muted'
-              }`}
+                  : 'bg-secondary text-secondary-foreground',
+                designLocked ? 'cursor-not-allowed' : 'hover:bg-muted'
+              )}
             >
               <Icon className="h-5 w-5" />
               <span className="text-xs font-medium">{label}</span>
