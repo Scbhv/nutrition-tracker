@@ -153,16 +153,16 @@ export default function Index() {
     });
   };
 
-  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processJsonFile = useCallback((file: File) => {
+    if (!file.name.endsWith('.json')) {
+      toast({ title: 'Error', description: 'Only .json files are supported', variant: 'destructive' });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const jsonString = event.target?.result as string;
         const parsed = JSON.parse(jsonString);
-
-        // Detect format: flat nutrient JSON vs full database export
         if (isFlatNutrientJSON(parsed)) {
           importFlatNutrientJSON(parsed, file.name);
         } else {
@@ -174,16 +174,46 @@ export default function Index() {
           });
         }
       } catch {
-        toast({
-          title: 'Error',
-          description: 'Invalid JSON file',
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: 'Invalid JSON file', variant: 'destructive' });
       }
     };
     reader.readAsText(file);
+  }, [importDatabase, mergeFoods, toast]);
+
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processJsonFile(file);
     e.target.value = '';
   };
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items?.length) setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) processJsonFile(file);
+  }, [processJsonFile]);
 
   const handleImportFoods = (newFoods: FoodItem[]) => {
     mergeFoods(newFoods);
