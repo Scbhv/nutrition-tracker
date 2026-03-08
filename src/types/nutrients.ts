@@ -60,6 +60,9 @@ export interface NutrientData {
   // Supplements
   "electrolyte-mix"?: number;
   "ashwaganda"?: number;
+  
+  // Index signature for custom nutrients
+  [key: string]: number | undefined;
 }
 
 export interface FoodItem {
