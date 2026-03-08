@@ -540,11 +540,11 @@ export default function Index() {
 
             {/* Premium Status / Restore */}
             {isPremium ? (
-              <div className="glass-card rounded-2xl p-4 flex items-center gap-3">
+              <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
                 <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground">Premium Active</p>
-                  <p className="text-xs text-muted-foreground">All features unlocked</p>
+                  <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
+                  <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
                 </div>
               </div>
             ) : (
