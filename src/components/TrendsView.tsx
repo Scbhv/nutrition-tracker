@@ -69,6 +69,8 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
   const [averagePeriod, setAveragePeriod] = useState<'week' | 'month'>('week');
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const trendsLocked = true; // Extended ranges locked until donation
 
   // Calculate nutrients for a specific date
   const getNutrientsForDate = (date: string): NutrientData => {
