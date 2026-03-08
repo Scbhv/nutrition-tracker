@@ -42,6 +42,7 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
   const [selectedNutrient, setSelectedNutrient] = useState<string>('energy-kcal');
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
+  const [averagePeriod, setAveragePeriod] = useState<'week' | 'month'>('week');
 
   // Calculate nutrients for a specific date
   const getNutrientsForDate = (date: string): NutrientData => {
@@ -124,6 +125,33 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
   }, [logs, foods, daysToShow, dailyGoals]);
 
   const hasAnyExercise = netCalorieData.some(d => d.burned > 0);
+
+  // Calculate average summary based on period
+  const averageSummary = useMemo(() => {
+    const periodDays = averagePeriod === 'week' ? 7 : 30;
+    let totalIntake = 0;
+    let totalBurned = 0;
+    let daysWithData = 0;
+
+    for (let i = periodDays - 1; i >= 0; i--) {
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const nutrients = getNutrientsForDate(date);
+      const intake = nutrients['energy-kcal'] || 0;
+      const burned = getBurnedForDate(date);
+      
+      if (intake > 0) {
+        totalIntake += intake;
+        totalBurned += burned;
+        daysWithData++;
+      }
+    }
+
+    const avgIntake = daysWithData > 0 ? Math.round(totalIntake / daysWithData) : 0;
+    const avgBurned = daysWithData > 0 ? Math.round(totalBurned / daysWithData) : 0;
+    const avgNet = avgIntake - avgBurned;
+
+    return { avgIntake, avgBurned, avgNet, daysWithData };
+  }, [logs, foods, averagePeriod]);
 
   const pieChartData = useMemo(() => {
     // Get total grams of each macro
@@ -359,6 +387,74 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               Goal
             </span>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Average Summary Card */}
+      <Card className="glass-card border-0">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">
+              {averagePeriod === 'week' ? 'Weekly' : 'Monthly'} Average
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant={averagePeriod === 'week' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setAveragePeriod('week')}
+              >
+                Week
+              </Button>
+              <Button
+                variant={averagePeriod === 'month' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setAveragePeriod('month')}
+              >
+                Month
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border/30">
+              <p className="text-xs text-muted-foreground mb-1">Avg Intake</p>
+              <p className="text-2xl font-bold text-foreground">{averageSummary.avgIntake}</p>
+              <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+            </div>
+            
+            {hasAnyExercise && (
+              <div className="p-4 rounded-xl bg-secondary/50 border border-border/30">
+                <p className="text-xs text-muted-foreground mb-1">Avg Burned</p>
+                <p className="text-2xl font-bold text-destructive">{averageSummary.avgBurned}</p>
+                <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+              </div>
+            )}
+            
+            <div className={cn(
+              "p-4 rounded-xl border border-border/30",
+              averageSummary.avgNet > 0 
+                ? "bg-secondary/50" 
+                : "bg-secondary/50"
+            )}>
+              <p className="text-xs text-muted-foreground mb-1">Avg Net</p>
+              <p className={cn(
+                "text-2xl font-bold",
+                averageSummary.avgNet < 0 
+                  ? "text-primary" 
+                  : "text-foreground"
+              )}>
+                {averageSummary.avgNet > 0 ? '+' : ''}{averageSummary.avgNet}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+            </div>
+          </div>
+          
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            Based on {averageSummary.daysWithData} days with logged data
+          </p>
         </CardContent>
       </Card>
 
