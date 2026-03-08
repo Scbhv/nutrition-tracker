@@ -101,7 +101,30 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
     return { barChartData: data, averageValue: avg };
   }, [logs, foods, selectedNutrient, daysToShow, dailyGoals]);
 
-  // Pie chart data - macro calorie distribution for selected date
+  // Net calorie chart data
+  const netCalorieData = useMemo(() => {
+    const data = [];
+    const calorieGoal = dailyGoals['energy-kcal'] || 2000;
+
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const nutrients = getNutrientsForDate(date);
+      const eaten = Math.round(nutrients['energy-kcal'] || 0);
+      const burned = Math.round(getBurnedForDate(date));
+      const net = eaten - burned;
+      data.push({
+        date: format(parseISO(date), 'MMM d'),
+        eaten,
+        burned,
+        net,
+        goal: calorieGoal,
+      });
+    }
+    return data;
+  }, [logs, foods, daysToShow, dailyGoals]);
+
+  const hasAnyExercise = netCalorieData.some(d => d.burned > 0);
+
   const pieChartData = useMemo(() => {
     // Get total grams of each macro
     const carbs = (selectedDateNutrients['carbohydrates'] || 0) + (selectedDateNutrients['sugars'] || 0);
