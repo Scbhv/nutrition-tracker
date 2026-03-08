@@ -24,7 +24,7 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-export function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }: AppearanceSettingsProps) {
+export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }, ref) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const designLocked = !isPremium;
