@@ -16,29 +16,28 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-async function checkRateLimitDb(
-  supabaseClient: any,
-  key: string,
-  maxRequests: number,
-  windowSeconds: number
-): Promise<boolean> {
-  const { data, error } = await supabaseClient.rpc("check_and_increment_rate_limit", {
-    p_key: key,
-    p_max_requests: maxRequests,
-    p_window_seconds: windowSeconds,
+function jsonResponse(cors: Record<string, string>, body: object, status = 200, extra?: Record<string, string>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json", ...extra },
   });
-  if (error) {
-    console.error("Rate limit check failed:", error.message);
-    return true;
-  }
+}
+
+async function checkRateLimitDb(
+  client: any, key: string, max: number, windowSec: number
+): Promise<boolean> {
+  const { data, error } = await client.rpc("check_and_increment_rate_limit", {
+    p_key: key, p_max_requests: max, p_window_seconds: windowSec,
+  });
+  if (error) { console.error("Rate limit check failed:", error.message); return true; }
   return data === true;
 }
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+  const cors = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: cors });
   }
 
   try {
@@ -49,10 +48,7 @@ serve(async (req) => {
     // Verify auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Unauthorized" }, 401);
     }
 
     const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -61,91 +57,44 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: authError } = await anonClient.auth.getClaims(token);
     if (authError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Unauthorized" }, 401);
     }
     const userId = claimsData.claims.sub as string;
 
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Rate limiting: 5 attempts per 10 minutes per user, 10 per IP
-    const clientIP =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    // Rate limiting: 5 attempts per 10 min per user, 10 per IP
+    const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("x-real-ip") || "unknown";
 
-    const ipAllowed = await checkRateLimitDb(serviceClient, `unlock_ip:${clientIP}`, 10, 600);
-    if (!ipAllowed) {
-      return new Response(JSON.stringify({ error: "Too many attempts. Please try again later." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "600" },
-      });
-    }
-
-    const userAllowed = await checkRateLimitDb(serviceClient, `unlock_user:${userId}`, 5, 600);
-    if (!userAllowed) {
-      return new Response(JSON.stringify({ error: "Too many attempts. Please try again later." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "600" },
-      });
+    if (!await checkRateLimitDb(serviceClient, `unlock_ip:${clientIP}`, 10, 600) ||
+        !await checkRateLimitDb(serviceClient, `unlock_user:${userId}`, 5, 600)) {
+      return jsonResponse(cors, { error: "Too many attempts. Please try again later." }, 429, { "Retry-After": "600" });
     }
 
     const { code } = await req.json();
     if (!code || typeof code !== "string" || code.trim().length === 0 || code.length > 100) {
-      return new Response(JSON.stringify({ error: "Invalid code" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Invalid code" }, 400);
     }
 
     // Atomic code redemption via DB function
     const { data: result, error: redeemError } = await serviceClient.rpc("redeem_unlock_code", {
-      p_code: code.trim(),
-      p_user_id: userId,
+      p_code: code.trim(), p_user_id: userId,
     });
 
     if (redeemError) {
       console.error("Redeem error:", redeemError);
-      return new Response(JSON.stringify({ error: "Failed to process code" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(cors, { error: "Failed to process code" }, 500);
     }
 
     const status = result?.status;
+    if (status === "already_premium") return jsonResponse(cors, { success: true, message: "Already unlocked" });
+    if (status === "invalid_code") return jsonResponse(cors, { error: "Invalid or expired code" }, 400);
+    if (status === "success") return jsonResponse(cors, { success: true, message: "Premium unlocked!" });
 
-    if (status === "already_premium") {
-      return new Response(JSON.stringify({ success: true, message: "Already unlocked" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (status === "invalid_code") {
-      return new Response(JSON.stringify({ error: "Invalid or expired code" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (status === "success") {
-      return new Response(JSON.stringify({ success: true, message: "Premium unlocked!" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ error: "Unexpected error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse(cors, { error: "Unexpected error" }, 500);
   } catch (e) {
     console.error("Error:", e);
-    return new Response(JSON.stringify({ error: "Internal error" }), {
-      status: 500,
-      headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-    });
+    return jsonResponse(getCorsHeaders(req), { error: "Internal error" }, 500);
   }
 });
