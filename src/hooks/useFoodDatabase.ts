@@ -132,10 +132,49 @@ export function useFoodDatabase() {
     ));
   }, []);
 
+  const addExerciseEntry = useCallback((name: string, caloriesBurned: number, durationMinutes?: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    const entry: ExerciseEntry = {
+      id: crypto.randomUUID(),
+      name,
+      caloriesBurned,
+      durationMinutes,
+      timestamp: new Date().toISOString(),
+    };
+
+    setLogs(prev => {
+      const existingLog = prev.find(log => log.date === today);
+      if (existingLog) {
+        return prev.map(log =>
+          log.date === today
+            ? { ...log, exerciseEntries: [...(log.exerciseEntries || []), entry] }
+            : log
+        );
+      } else {
+        return [...prev, { id: crypto.randomUUID(), date: today, entries: [], exerciseEntries: [entry] }];
+      }
+    });
+
+    return entry;
+  }, []);
+
+  const removeExerciseEntry = useCallback((date: string, entryId: string) => {
+    setLogs(prev => prev.map(log =>
+      log.date === date
+        ? { ...log, exerciseEntries: (log.exerciseEntries || []).filter(e => e.id !== entryId) }
+        : log
+    ));
+  }, []);
+
   const getTodayLog = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
-    return logs.find(log => log.date === today) || { id: '', date: today, entries: [] };
+    return logs.find(log => log.date === today) || { id: '', date: today, entries: [], exerciseEntries: [] };
   }, [logs]);
+
+  const getTodayBurnedCalories = useCallback((): number => {
+    const todayLog = getTodayLog();
+    return (todayLog.exerciseEntries || []).reduce((sum, e) => sum + e.caloriesBurned, 0);
+  }, [getTodayLog]);
 
   const getTodayNutrients = useCallback((): NutrientData => {
     const todayLog = getTodayLog();
