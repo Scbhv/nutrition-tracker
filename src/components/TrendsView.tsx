@@ -178,6 +178,35 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
     return { avgIntake, avgBurned, avgNet, daysWithData };
   }, [logs, foods, averagePeriod]);
 
+  // Export trends data as CSV
+  const exportCSV = () => {
+    const rows: string[][] = [];
+    rows.push(['Date', 'Calories Eaten (kcal)', 'Calories Burned (kcal)', 'Net Calories (kcal)', 'Protein (g)', 'Carbs (g)', 'Fat (g)', 'Goal (kcal)']);
+
+    const calorieGoal = dailyGoals['energy-kcal'] || 2000;
+
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const dateStr = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const nutrients = getNutrientsForDate(dateStr);
+      const eaten = Math.round(nutrients['energy-kcal'] || 0);
+      const burned = Math.round(getBurnedForDate(dateStr));
+      const protein = Math.round((nutrients['proteins'] || 0) * 10) / 10;
+      const carbs = Math.round(((nutrients['carbohydrates'] || 0) + (nutrients['sugars'] || 0)) * 10) / 10;
+      const fat = Math.round(((nutrients['fat'] || 0) + (nutrients['saturated-fat'] || 0) + (nutrients['unsaturated-fat'] || 0)) * 10) / 10;
+
+      rows.push([dateStr, String(eaten), String(burned), String(eaten - burned), String(protein), String(carbs), String(fat), String(calorieGoal)]);
+    }
+
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nutrition-trends-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const pieChartData = useMemo(() => {
     // Get total grams of each macro
     const carbs = (selectedDateNutrients['carbohydrates'] || 0) + (selectedDateNutrients['sugars'] || 0);
