@@ -36,7 +36,7 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--muted))"
+          stroke="hsl(var(--muted) / 0.5)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
@@ -53,7 +53,7 @@ export function ProgressRing({
           strokeDashoffset={offset}
           className="progress-ring-circle"
           style={{
-            filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.5))',
+            filter: 'drop-shadow(0 0 6px hsl(var(--primary) / 0.4))',
           }}
         />
       </svg>
@@ -61,13 +61,13 @@ export function ProgressRing({
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         {label && (
-          <span className="text-lg text-muted-foreground font-medium">{label}</span>
+          <span className="text-[15px] text-muted-foreground/80 font-medium tracking-tight">{label}</span>
         )}
         {value && (
-          <span className="text-5xl font-bold text-foreground tracking-tight">{value}</span>
+          <span className="text-[44px] font-semibold text-foreground tracking-tight leading-none">{value}</span>
         )}
         {sublabel && (
-          <span className="text-sm text-primary font-semibold mt-1">{sublabel}</span>
+          <span className="text-[13px] text-primary font-semibold mt-1 tracking-tight">{sublabel}</span>
         )}
       </div>
     </div>

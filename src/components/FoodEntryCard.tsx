@@ -22,28 +22,28 @@ export function FoodEntryCard({ food, entry, onRemove }: FoodEntryCardProps) {
   });
 
   return (
-    <div className="glass-card rounded-2xl p-4 animate-slide-up group">
+    <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 border border-border/30 shadow-sm animate-slide-up group">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-foreground truncate">{food.name}</h4>
+            <h4 className="font-semibold text-[15px] text-foreground truncate tracking-tight">{food.name}</h4>
           </div>
           
-          <p className="text-sm text-muted-foreground mb-3">
+          <p className="text-[13px] text-muted-foreground/70 mb-3">
             {entry.servingAmount} × {food.servingSize}{food.servingUnit} • {time}
           </p>
           
-          <div className="flex flex-wrap gap-2">
-            <span className="nutrient-pill bg-nutrient-energy/20 text-nutrient-energy">
+          <div className="flex flex-wrap gap-1.5">
+            <span className="nutrient-pill bg-nutrient-energy/15 text-nutrient-energy">
               {calories.toFixed(0)} kcal
             </span>
-            <span className="nutrient-pill bg-nutrient-protein/20 text-nutrient-protein">
+            <span className="nutrient-pill bg-nutrient-protein/15 text-nutrient-protein">
               {protein.toFixed(0)}g P
             </span>
-            <span className="nutrient-pill bg-nutrient-carbs/20 text-nutrient-carbs">
+            <span className="nutrient-pill bg-nutrient-carbs/15 text-nutrient-carbs">
               {carbs.toFixed(0)}g C
             </span>
-            <span className="nutrient-pill bg-nutrient-fat/20 text-nutrient-fat">
+            <span className="nutrient-pill bg-nutrient-fat/15 text-nutrient-fat">
               {fat.toFixed(0)}g F
             </span>
           </div>

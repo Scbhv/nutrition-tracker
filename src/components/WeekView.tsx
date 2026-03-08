@@ -25,41 +25,41 @@ export function WeekView({ onDayClick }: WeekViewProps) {
     return {
       day,
       date: date.getDate(),
-      hasData: index < dayOfWeek, // Mock: past days have data
+      hasData: index < dayOfWeek,
       isToday: index === dayOfWeek,
       isPast: index < dayOfWeek,
     };
   });
 
   return (
-    <div className="glass-card rounded-2xl p-4 animate-slide-up">
+    <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 border border-border/30 shadow-sm animate-slide-up">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-foreground">My Week</h3>
-        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        <h3 className="font-semibold text-[15px] text-foreground tracking-tight">My Week</h3>
+        <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
       </div>
       
       <div className="flex items-center justify-between gap-1">
-        {days.map((dayData, index) => (
+        {days.map((dayData) => (
           <button
             key={dayData.day}
             onClick={() => onDayClick?.(dayData.date)}
             className={cn(
-              "flex flex-col items-center gap-1 py-2 px-2 rounded-xl transition-all",
-              dayData.isToday && "bg-primary/20",
-              !dayData.isPast && !dayData.isToday && "opacity-50"
+              "flex flex-col items-center gap-1.5 py-2 px-2 rounded-2xl transition-all",
+              dayData.isToday && "bg-primary/15",
+              !dayData.isPast && !dayData.isToday && "opacity-40"
             )}
           >
             <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors",
+              "w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors",
               dayData.hasData && "bg-primary text-primary-foreground",
               dayData.isToday && !dayData.hasData && "bg-secondary text-foreground",
-              !dayData.hasData && !dayData.isToday && "bg-muted text-muted-foreground"
+              !dayData.hasData && !dayData.isToday && "bg-muted/50 text-muted-foreground"
             )}>
               {dayData.hasData ? '✓' : dayData.date}
             </div>
             <span className={cn(
-              "text-[10px] font-medium",
-              dayData.isToday ? "text-primary" : "text-muted-foreground"
+              "text-[10px] font-medium tracking-wide",
+              dayData.isToday ? "text-primary" : "text-muted-foreground/70"
             )}>
               {dayData.day}
             </span>
