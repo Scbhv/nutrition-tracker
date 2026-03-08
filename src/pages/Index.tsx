@@ -1,5 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
