@@ -127,6 +127,8 @@ export interface UserSettings {
   weekdayGoalsEnabled?: boolean;
   /** Per-weekday goal overrides. Keys are 0 (Sun) – 6 (Sat). */
   weekdayGoals?: Partial<Record<Weekday, NutrientData>>;
+  /** User-defined custom nutrients */
+  customNutrients?: CustomNutrient[];
 }
 
 export const NUTRIENT_CATEGORIES = {
