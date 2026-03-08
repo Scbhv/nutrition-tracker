@@ -89,63 +89,45 @@ serve(async (req) => {
       });
     }
 
-    // Check if already premium
-    const { data: existing } = await serviceClient
-      .from("premium_users")
-      .select("id")
-      .eq("user_id", userId)
-      .maybeSingle();
+    // Atomic code redemption via DB function
+    const { data: result, error: redeemError } = await serviceClient.rpc("redeem_unlock_code", {
+      p_code: code.trim(),
+      p_user_id: userId,
+    });
 
-    if (existing) {
+    if (redeemError) {
+      console.error("Redeem error:", redeemError);
+      return new Response(JSON.stringify({ error: "Failed to process code" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const status = result?.status;
+
+    if (status === "already_premium") {
       return new Response(JSON.stringify({ success: true, message: "Already unlocked" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Find valid code
-    const { data: unlockCode, error: codeError } = await serviceClient
-      .from("unlock_codes")
-      .select("*")
-      .eq("code", code.trim())
-      .eq("is_active", true)
-      .maybeSingle();
-
-    if (codeError || !unlockCode) {
+    if (status === "invalid_code") {
       return new Response(JSON.stringify({ error: "Invalid or expired code" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (unlockCode.current_uses >= unlockCode.max_uses) {
-      return new Response(JSON.stringify({ error: "This code has been fully redeemed" }), {
-        status: 400,
+    if (status === "success") {
+      return new Response(JSON.stringify({ success: true, message: "Premium unlocked!" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Grant premium
-    const { error: insertError } = await serviceClient
-      .from("premium_users")
-      .insert({ user_id: userId, unlock_method: "code" });
-
-    if (insertError) {
-      console.error("Insert error:", insertError);
-      return new Response(JSON.stringify({ error: "Failed to unlock" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Increment code usage
-    await serviceClient
-      .from("unlock_codes")
-      .update({ current_uses: unlockCode.current_uses + 1 })
-      .eq("id", unlockCode.id);
-
-    return new Response(JSON.stringify({ success: true, message: "Premium unlocked!" }), {
-      status: 200,
+    return new Response(JSON.stringify({ error: "Unexpected error" }), {
+      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
