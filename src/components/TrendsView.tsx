@@ -40,6 +40,7 @@ interface TrendsViewProps {
   foods: FoodItem[];
   logs: DailyLog[];
   dailyGoals: NutrientData;
+  isPremium?: boolean;
 }
 
 // Calorie conversion factors
