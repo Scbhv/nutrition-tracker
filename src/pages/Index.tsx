@@ -599,6 +599,7 @@ export default function Index() {
         onAILookup={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)}
         onImport={handleImport}
         onLockedTab={() => setShowDonationGate(true)}
+        isPremium={isPremium}
       />
 
       {/* Hidden file input */}
