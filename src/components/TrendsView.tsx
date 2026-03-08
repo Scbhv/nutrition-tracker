@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, forwardRef } from 'react';
 import { format, subDays, parseISO } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ReferenceLine, ComposedChart, Line } from 'recharts';
 import { TrendingUp, PieChartIcon, CalendarIcon, Flame, Download, Lock } from 'lucide-react';
