@@ -88,7 +88,7 @@ serve(async (req) => {
     // Grant premium
     const { error: insertError } = await serviceClient
       .from("premium_users")
-      .insert({ user_id: user.id, unlock_method: "code" });
+      .insert({ user_id: userId, unlock_method: "code" });
 
     if (insertError) {
       console.error("Insert error:", insertError);
