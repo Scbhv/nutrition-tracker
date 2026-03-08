@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NutrientBar } from '@/components/NutrientBar';
-import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, CustomNutrient } from '@/types/nutrients';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import {
 interface NutrientsSummaryProps {
   todayNutrients: NutrientData;
   dailyGoals: NutrientData;
+  customNutrients?: CustomNutrient[];
 }
 
 type SortOption = 'name' | 'progress' | 'amount';
