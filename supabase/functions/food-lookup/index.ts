@@ -306,12 +306,6 @@ serve(async (req) => {
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    // IP-based rate limit
-    const ipCheck = checkRateLimit(ipLimits, clientIP, IP_MAX_REQUESTS);
-    if (!ipCheck.allowed) {
-      return rateLimitResponse(ipCheck.retryAfterMs, corsHeaders);
-    }
-
     // Validate authentication
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -323,17 +317,22 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: "Server configuration error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Auth client for user verification
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
+
+    // Service role client for rate limiting (bypasses RLS)
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const token = authHeader.replace("Bearer ", "");
     const { data, error: authError } = await supabaseClient.auth.getUser(token);
@@ -345,10 +344,16 @@ serve(async (req) => {
       );
     }
 
-    // User-based rate limit
-    const userCheck = checkRateLimit(userLimits, data.user.id, USER_MAX_REQUESTS);
-    if (!userCheck.allowed) {
-      return rateLimitResponse(userCheck.retryAfterMs, corsHeaders);
+    // IP-based rate limit (database-backed)
+    const ipAllowed = await checkRateLimitDb(serviceClient, `ip:${clientIP}`, IP_MAX_REQUESTS);
+    if (!ipAllowed) {
+      return rateLimitResponse(corsHeaders);
+    }
+
+    // User-based rate limit (database-backed)
+    const userAllowed = await checkRateLimitDb(serviceClient, `user:${data.user.id}`, USER_MAX_REQUESTS);
+    if (!userAllowed) {
+      return rateLimitResponse(corsHeaders);
     }
 
     // Parse and validate input
