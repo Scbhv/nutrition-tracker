@@ -644,6 +644,7 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
           )}
         </CardContent>
       </Card>
+      <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
 }
