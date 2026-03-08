@@ -21,6 +21,7 @@ import { SettingsModal } from '@/components/SettingsModal';
 import { TrendsView } from '@/components/TrendsView';
 import { AppearanceSettings } from '@/components/AppearanceSettings';
 import { AddExerciseModal } from '@/components/AddExerciseModal';
+import { HealthKitExport } from '@/components/HealthKitExport';
 import { FoodItem, NutrientData } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -396,6 +397,11 @@ export default function Index() {
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
             </Button>
+            <HealthKitExport
+              foods={foods}
+              logs={logs}
+              getTodayNutrients={getTodayNutrients}
+            />
             <Button 
               onClick={handleExport} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
