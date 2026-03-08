@@ -582,7 +582,7 @@ export default function Index() {
         onTabChange={setActiveTab}
         onAddFood={() => setShowAddFood(true)}
         onScanBarcode={() => setShowScanner(true)}
-        onAILookup={() => setShowAILookup(true)}
+        onAILookup={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)}
         onImport={handleImport}
       />
 
