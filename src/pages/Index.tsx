@@ -287,6 +287,10 @@ export default function Index() {
       case 'profile':
         return (
           <div className="space-y-4 animate-fade-in">
+            <AppearanceSettings
+              appearance={appearance}
+              onUpdate={updateAppearance}
+            />
             <Button 
               onClick={() => setShowSettings(true)} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
