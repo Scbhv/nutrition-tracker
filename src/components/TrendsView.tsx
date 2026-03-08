@@ -10,6 +10,31 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { FoodItem, DailyLog, NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, NUTRIENT_CATEGORIES } from '@/types/nutrients';
 
+// Custom tooltip for Net Calories chart
+function NetCalorieTooltip({ active, payload, label }: any) {
+  if (!active || !payload) return null;
+
+  return (
+    <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+      <p className="text-sm font-semibold text-foreground mb-2">{label}</p>
+      {payload.map((entry: any, index: number) => {
+        const color = entry.color || 'hsl(var(--foreground))';
+        const labels: Record<string, string> = {
+          eaten: 'Eaten',
+          burned: 'Burned',
+          net: 'Net',
+          goal: 'Goal',
+        };
+        return (
+          <p key={index} style={{ color }} className="text-xs font-medium">
+            {labels[entry.dataKey] || entry.dataKey}: <span className="font-bold">{entry.value} kcal</span>
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 interface TrendsViewProps {
   foods: FoodItem[];
   logs: DailyLog[];
@@ -325,17 +350,8 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                   width={50}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  formatter={(value: number, name: string) => {
-                    const labels: Record<string, string> = { eaten: 'Eaten', burned: 'Burned', net: 'Net' };
-                    return [`${value} kcal`, labels[name] || name];
-                  }}
+                  content={<NetCalorieTooltip />}
+                  cursor={{ fill: 'hsl(var(--primary) / 0.1)' }}
                 />
                 <Bar dataKey="eaten" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={30} name="eaten" />
                 {hasAnyExercise && (
