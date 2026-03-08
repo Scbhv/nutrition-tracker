@@ -71,6 +71,24 @@ export default function Index() {
   const aiLocked = !isPremium;
   const dragCounter = useRef(0);
 
+  // Auth gate: redirect to /auth if not logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) navigate('/auth');
+      else setAuthChecked(true);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate('/auth');
+      else setAuthChecked(true);
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
   const dailyGoals = getGoalsForDate();
