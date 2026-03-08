@@ -1,5 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
@@ -30,7 +32,9 @@ type Tab = 'today' | 'database' | 'trends' | 'profile';
 
 export default function Index() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
@@ -66,6 +70,24 @@ export default function Index() {
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
   const dragCounter = useRef(0);
+
+  // Auth gate: redirect to /auth if not logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) navigate('/auth');
+      else setAuthChecked(true);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate('/auth');
+      else setAuthChecked(true);
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
@@ -538,6 +560,16 @@ export default function Index() {
               Import Database
             </Button>
 
+            {/* Sign Out */}
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Sign Out
+            </Button>
+
             {/* Premium Status */}
             {isPremium && (
               <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
@@ -588,10 +620,18 @@ export default function Index() {
       case 'today': return 'Nutrition';
       case 'database': return 'Foods';
       case 'trends': return 'Trends';
-      case 'profile': return 'Profile';
+      case 'profile': return '';
       default: return 'NutriTrack';
     }
   };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div
