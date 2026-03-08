@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle } from 'lucide-react';
 import { usePremium } from '@/hooks/usePremium';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
@@ -537,6 +537,29 @@ export default function Index() {
             >
               Import Database
             </Button>
+
+            {/* Premium Status / Restore */}
+            {isPremium ? (
+              <div className="glass-card rounded-2xl p-4 flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">Premium Active</p>
+                  <p className="text-xs text-muted-foreground">All features unlocked</p>
+                </div>
+              </div>
+            ) : (
+              <Button
+                onClick={() => {
+                  recheckPremium();
+                  toast({ title: 'Checking...', description: 'Looking up your premium status' });
+                }}
+                className="w-full ios-button-secondary h-14 justify-start px-4"
+              >
+                <RotateCcw className="h-5 w-5 mr-3" />
+                Restore Purchase
+              </Button>
+            )}
+
             <Button
               onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
               variant="ghost"
