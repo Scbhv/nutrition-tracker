@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,12 @@ interface BottomNavProps {
   onAddFood: () => void;
   onScanBarcode: () => void;
   onAILookup: () => void;
+}
+
+function triggerHaptic() {
+  if (navigator.vibrate) {
+    navigator.vibrate(8);
+  }
 }
 
 export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup }: BottomNavProps) {
@@ -31,7 +37,13 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
     { id: 'ai', label: 'AI Lookup', icon: Sparkles, action: onAILookup },
   ];
 
+  const toggleMenu = useCallback(() => {
+    triggerHaptic();
+    setMenuOpen(prev => !prev);
+  }, []);
+
   const handleMenuItemClick = (action: () => void) => {
+    triggerHaptic();
     action();
     setMenuOpen(false);
   };
@@ -43,15 +55,18 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
     return (
       <button
         key={tab.id}
-        onClick={() => onTabChange(tab.id)}
+        onClick={() => {
+          triggerHaptic();
+          onTabChange(tab.id);
+        }}
         className={cn(
-          "bottom-nav-item min-w-[56px]",
+          "bottom-nav-item min-w-[56px] transition-transform duration-150 active:scale-90",
           isActive && "active"
         )}
       >
         <div className={cn(
-          "p-2 rounded-xl transition-colors",
-          isActive && "bg-secondary"
+          "p-2 rounded-xl transition-all duration-200",
+          isActive && "bg-secondary scale-105"
         )}>
           <Icon className="h-5 w-5" />
         </div>
@@ -65,26 +80,26 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
       {/* Backdrop when menu is open */}
       {menuOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-40 animate-fade-in"
+          className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm animate-fade-in"
           onClick={() => setMenuOpen(false)}
         />
       )}
 
       {/* Floating menu */}
       {menuOpen && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3 animate-scale-in">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-3">
           {menuItems.map((item, index) => (
             <button
               key={item.id}
               onClick={() => handleMenuItemClick(item.action)}
-              className="flex items-center gap-3 px-5 py-3 bg-card rounded-2xl shadow-lg border border-border hover:bg-secondary transition-colors"
+              className="flex items-center gap-3 px-5 py-3 bg-card rounded-2xl shadow-lg border border-border/50 
+                hover:bg-secondary active:scale-95 transition-all duration-150 opacity-0"
               style={{ 
-                animationDelay: `${index * 50}ms`,
-                animation: 'fade-in 0.2s ease-out forwards'
+                animation: `menuItemIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${(menuItems.length - 1 - index) * 60}ms forwards`,
               }}
             >
               <div className={cn(
-                "p-2 rounded-xl",
+                "p-2 rounded-xl transition-colors",
                 item.id === 'ai' ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
               )}>
                 <item.icon className="h-5 w-5" />
@@ -103,20 +118,26 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
           {/* Center FAB button */}
           <div className="relative -mt-8">
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={toggleMenu}
               className={cn(
-                "w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300",
+                "w-14 h-14 rounded-full flex items-center justify-center shadow-lg",
+                "transition-all duration-300 ease-out active:scale-90",
                 menuOpen 
-                  ? "bg-muted-foreground rotate-45" 
-                  : "bg-primary hover:bg-primary/90"
+                  ? "bg-muted-foreground rotate-[135deg] shadow-none" 
+                  : "bg-primary hover:bg-primary/90 hover:shadow-glow hover:scale-105"
               )}
             >
-              {menuOpen ? (
-                <X className="h-6 w-6 text-background" />
-              ) : (
-                <Plus className="h-6 w-6 text-primary-foreground" />
-              )}
+              <Plus className={cn(
+                "h-6 w-6 transition-colors duration-200",
+                menuOpen ? "text-background" : "text-primary-foreground"
+              )} />
             </button>
+            {/* Pulse ring on idle */}
+            {!menuOpen && (
+              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping pointer-events-none" 
+                style={{ animationDuration: '3s' }} 
+              />
+            )}
           </div>
 
           {/* Right tabs */}
