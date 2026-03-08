@@ -495,6 +495,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
           </Button>
         </div>
       </DialogContent>
+      <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </Dialog>
   );
 }
