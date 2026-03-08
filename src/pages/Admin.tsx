@@ -33,8 +33,25 @@ export default function AdminPanel() {
   const [newMaxUses, setNewMaxUses] = useState('10');
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session?.user);
+      setCheckingAuth(false);
+    };
+    checkAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+      setCheckingAuth(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchData = useCallback(async () => {
+    if (!isAuthenticated) { setLoading(false); return; }
     setLoading(true);
     setError(null);
     try {
@@ -53,7 +70,7 @@ export default function AdminPanel() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
