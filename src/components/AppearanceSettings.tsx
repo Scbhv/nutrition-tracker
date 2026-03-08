@@ -14,6 +14,8 @@ import {
 interface AppearanceSettingsProps {
   appearance: AppearanceSettingsType;
   onUpdate: (updates: Partial<AppearanceSettingsType>) => void;
+  isPremium?: boolean;
+  onShowDonationGate?: () => void;
 }
 
 const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
@@ -22,11 +24,15 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-const designLocked = true; // Locked until donation
-
-export function AppearanceSettings({ appearance, onUpdate }: AppearanceSettingsProps) {
+export function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }: AppearanceSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
+  const designLocked = !isPremium;
+
+  const showGate = () => {
+    if (onShowDonationGate) onShowDonationGate();
+    else setShowDonationGate(true);
+  };
 
   const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
