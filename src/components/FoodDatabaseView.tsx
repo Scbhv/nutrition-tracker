@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,9 +79,17 @@ export function FoodDatabaseView({
     }
   };
 
+  // Load last-used portions from localStorage
+  const lastPortions = useMemo<Record<string, number>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('lastPortions') || '{}');
+    } catch { return {}; }
+  }, [portionFood]);
+
   const openPortionDialog = (food: FoodItem) => {
     setPortionFood(food);
-    setPortionGrams(String(food.servingSize));
+    const last = lastPortions[food.id];
+    setPortionGrams(String(last ?? food.servingSize));
     setTimeout(() => portionInputRef.current?.select(), 100);
   };
 
@@ -89,6 +97,12 @@ export function FoodDatabaseView({
     if (!portionFood) return;
     const grams = parseFloat(portionGrams);
     if (isNaN(grams) || grams <= 0) return;
+    // Save last-used portion
+    try {
+      const stored = JSON.parse(localStorage.getItem('lastPortions') || '{}');
+      stored[portionFood.id] = grams;
+      localStorage.setItem('lastPortions', JSON.stringify(stored));
+    } catch {}
     onLogFood(portionFood.id, grams);
     setPortionFood(null);
     setPortionGrams('');
@@ -342,6 +356,19 @@ export function FoodDatabaseView({
               {portionFood?.nutrients['energy-kcal'] || 0} kcal/100g
             </div>
             <div className="flex flex-wrap gap-2 justify-center">
+              {portionFood && lastPortions[portionFood.id] && ![50, 100, 150, 200].includes(lastPortions[portionFood.id]) && (
+                <button
+                  onClick={() => setPortionGrams(String(lastPortions[portionFood.id]))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                    portionGrams === String(lastPortions[portionFood.id])
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-accent text-accent-foreground border-border hover:bg-accent/80"
+                  )}
+                >
+                  Last: {lastPortions[portionFood.id]}g
+                </button>
+              )}
               {[50, 100, 150, 200].map(g => (
                 <button
                   key={g}
