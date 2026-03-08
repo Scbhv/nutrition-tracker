@@ -35,6 +35,7 @@ export default function Index() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
@@ -74,12 +75,12 @@ export default function Index() {
   // Auth gate: redirect to /auth if not logged in
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) navigate('/auth');
-      else setAuthChecked(true);
+      if (!session) { setIsLoggedIn(false); setAuthChecked(true); }
+      else { setIsLoggedIn(true); setAuthChecked(true); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) navigate('/auth');
-      else setAuthChecked(true);
+      setIsLoggedIn(!!session);
+      setAuthChecked(true);
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -560,15 +561,24 @@ export default function Index() {
               Import Database
             </Button>
 
-            {/* Sign Out */}
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              Sign Out
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate('/auth')}
+                className="w-full h-14 justify-start px-4 rounded-2xl"
+              >
+                <LogOut className="h-5 w-5 mr-3 rotate-180" />
+                Log In
+              </Button>
+            )}
 
             {/* Premium Status */}
             {isPremium && (
