@@ -10,11 +10,20 @@ const securityHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate",
 };
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  ...securityHeaders,
-};
+const ALLOWED_ORIGINS = [
+  "https://food-whisperer-health.lovable.app",
+  "https://id-preview--1764e644-44c7-4500-bf0b-0dd59c1a1055.lovable.app",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    ...securityHeaders,
+  };
+}
 
 const OPEN_FOOD_FACTS_API = "https://world.openfoodfacts.org";
 
@@ -63,13 +72,13 @@ setInterval(() => {
   }
 }, 300_000);
 
-function rateLimitResponse(retryAfterMs: number) {
+function rateLimitResponse(retryAfterMs: number, headers: Record<string, string>) {
   return new Response(
     JSON.stringify({ error: "Too many requests. Please try again shortly." }),
     {
       status: 429,
       headers: {
-        ...corsHeaders,
+        ...headers,
         "Content-Type": "application/json",
         "Retry-After": String(retryAfterMs),
       },
@@ -298,6 +307,8 @@ Only include nutrients you're confident about. Use null for unknown values.`,
 
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -320,7 +331,7 @@ serve(async (req) => {
     // IP-based rate limit
     const ipCheck = checkRateLimit(ipLimits, clientIP, IP_MAX_REQUESTS);
     if (!ipCheck.allowed) {
-      return rateLimitResponse(ipCheck.retryAfterMs);
+      return rateLimitResponse(ipCheck.retryAfterMs, corsHeaders);
     }
 
     // Validate authentication
@@ -359,7 +370,7 @@ serve(async (req) => {
     // User-based rate limit
     const userCheck = checkRateLimit(userLimits, data.user.id, USER_MAX_REQUESTS);
     if (!userCheck.allowed) {
-      return rateLimitResponse(userCheck.retryAfterMs);
+      return rateLimitResponse(userCheck.retryAfterMs, corsHeaders);
     }
 
     // Parse and validate input
