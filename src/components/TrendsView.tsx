@@ -64,6 +64,13 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
     return totals;
   };
 
+  // Get burned calories for a specific date
+  const getBurnedForDate = (date: string): number => {
+    const log = logs.find(l => l.date === date);
+    if (!log) return 0;
+    return (log.exerciseEntries || []).reduce((sum, e) => sum + e.caloriesBurned, 0);
+  };
+
   // Get selected date for pie chart
   const selectedDateStr = format(pieChartDate, 'yyyy-MM-dd');
   const selectedDateNutrients = useMemo(() => getNutrientsForDate(selectedDateStr), [logs, foods, selectedDateStr]);
