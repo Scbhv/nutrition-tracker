@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock } from 'lucide-react';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -503,11 +503,14 @@ export default function Index() {
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
             </Button>
-            <HealthKitExport
-              foods={foods}
-              logs={logs}
-              getTodayNutrients={getTodayNutrients}
-            />
+            <Button
+              onClick={() => setShowDonationGate(true)}
+              className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+            >
+              <Heart className="h-5 w-5 mr-3 text-destructive" />
+              Apple Health Export
+              <Lock className="h-3.5 w-3.5 ml-auto" />
+            </Button>
             <Button 
               onClick={handleExport} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
@@ -584,6 +587,7 @@ export default function Index() {
         onScanBarcode={() => setShowScanner(true)}
         onAILookup={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)}
         onImport={handleImport}
+        onLockedTab={() => setShowDonationGate(true)}
       />
 
       {/* Hidden file input */}
