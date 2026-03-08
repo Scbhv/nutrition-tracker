@@ -126,6 +126,33 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
 
   const hasAnyExercise = netCalorieData.some(d => d.burned > 0);
 
+  // Calculate average summary based on period
+  const averageSummary = useMemo(() => {
+    const periodDays = averagePeriod === 'week' ? 7 : 30;
+    let totalIntake = 0;
+    let totalBurned = 0;
+    let daysWithData = 0;
+
+    for (let i = periodDays - 1; i >= 0; i--) {
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const nutrients = getNutrientsForDate(date);
+      const intake = nutrients['energy-kcal'] || 0;
+      const burned = getBurnedForDate(date);
+      
+      if (intake > 0) {
+        totalIntake += intake;
+        totalBurned += burned;
+        daysWithData++;
+      }
+    }
+
+    const avgIntake = daysWithData > 0 ? Math.round(totalIntake / daysWithData) : 0;
+    const avgBurned = daysWithData > 0 ? Math.round(totalBurned / daysWithData) : 0;
+    const avgNet = avgIntake - avgBurned;
+
+    return { avgIntake, avgBurned, avgNet, daysWithData };
+  }, [logs, foods, averagePeriod]);
+
   const pieChartData = useMemo(() => {
     // Get total grams of each macro
     const carbs = (selectedDateNutrients['carbohydrates'] || 0) + (selectedDateNutrients['sugars'] || 0);
