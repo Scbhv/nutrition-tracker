@@ -687,4 +687,4 @@ export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function T
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
-}
+});
