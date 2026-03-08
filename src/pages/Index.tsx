@@ -488,6 +488,7 @@ export default function Index() {
             foods={foods}
             logs={logs}
             dailyGoals={dailyGoals}
+            isPremium={isPremium}
           />
         );
 
