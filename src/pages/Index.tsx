@@ -523,10 +523,11 @@ export default function Index() {
               </Button>
             )}
             <Button 
-              onClick={handleExport} 
-              className="w-full ios-button-secondary h-14 justify-start px-4"
+              onClick={() => isPremium ? handleExport() : setShowDonationGate(true)} 
+              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
             >
               Export Database (JSON)
+              {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
             </Button>
             <Button 
               onClick={handleImport} 
