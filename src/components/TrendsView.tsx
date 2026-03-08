@@ -235,6 +235,13 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" className="rounded-xl gap-2" onClick={exportCSV}>
+          <Download className="h-4 w-4" />
+          Export CSV
+        </Button>
+      </div>
       {/* Nutrient Over Time - Bar Chart */}
       <Card className="glass-card border-0">
         <CardHeader className="pb-2">
