@@ -21,7 +21,7 @@ function triggerHaptic(pattern: number | number[] = 8) {
   }
 }
 
-export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup, onImport, onLockedTab }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, onAILookup, onImport, onLockedTab, isPremium = false }: BottomNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const leftTabs = [
