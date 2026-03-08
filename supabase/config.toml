@@ -2,3 +2,6 @@ project_id = "patfcksfnfxuxypqgaxq"
 
 [functions.food-lookup]
 verify_jwt = false
+
+[functions.verify-unlock-code]
+verify_jwt = false
