@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      premium_users: {
+        Row: {
+          id: string
+          unlock_method: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          unlock_method?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          unlock_method?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           count: number
@@ -35,6 +56,33 @@ export type Database = {
         }
         Relationships: []
       }
+      unlock_codes: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          id: string
+          is_active: boolean
+          max_uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -48,6 +96,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_premium: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
