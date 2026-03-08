@@ -240,9 +240,21 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
     <div className="space-y-6 animate-fade-in">
       {/* Export Button */}
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" className="rounded-xl gap-2" onClick={exportCSV}>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn("rounded-xl gap-2", trendsLocked && "opacity-50")}
+          onClick={() => {
+            if (trendsLocked) {
+              setShowDonationGate(true);
+            } else {
+              exportCSV();
+            }
+          }}
+        >
           <Download className="h-4 w-4" />
           Export CSV
+          {trendsLocked && <Lock className="h-3 w-3" />}
         </Button>
       </div>
       {/* Nutrient Over Time - Bar Chart */}
