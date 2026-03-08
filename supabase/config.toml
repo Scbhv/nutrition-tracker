@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.verify-unlock-code]
 verify_jwt = false
+
+[functions.admin-codes]
+verify_jwt = false
