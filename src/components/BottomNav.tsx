@@ -36,6 +36,7 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
     { id: 'add', label: 'Add Food', icon: UtensilsCrossed, action: onAddFood },
     { id: 'scan', label: 'Scan Barcode', icon: Scan, action: onScanBarcode },
     { id: 'ai', label: 'AI Lookup', icon: Sparkles, action: onAILookup },
+    { id: 'import', label: 'Import JSON', icon: Upload, action: onImport },
   ];
 
   const toggleMenu = useCallback(() => {
