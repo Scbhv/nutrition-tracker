@@ -52,11 +52,16 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (manualBarcode.trim()) {
-      onScan(manualBarcode.trim());
-      setManualBarcode('');
-      onClose();
+    const trimmed = manualBarcode.trim();
+    if (!trimmed) return;
+    // Validate: alphanumeric + hyphens, max 50 chars
+    if (!/^[a-zA-Z0-9-]+$/.test(trimmed) || trimmed.length > 50) {
+      setError('Invalid barcode format');
+      return;
     }
+    onScan(trimmed);
+    setManualBarcode('');
+    onClose();
   };
 
   return (

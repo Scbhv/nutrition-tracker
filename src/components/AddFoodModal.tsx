@@ -105,11 +105,13 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
                   <Input
                     id="name"
                     value={name}
-                    onChange={e => setName(e.target.value)}
+                    onChange={e => setName(e.target.value.slice(0, 200))}
                     placeholder="e.g., Oatmeal"
-                    className="bg-secondary border-0 rounded-xl"
+                    className={`bg-secondary border-0 rounded-xl ${validationErrors.name ? 'ring-2 ring-destructive' : ''}`}
                     required
+                    maxLength={200}
                   />
+                  {validationErrors.name && <p className="text-xs text-destructive">{validationErrors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
