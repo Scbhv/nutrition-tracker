@@ -275,7 +275,7 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               }
               setDaysToShow(num);
             }}>
-              <SelectTrigger className="w-24 bg-secondary border-0 rounded-xl">
+              <SelectTrigger className="w-28 bg-secondary border-0 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -288,6 +288,16 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                 <SelectItem value="30" className={trendsLocked ? "opacity-50" : ""}>
                   <span className="flex items-center gap-1">
                     30 days {trendsLocked && <Lock className="h-3 w-3" />}
+                  </span>
+                </SelectItem>
+                <SelectItem value="365" className={trendsLocked ? "opacity-50" : ""}>
+                  <span className="flex items-center gap-1">
+                    1 year {trendsLocked && <Lock className="h-3 w-3" />}
+                  </span>
+                </SelectItem>
+                <SelectItem value="9999" className={trendsLocked ? "opacity-50" : ""}>
+                  <span className="flex items-center gap-1">
+                    All time {trendsLocked && <Lock className="h-3 w-3" />}
                   </span>
                 </SelectItem>
               </SelectContent>
