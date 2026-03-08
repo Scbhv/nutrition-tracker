@@ -219,6 +219,17 @@
     0%, 100% { box-shadow: 0 0 20px hsl(142 76% 46% / 0.3); }
     50% { box-shadow: 0 0 40px hsl(142 76% 46% / 0.5); }
   }
+
+  @keyframes menuItemIn {
+    0% { 
+      opacity: 0;
+      transform: translateY(16px) scale(0.9);
+    }
+    100% { 
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }
 
 /* Liquid Glass Design Style */
