@@ -38,12 +38,18 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
   ];
 
   const toggleMenu = useCallback(() => {
-    triggerHaptic();
+    if (!menuOpen) {
+      // Opening menu: double tap pattern
+      triggerHaptic([10, 20, 10]);
+    } else {
+      // Closing menu: single gentle tap
+      triggerHaptic(6);
+    }
     setMenuOpen(prev => !prev);
-  }, []);
+  }, [menuOpen]);
 
   const handleMenuItemClick = (action: () => void) => {
-    triggerHaptic();
+    triggerHaptic(12);
     action();
     setMenuOpen(false);
   };
