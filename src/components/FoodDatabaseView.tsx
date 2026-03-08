@@ -38,6 +38,9 @@ export function FoodDatabaseView({
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSubTab, setActiveSubTab] = useState<'database' | 'files'>('database');
+  const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
+  const [portionGrams, setPortionGrams] = useState('');
+  const portionInputRef = useRef<HTMLInputElement>(null);
   
   const fileSystem = useFileSystemSync();
 
