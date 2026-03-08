@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload } from 'lucide-react';
 import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
