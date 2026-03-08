@@ -10,6 +10,7 @@ interface BottomNavProps {
   onAddFood: () => void;
   onScanBarcode: () => void;
   onAILookup: () => void;
+  onImport: () => void;
 }
 
 function triggerHaptic(pattern: number | number[] = 8) {
