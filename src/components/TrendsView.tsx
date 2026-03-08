@@ -390,6 +390,78 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
         </CardContent>
       </Card>
 
+      {/* Average Summary Card */}
+      <Card className="glass-card border-0">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">
+              {averagePeriod === 'week' ? 'Weekly' : 'Monthly'} Average
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant={averagePeriod === 'week' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setAveragePeriod('week')}
+              >
+                Week
+              </Button>
+              <Button
+                variant={averagePeriod === 'month' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setAveragePeriod('month')}
+              >
+                Month
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border/30">
+              <p className="text-xs text-muted-foreground mb-1">Avg Intake</p>
+              <p className="text-2xl font-bold text-foreground">{averageSummary.avgIntake}</p>
+              <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+            </div>
+            
+            {hasAnyExercise && (
+              <div className="p-4 rounded-xl bg-secondary/50 border border-border/30">
+                <p className="text-xs text-muted-foreground mb-1">Avg Burned</p>
+                <p className="text-2xl font-bold text-destructive">{averageSummary.avgBurned}</p>
+                <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+              </div>
+            )}
+            
+            <div className={cn(
+              "p-4 rounded-xl border border-border/30",
+              averageSummary.avgNet > 0 
+                ? "bg-secondary/50" 
+                : averageSummary.avgNet < 0 
+                ? "bg-green-500/10 border-green-500/30" 
+                : "bg-secondary/50"
+            )}>
+              <p className="text-xs text-muted-foreground mb-1">Avg Net</p>
+              <p className={cn(
+                "text-2xl font-bold",
+                averageSummary.avgNet > 0 
+                  ? "text-foreground" 
+                  : averageSummary.avgNet < 0 
+                  ? "text-green-600 dark:text-green-400" 
+                  : "text-foreground"
+              )}>
+                {averageSummary.avgNet > 0 ? '+' : ''}{averageSummary.avgNet}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">kcal/day</p>
+            </div>
+          </div>
+          
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            Based on {averageSummary.daysWithData} days with logged data
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Macro Calorie Distribution - Pie Chart */}
       <Card className="glass-card border-0">
         <CardHeader className="pb-2">
