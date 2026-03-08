@@ -593,7 +593,7 @@ export default function Index() {
             )}
 
             {/* Footer links */}
-            <div className="flex items-center justify-center gap-4 pt-2 pb-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 pb-4">
               <button
                 onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
                 className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
