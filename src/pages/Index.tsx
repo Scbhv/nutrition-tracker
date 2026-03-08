@@ -307,28 +307,28 @@ export default function Index() {
             )}
 
             {/* Action Buttons */}
-            <section className="flex gap-2 px-1">
-              <Button 
+            <section className="flex gap-2.5 px-1">
+              <button 
                 onClick={() => setShowAddFood(true)} 
-                className="flex-1 ios-button-secondary h-14 text-base"
+                className="flex-1 h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
               >
-                <Plus className="h-5 w-5 mr-2" />
+                <Plus className="h-[18px] w-[18px] text-primary" />
                 Add Food
-              </Button>
-              <Button 
+              </button>
+              <button 
                 onClick={() => setShowAddExercise(true)} 
-                className="flex-[0.8] ios-button-secondary h-14 text-base"
+                className="flex-[0.7] h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
               >
-                <Flame className="h-5 w-5 mr-2" />
+                <Flame className="h-[18px] w-[18px] text-destructive" />
                 Burn
-              </Button>
-              <Button 
+              </button>
+              <button 
                 onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
-                className={`flex-1 ios-button-accent h-14 text-base ${aiLocked ? 'opacity-50' : ''}`}
+                className={`flex-1 h-12 rounded-[16px] bg-primary/15 backdrop-blur-2xl border border-primary/20 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-primary tracking-tight active:scale-[0.97] transition-all ${aiLocked ? 'opacity-40' : ''}`}
               >
-                <Sparkles className="h-5 w-5 mr-2" />
+                <Sparkles className="h-[18px] w-[18px]" />
                 Generate
-              </Button>
+              </button>
             </section>
 
             {/* Week View */}
@@ -538,8 +538,8 @@ export default function Index() {
               Import Database
             </Button>
 
-            {/* Premium Status / Restore */}
-            {isPremium ? (
+            {/* Premium Status */}
+            {isPremium && (
               <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
                 <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                 <div className="flex-1">
@@ -547,28 +547,34 @@ export default function Index() {
                   <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
                 </div>
               </div>
-            ) : (
-              <Button
-                onClick={() => {
-                  recheckPremium();
-                  toast({ title: 'Checking...', description: 'Looking up your premium status' });
-                }}
-                className="w-full ios-button-secondary h-14 justify-start px-4"
-              >
-                <RotateCcw className="h-5 w-5 mr-3" />
-                Restore Purchase
-              </Button>
             )}
 
-            <Button
-              onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
-              variant="ghost"
-              className="w-full h-12 justify-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Heart className="h-4 w-4" />
-              Support this app
-              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </Button>
+            {/* Footer links */}
+            <div className="flex items-center justify-center gap-4 pt-2 pb-4">
+              <button
+                onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
+                className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
+              >
+                <Heart className="h-3 w-3" />
+                Support this app
+                <ExternalLink className="h-2.5 w-2.5 opacity-50" />
+              </button>
+              {!isPremium && (
+                <>
+                  <span className="text-muted-foreground/30">·</span>
+                  <button
+                    onClick={() => {
+                      recheckPremium();
+                      toast({ title: 'Checking...', description: 'Looking up your premium status' });
+                    }}
+                    className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    Restore Purchase
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         );
 
