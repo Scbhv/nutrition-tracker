@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed, Upload } from 'lucide-react';
+import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed, Upload, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -11,6 +11,7 @@ interface BottomNavProps {
   onScanBarcode: () => void;
   onAILookup: () => void;
   onImport: () => void;
+  onLockedTab?: () => void;
 }
 
 function triggerHaptic(pattern: number | number[] = 8) {
