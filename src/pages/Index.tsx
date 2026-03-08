@@ -659,6 +659,7 @@ export default function Index() {
       <DonationGateModal
         open={showDonationGate}
         onClose={() => setShowDonationGate(false)}
+        onUnlocked={recheckPremium}
       />
     </div>
   );
