@@ -307,6 +307,8 @@ Only include nutrients you're confident about. Use null for unknown values.`,
 
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -329,7 +331,7 @@ serve(async (req) => {
     // IP-based rate limit
     const ipCheck = checkRateLimit(ipLimits, clientIP, IP_MAX_REQUESTS);
     if (!ipCheck.allowed) {
-      return rateLimitResponse(ipCheck.retryAfterMs);
+      return rateLimitResponse(ipCheck.retryAfterMs, corsHeaders);
     }
 
     // Validate authentication
@@ -368,7 +370,7 @@ serve(async (req) => {
     // User-based rate limit
     const userCheck = checkRateLimit(userLimits, data.user.id, USER_MAX_REQUESTS);
     if (!userCheck.allowed) {
-      return rateLimitResponse(userCheck.retryAfterMs);
+      return rateLimitResponse(userCheck.retryAfterMs, corsHeaders);
     }
 
     // Parse and validate input
