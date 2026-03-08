@@ -341,6 +341,22 @@ export function FoodDatabaseView({
               {portionFood?.servingSize}{portionFood?.servingUnit} per serving •{' '}
               {portionFood?.nutrients['energy-kcal'] || 0} kcal/100g
             </div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {[50, 100, 150, 200].map(g => (
+                <button
+                  key={g}
+                  onClick={() => setPortionGrams(String(g))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                    portionGrams === String(g)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary text-secondary-foreground border-border hover:bg-accent"
+                  )}
+                >
+                  {g}g
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-3">
               <Input
                 ref={portionInputRef}
