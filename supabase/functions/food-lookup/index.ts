@@ -27,52 +27,30 @@ function getCorsHeaders(req: Request) {
 
 const OPEN_FOOD_FACTS_API = "https://world.openfoodfacts.org";
 
-// ─── Rate Limiting ────────────────────────────────────────────────────────────
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
-const ipLimits = new Map<string, RateLimitEntry>();
-const userLimits = new Map<string, RateLimitEntry>();
-
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+// ─── Rate Limiting (Database-backed) ──────────────────────────────────────────
 const IP_MAX_REQUESTS = 20;          // 20 req/min per IP
 const USER_MAX_REQUESTS = 15;        // 15 req/min per user
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 
-function checkRateLimit(
-  store: Map<string, RateLimitEntry>,
+async function checkRateLimitDb(
+  supabaseClient: any,
   key: string,
   maxRequests: number
-): { allowed: boolean; retryAfterMs: number } {
-  const now = Date.now();
-  const entry = store.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, retryAfterMs: 0 };
+): Promise<boolean> {
+  const { data, error } = await supabaseClient.rpc("check_and_increment_rate_limit", {
+    p_key: key,
+    p_max_requests: maxRequests,
+    p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
+  });
+  if (error) {
+    console.error("Rate limit check failed:", error.message);
+    // Fail open on DB errors to avoid blocking legitimate users
+    return true;
   }
-
-  if (entry.count >= maxRequests) {
-    return { allowed: false, retryAfterMs: Math.ceil((entry.resetAt - now) / 1000) };
-  }
-
-  entry.count++;
-  return { allowed: true, retryAfterMs: 0 };
+  return data === true;
 }
 
-// Periodically clean expired entries (every 5 min)
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of ipLimits) {
-    if (now > entry.resetAt) ipLimits.delete(key);
-  }
-  for (const [key, entry] of userLimits) {
-    if (now > entry.resetAt) userLimits.delete(key);
-  }
-}, 300_000);
-
-function rateLimitResponse(retryAfterMs: number, headers: Record<string, string>) {
+function rateLimitResponse(headers: Record<string, string>) {
   return new Response(
     JSON.stringify({ error: "Too many requests. Please try again shortly." }),
     {
@@ -80,7 +58,7 @@ function rateLimitResponse(retryAfterMs: number, headers: Record<string, string>
       headers: {
         ...headers,
         "Content-Type": "application/json",
-        "Retry-After": String(retryAfterMs),
+        "Retry-After": "60",
       },
     }
   );
