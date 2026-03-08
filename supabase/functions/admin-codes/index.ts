@@ -49,8 +49,16 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get("action");
 
+    // For POST requests, parse body and use body.action
+    let body: any = {};
+    if (req.method === "POST") {
+      body = await req.json();
+    }
+
+    const resolvedAction = action || body.action;
+
     // LIST codes
-    if (req.method === "GET" || action === "list") {
+    if (req.method === "GET" || resolvedAction === "list") {
       const { data: codes, error } = await serviceClient
         .from("unlock_codes")
         .select("*")
