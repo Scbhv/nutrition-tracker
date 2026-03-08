@@ -96,6 +96,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      delete_own_account: { Args: never; Returns: undefined }
       is_premium: { Args: { p_user_id: string }; Returns: boolean }
       redeem_unlock_code: {
         Args: { p_code: string; p_user_id: string }
