@@ -311,7 +311,7 @@ export function FoodDatabaseView({
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => onLogFood(food.id)}
+                              onClick={() => openPortionDialog(food)}
                               className="rounded-full h-8 w-8"
                             >
                               <Plus className="h-4 w-4" />
