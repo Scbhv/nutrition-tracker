@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, Beaker } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS, CustomNutrient } from '@/types/nutrients';
 import { validateFoodName, validateBarcode, validateBrand, validateServingSize, validateServingUnit, validateNutrientValue, sanitizeText } from '@/lib/inputSanitization';
