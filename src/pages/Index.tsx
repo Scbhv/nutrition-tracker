@@ -421,7 +421,7 @@ export default function Index() {
                         </div>
                         <div>
                           <p className="font-semibold text-[14px] text-foreground tracking-tight">{entry.name}</p>
-                          <p className="text-xs text-muted-foreground">
+                           <p className="text-[12px] text-muted-foreground/70">
                             {entry.caloriesBurned} kcal burned
                             {entry.durationMinutes ? ` • ${entry.durationMinutes} min` : ''}
                             {' • '}
