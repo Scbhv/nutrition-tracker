@@ -110,7 +110,7 @@ serve(async (req) => {
       });
     }
 
-    if (body.action === "delete") {
+    if (resolvedAction === "delete") {
       const { id } = body;
       const { error } = await serviceClient.from("unlock_codes").delete().eq("id", id);
       if (error) throw error;
