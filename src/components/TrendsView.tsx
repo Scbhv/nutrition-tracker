@@ -267,14 +267,25 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={daysToShow.toString()} onValueChange={(v) => setDaysToShow(Number(v))}>
+            <Select value={daysToShow.toString()} onValueChange={(v) => {
+              const num = Number(v);
+              if (num > 14 && trendsLocked) {
+                setShowDonationGate(true);
+                return;
+              }
+              setDaysToShow(num);
+            }}>
               <SelectTrigger className="w-24 bg-secondary border-0 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="7">7 days</SelectItem>
                 <SelectItem value="14">14 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="30" className={trendsLocked ? "opacity-50" : ""}>
+                  <span className="flex items-center gap-1">
+                    30 days {trendsLocked && <Lock className="h-3 w-3" />}
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
