@@ -212,4 +212,4 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
-}
+});
