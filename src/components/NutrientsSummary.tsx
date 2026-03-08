@@ -92,7 +92,7 @@ const SORT_LABELS: Record<SortOption, string> = {
   amount: 'Amount',
 };
 
-export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummaryProps) {
+export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients = [] }: NutrientsSummaryProps) {
   const [showMore, setShowMore] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
