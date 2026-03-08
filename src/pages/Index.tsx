@@ -420,7 +420,7 @@ export default function Index() {
                           <Dumbbell className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-semibold text-sm text-foreground">{entry.name}</p>
+                          <p className="font-semibold text-[14px] text-foreground tracking-tight">{entry.name}</p>
                           <p className="text-xs text-muted-foreground">
                             {entry.caloriesBurned} kcal burned
                             {entry.durationMinutes ? ` • ${entry.durationMinutes} min` : ''}
