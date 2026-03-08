@@ -103,17 +103,81 @@ export default function Index() {
 
   const handleImport = () => fileInputRef.current?.click();
 
+  // Convert grams to the app's expected unit for a nutrient key
+  const convertFromGrams = (key: string, valueInGrams: number): number => {
+    const unit = NUTRIENT_UNITS[key];
+    if (!unit) return valueInGrams;
+    if (unit === 'mg') return Math.round(valueInGrams * 1000 * 100) / 100;
+    if (unit === 'μg') return Math.round(valueInGrams * 1_000_000 * 100) / 100;
+    // kcal, g, ml — no conversion
+    return Math.round(valueInGrams * 100) / 100;
+  };
+
+  // Detect flat nutrient JSON (keys ending in _100g)
+  const isFlatNutrientJSON = (obj: any): boolean => {
+    if (typeof obj !== 'object' || Array.isArray(obj)) return false;
+    return Object.keys(obj).some(k => k.endsWith('_100g'));
+  };
+
+  const importFlatNutrientJSON = (parsed: Record<string, number>, fileName: string) => {
+    const nutrients: NutrientData = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value !== 'number') continue;
+      const nutrientKey = key.replace(/_100g$/, '');
+      // energy-kcal stays in kcal, macros in g — only convert minerals/vitamins
+      if (nutrientKey === 'energy-kcal') {
+        nutrients[nutrientKey] = Math.round(value * 100) / 100;
+      } else {
+        nutrients[nutrientKey] = convertFromGrams(nutrientKey, value);
+      }
+    }
+
+    const foodName = fileName.replace(/\.json$/i, '').replace(/[_-]/g, ' ').trim() || 'Imported Food';
+    const now = new Date().toISOString();
+    const newFood: FoodItem = {
+      id: crypto.randomUUID(),
+      name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
+      servingSize: 100,
+      servingUnit: 'g',
+      nutrients,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    mergeFoods([newFood]);
+    toast({
+      title: 'Food Imported',
+      description: `"${newFood.name}" added to your database`,
+    });
+  };
+
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const result = importDatabase(event.target?.result as string);
-      toast({
-        title: result.success ? 'Imported' : 'Error',
-        description: result.success ? 'Database restored' : result.errorMessage || 'Invalid file',
-        variant: result.success ? 'default' : 'destructive',
-      });
+      try {
+        const jsonString = event.target?.result as string;
+        const parsed = JSON.parse(jsonString);
+
+        // Detect format: flat nutrient JSON vs full database export
+        if (isFlatNutrientJSON(parsed)) {
+          importFlatNutrientJSON(parsed, file.name);
+        } else {
+          const result = importDatabase(jsonString);
+          toast({
+            title: result.success ? 'Imported' : 'Error',
+            description: result.success ? 'Database restored' : result.errorMessage || 'Invalid file',
+            variant: result.success ? 'default' : 'destructive',
+          });
+        }
+      } catch {
+        toast({
+          title: 'Error',
+          description: 'Invalid JSON file',
+          variant: 'destructive',
+        });
+      }
     };
     reader.readAsText(file);
     e.target.value = '';
