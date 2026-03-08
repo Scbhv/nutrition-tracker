@@ -664,7 +664,7 @@ export default function Index() {
       <Header title={getTitle()} />
 
       <ScrollArea className="h-[calc(100vh-140px)]">
-        <main className="container mx-auto px-5 pb-6 safe-bottom">
+        <main className="max-w-lg mx-auto px-5 pb-6 safe-bottom">
           {renderContent()}
         </main>
       </ScrollArea>
