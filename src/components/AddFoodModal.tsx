@@ -71,12 +71,12 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
 
   const updateNutrient = (key: string, value: string) => {
     const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue >= 0) {
-      setNutrients(prev => ({ ...prev, [key]: numValue }));
-    } else if (value === '') {
+    if (value === '') {
       const newNutrients = { ...nutrients };
       delete newNutrients[key as keyof NutrientData];
       setNutrients(newNutrients);
+    } else if (!isNaN(numValue) && validateNutrientValue(numValue)) {
+      setNutrients(prev => ({ ...prev, [key]: numValue }));
     }
   };
 
