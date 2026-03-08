@@ -17,7 +17,7 @@ interface AddFoodModalProps {
   customNutrients?: CustomNutrient[];
 }
 
-export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }: AddFoodModalProps) {
+export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, customNutrients = [] }: AddFoodModalProps) {
   const [name, setName] = useState(initialName || '');
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
