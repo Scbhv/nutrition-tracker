@@ -53,7 +53,7 @@ serve(async (req) => {
     const { data: existing } = await serviceClient
       .from("premium_users")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (existing) {
