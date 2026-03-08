@@ -431,7 +431,14 @@ export default function Index() {
               deleteFood(id);
               toast({ title: 'Deleted' });
             }}
-            onLogFood={handleQuickAdd}
+            onLogFood={(foodId, portionGrams) => {
+              const food = foods.find(f => f.id === foodId);
+              if (food) {
+                const servingAmount = portionGrams / food.servingSize;
+                addFoodEntry(foodId, servingAmount);
+                toast({ title: 'Added', description: `${food.name} — ${portionGrams}g` });
+              }
+            }}
             onExport={handleExport}
             onImport={handleImport}
             onImportFoods={handleImportFoods}
