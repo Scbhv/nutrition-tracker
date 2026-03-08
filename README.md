@@ -4,70 +4,198 @@
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-## How can I edit this code?
+# Project README
 
-There are several ways of editing your application.
+## Overview
+This repository contains the source code for a **nutrition tracking application** designed to record and analyze food intake with precise nutrient data.  
+The application is optimized for fast logging and integrates with workflows such as **barcode scanning, manual entry, and Apple Health–compatible data structures**.
 
-**Use Lovable**
+The project can be edited and maintained in several ways depending on your workflow. Changes made through supported environments will stay synchronized with this repository.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+# App Features
 
-**Use your preferred IDE**
+## Nutrient Tracking
+The app allows users to track their daily nutrition based on **nutrient values per 100 g** of food.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Tracked data includes:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Energy (kcal)
+- Macronutrients  
+  - Protein  
+  - Carbohydrates  
+  - Sugars  
+  - Fat  
+  - Saturated fat
+- Sodium
+- Micronutrients  
+  - Vitamins  
+  - Minerals  
+  - Amino acids
 
-Follow these steps:
+All nutrients are standardized to **grams per 100 g** to ensure consistent calculations and compatibility with external health systems.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+---
+
+## Barcode Scanning
+Users can quickly add foods by scanning product barcodes.
+
+The system retrieves or generates structured nutritional data for the scanned item and converts it into the internal format used by the app.
+
+This enables fast logging of packaged foods.
+
+---
+
+## Manual Food Entry
+If a food is not available via barcode:
+
+Users can manually enter:
+
+- food name
+- nutrient values
+- serving size
+
+The application automatically converts the data into the standardized **per-100 g format**.
+
+---
+
+## Serving Size Calculation
+Users can define a **custom serving size**, and the application automatically calculates the nutrient values for the consumed portion based on the 100 g reference.
+
+Example:
+
+
+**Food: Almonds
+Reference: per 100 g
+Serving eaten: 30 g
+→ all nutrients scaled proportionally**
+
+
+---
+
+## Health Data Compatibility
+The structured nutrient data can be exported or integrated with **health tracking systems such as Apple Health**.
+
+This enables:
+
+- accurate nutrition tracking
+- integration with fitness or health metrics
+- long-term dietary analysis
+
+---
+
+# Editing the Application
+
+## 1. Use Lovable (Recommended)
+The easiest way to edit the application is through **Lovable**.
+
+1. Open the Lovable project.
+2. Start prompting or editing within the Lovable interface.
+3. All changes made in Lovable are **automatically committed** to this repository.
+
+---
+
+## 2. Use Your Preferred IDE (Local Development)
+
+You can work locally using any IDE (for example **VS Code**, **WebStorm**, etc.). Changes pushed to this repository will also be reflected in Lovable.
+
+### Requirements
+
+- **Node.js**
+- **npm**
+
+Recommended installation method:
+**nvm install node**
+
+
+**### Setup Instructions**
+
+**#### Step 1 — Clone the repository**
+
+```bash
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+**Step 2 — Navigate to the project directory**
+
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Step 3 — Install dependencies**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
+
+**Step 4 — Start the development server**
+
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+**This starts a development server with:
+hot reloading
+instant preview**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**3. Edit Files Directly in GitHub
+You can also edit files directly in the GitHub interface.**
 
-**Use GitHub Codespaces**
+Navigate to the file you want to modify.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Click the Edit button (pencil icon).
 
-## What technologies are used for this project?
+Make your changes.
 
-This project is built with:
+Commit the changes.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+**4. Use GitHub Codespaces
 
-## Can I connect a custom domain to my Lovable project?
+GitHub Codespaces provides a cloud-based development environment.**
 
-Yes, you can!
+Steps:
+Navigate to the main page of the repository
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Click the Code button
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Open the Codespaces tab
+
+Click New codespace
+
+You can then edit, run, and push changes directly from the browser.
+
+**Technologies Used
+This project is built with:**
+Vite
+TypeScript
+React
+shadcn-ui
+Tailwind CSS
+Deployment
+
+**To deploy the project:**
+Open Lovable
+
+Click Share
+
+Select Publish
+
+Lovable will automatically build and deploy the application.
+
+**Custom Domain
+
+You can connect a custom domain to your Lovable project.**
+Steps:
+Go to Project → Settings → Domains
+Click Connect Domain
+Follow the configuration instructions.
+Further documentation:
+Setting up a custom domain.
+
+
+
+*Licence :*
+
+## Quellen
+- https://react.dev  
+- https://vitejs.dev/guide/  
+- https://tailwindcss.com/docs  
+- https://ui.shadcn.com
+
+
