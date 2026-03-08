@@ -517,6 +517,15 @@ export default function Index() {
             >
               Import Database
             </Button>
+            <Button
+              onClick={() => window.open('https://buymeacoffee.com/Simon0907', '_blank', 'noopener,noreferrer')}
+              variant="ghost"
+              className="w-full h-12 justify-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Heart className="h-4 w-4" />
+              Support this app
+              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+            </Button>
           </div>
         );
 
