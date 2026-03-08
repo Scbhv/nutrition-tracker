@@ -79,9 +79,17 @@ export function FoodDatabaseView({
     }
   };
 
+  // Load last-used portions from localStorage
+  const lastPortions = useMemo<Record<string, number>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('lastPortions') || '{}');
+    } catch { return {}; }
+  }, [portionFood]);
+
   const openPortionDialog = (food: FoodItem) => {
     setPortionFood(food);
-    setPortionGrams(String(food.servingSize));
+    const last = lastPortions[food.id];
+    setPortionGrams(String(last ?? food.servingSize));
     setTimeout(() => portionInputRef.current?.select(), 100);
   };
 
@@ -89,6 +97,12 @@ export function FoodDatabaseView({
     if (!portionFood) return;
     const grams = parseFloat(portionGrams);
     if (isNaN(grams) || grams <= 0) return;
+    // Save last-used portion
+    try {
+      const stored = JSON.parse(localStorage.getItem('lastPortions') || '{}');
+      stored[portionFood.id] = grams;
+      localStorage.setItem('lastPortions', JSON.stringify(stored));
+    } catch {}
     onLogFood(portionFood.id, grams);
     setPortionFood(null);
     setPortionGrams('');
