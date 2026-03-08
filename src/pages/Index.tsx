@@ -32,7 +32,9 @@ type Tab = 'today' | 'database' | 'trends' | 'profile';
 
 export default function Index() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
