@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed } from 'lucide-react';
+import { Apple, Database, BarChart3, User, Plus, X, Scan, Sparkles, UtensilsCrossed, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
