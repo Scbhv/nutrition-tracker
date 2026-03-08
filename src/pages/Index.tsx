@@ -343,6 +343,7 @@ export default function Index() {
             <NutrientsSummary 
               todayNutrients={todayNutrients}
               dailyGoals={dailyGoals}
+              customNutrients={settings.customNutrients}
             />
 
             {/* Quick Add */}
