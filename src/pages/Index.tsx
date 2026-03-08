@@ -414,7 +414,7 @@ export default function Index() {
                 </div>
                 <div className="space-y-2">
                   {(todayLog.exerciseEntries || []).map(entry => (
-                    <div key={entry.id} className="glass-card rounded-2xl p-4 flex items-center justify-between group">
+                    <div key={entry.id} className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center justify-between group border border-border/30 shadow-sm">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-xl bg-destructive/15 text-destructive">
                           <Dumbbell className="h-4 w-4" />
