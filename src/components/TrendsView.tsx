@@ -475,10 +475,16 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               <Button
                 variant={averagePeriod === 'month' ? 'default' : 'outline'}
                 size="sm"
-                className="rounded-xl"
-                onClick={() => setAveragePeriod('month')}
+                className={cn("rounded-xl", trendsLocked && "opacity-50")}
+                onClick={() => {
+                  if (trendsLocked) {
+                    setShowDonationGate(true);
+                    return;
+                  }
+                  setAveragePeriod('month');
+                }}
               >
-                Month
+                Month {trendsLocked && <Lock className="h-3 w-3 ml-1" />}
               </Button>
             </div>
           </div>
