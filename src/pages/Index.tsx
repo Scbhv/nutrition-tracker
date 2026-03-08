@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Plus, Sparkles, Apple, Settings } from 'lucide-react';
+import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
