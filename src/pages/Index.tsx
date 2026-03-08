@@ -39,8 +39,11 @@ export default function Index() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    addExerciseEntry,
+    removeExerciseEntry,
     getTodayLog,
     getTodayNutrients,
+    getTodayBurnedCalories,
     getGoalsForDate,
     exportDatabase,
     importDatabase,
@@ -53,15 +56,19 @@ export default function Index() {
   const [showScanner, setShowScanner] = useState(false);
   const [showAILookup, setShowAILookup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
 
   const todayNutrients = getTodayNutrients();
   const todayLog = getTodayLog();
-  const dailyGoals = getGoalsForDate(); // resolves weekday-specific goals
+  const dailyGoals = getGoalsForDate();
+  const burnedCalories = getTodayBurnedCalories();
 
   const calorieGoal = dailyGoals['energy-kcal'] || 2000;
   const currentCalories = todayNutrients['energy-kcal'] || 0;
+  const netCalories = currentCalories - burnedCalories;
   const caloriePercentage = Math.round((currentCalories / calorieGoal) * 100);
+  const netPercentage = Math.round((netCalories / calorieGoal) * 100);
 
   const handleBarcodeScan = (barcode: string) => {
     const existingFood = getFoodByBarcode(barcode);
