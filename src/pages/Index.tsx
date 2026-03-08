@@ -295,6 +295,50 @@ export default function Index() {
               )}
             </section>
 
+            {/* Today's Exercise */}
+            {(todayLog.exerciseEntries || []).length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <Flame className="h-5 w-5 text-destructive" />
+                    Exercise
+                  </h2>
+                  <button
+                    onClick={() => setShowAddExercise(true)}
+                    className="text-sm text-primary font-medium"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(todayLog.exerciseEntries || []).map(entry => (
+                    <div key={entry.id} className="glass-card rounded-2xl p-4 flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-destructive/15 text-destructive">
+                          <Dumbbell className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">{entry.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {entry.caloriesBurned} kcal burned
+                            {entry.durationMinutes ? ` • ${entry.durationMinutes} min` : ''}
+                            {' • '}
+                            {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeExerciseEntry(todayLog.date, entry.id)}
+                        className="p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Nutrients Summary with Show More */}
             <NutrientsSummary 
               todayNutrients={todayNutrients}
