@@ -72,13 +72,13 @@ setInterval(() => {
   }
 }, 300_000);
 
-function rateLimitResponse(retryAfterMs: number) {
+function rateLimitResponse(retryAfterMs: number, headers: Record<string, string>) {
   return new Response(
     JSON.stringify({ error: "Too many requests. Please try again shortly." }),
     {
       status: 429,
       headers: {
-        ...corsHeaders,
+        ...headers,
         "Content-Type": "application/json",
         "Retry-After": String(retryAfterMs),
       },
