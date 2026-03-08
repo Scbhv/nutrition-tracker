@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { validateFoodName, validateBarcode, validateBrand, validateServingSize, validateServingUnit, validateNutrientValue, sanitizeText } from '@/lib/inputSanitization';
 
 interface AddFoodModalProps {
   open: boolean;
@@ -24,16 +25,39 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
   const [nutrients, setNutrients] = useState<NutrientData>(initialData || {});
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['macros']);
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const errors: Record<string, string> = {};
 
+    const nameCheck = validateFoodName(name);
+    if (!nameCheck.valid) errors.name = nameCheck.error!;
+
+    const barcodeCheck = validateBarcode(barcode.trim());
+    if (!barcodeCheck.valid) errors.barcode = barcodeCheck.error!;
+
+    const brandCheck = validateBrand(brand.trim());
+    if (!brandCheck.valid) errors.brand = brandCheck.error!;
+
+    const sizeCheck = validateServingSize(parseFloat(servingSize) || 0);
+    if (!sizeCheck.valid) errors.servingSize = sizeCheck.error!;
+
+    const unitCheck = validateServingUnit(servingUnit);
+    if (!unitCheck.valid) errors.servingUnit = unitCheck.error!;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     onAdd({
-      name: name.trim(),
-      brand: brand.trim() || undefined,
+      name: sanitizeText(name, 200),
+      brand: brand.trim() ? sanitizeText(brand, 100) : undefined,
       barcode: barcode.trim() || undefined,
       servingSize: parseFloat(servingSize) || 100,
-      servingUnit,
+      servingUnit: servingUnit.trim(),
       nutrients,
     });
 
@@ -47,12 +71,12 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
 
   const updateNutrient = (key: string, value: string) => {
     const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue >= 0) {
-      setNutrients(prev => ({ ...prev, [key]: numValue }));
-    } else if (value === '') {
+    if (value === '') {
       const newNutrients = { ...nutrients };
       delete newNutrients[key as keyof NutrientData];
       setNutrients(newNutrients);
+    } else if (!isNaN(numValue) && validateNutrientValue(numValue)) {
+      setNutrients(prev => ({ ...prev, [key]: numValue }));
     }
   };
 
@@ -81,11 +105,13 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
                   <Input
                     id="name"
                     value={name}
-                    onChange={e => setName(e.target.value)}
+                    onChange={e => setName(e.target.value.slice(0, 200))}
                     placeholder="e.g., Oatmeal"
-                    className="bg-secondary border-0 rounded-xl"
+                    className={`bg-secondary border-0 rounded-xl ${validationErrors.name ? 'ring-2 ring-destructive' : ''}`}
                     required
+                    maxLength={200}
                   />
+                  {validationErrors.name && <p className="text-xs text-destructive">{validationErrors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
