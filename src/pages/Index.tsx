@@ -61,6 +61,8 @@ export default function Index() {
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const aiLocked = true; // Toggle to false for paid users
   const dragCounter = useRef(0);
 
   const todayNutrients = getTodayNutrients();
