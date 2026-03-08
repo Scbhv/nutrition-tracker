@@ -57,27 +57,38 @@ export function BottomNav({ activeTab, onTabChange, onAddFood, onScanBarcode, on
     setMenuOpen(false);
   };
 
+  const lockedTabs = new Set<Tab>(['database']);
+  const databaseLocked = true; // Toggle for paid users
+
   const renderTab = (tab: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }) => {
     const Icon = tab.icon;
     const isActive = activeTab === tab.id;
+    const isLocked = databaseLocked && lockedTabs.has(tab.id);
     
     return (
       <button
         key={tab.id}
         onClick={() => {
-          triggerHaptic();
-          onTabChange(tab.id);
+          if (isLocked && onLockedTab) {
+            triggerHaptic();
+            onLockedTab();
+          } else {
+            triggerHaptic();
+            onTabChange(tab.id);
+          }
         }}
         className={cn(
           "bottom-nav-item min-w-[56px] transition-transform duration-150 active:scale-90",
-          isActive && "active"
+          isActive && "active",
+          isLocked && "opacity-50"
         )}
       >
         <div className={cn(
-          "p-2 rounded-xl transition-all duration-200",
+          "p-2 rounded-xl transition-all duration-200 relative",
           isActive && "bg-secondary scale-105"
         )}>
           <Icon className="h-5 w-5" />
+          {isLocked && <Lock className="h-2.5 w-2.5 absolute -top-0.5 -right-0.5" />}
         </div>
         <span className="text-xs font-medium">{tab.label}</span>
       </button>
