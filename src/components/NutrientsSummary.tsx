@@ -110,12 +110,12 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
     return goal > 0 ? (current / goal) * 100 : 0;
   };
 
-  const sortNutrients = (nutrients: readonly string[]) => {
+  const sortNutrients = (nutrients: string[]) => {
     return [...nutrients].sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          const nameA = NUTRIENT_LABELS[a] || a;
-          const nameB = NUTRIENT_LABELS[b] || b;
+          const nameA = customNutrients.find(n => n.id === a)?.label || NUTRIENT_LABELS[a] || a;
+          const nameB = customNutrients.find(n => n.id === b)?.label || NUTRIENT_LABELS[b] || b;
           return nameA.localeCompare(nameB);
         case 'progress':
           return getProgress(b) - getProgress(a);
@@ -127,19 +127,26 @@ export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients =
     });
   };
 
+  // Combine built-in + custom nutrient keys
+  const allNutrientKeys = useMemo(() => {
+    const builtIn = [...ALL_VITAMINS_MINERALS] as string[];
+    const customKeys = customNutrients.map(n => n.id);
+    return [...builtIn, ...customKeys];
+  }, [customNutrients]);
+
   // Separate tracked (has value > 0) and untracked nutrients
   const { trackedNutrients, untrackedNutrients } = useMemo(() => {
-    const tracked = ALL_VITAMINS_MINERALS.filter(
+    const tracked = allNutrientKeys.filter(
       nutrient => (todayNutrients[nutrient] || 0) > 0
     );
-    const untracked = ALL_VITAMINS_MINERALS.filter(
+    const untracked = allNutrientKeys.filter(
       nutrient => (todayNutrients[nutrient] || 0) === 0
     );
     return {
       trackedNutrients: sortNutrients(tracked),
       untrackedNutrients: sortNutrients(untracked),
     };
-  }, [todayNutrients, sortBy]);
+  }, [todayNutrients, sortBy, allNutrientKeys]);
 
   return (
     <section className="glass-card rounded-2xl p-4 space-y-4">
