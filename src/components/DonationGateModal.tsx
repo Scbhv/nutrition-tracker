@@ -81,6 +81,9 @@ export function DonationGateModal({ open, onClose, onUnlocked }: DonationGateMod
           <DialogTitle className="text-lg">
             {unlocked ? 'Unlocked!' : 'Support This App'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {unlocked ? 'All premium features unlocked' : 'Donate to unlock premium features or enter an unlock code'}
+          </DialogDescription>
         </DialogHeader>
 
         {unlocked ? (

@@ -94,6 +94,7 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, c
       <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 bg-card border-border rounded-3xl">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-xl">Add Food</DialogTitle>
+          <DialogDescription className="sr-only">Add a new food item to your database</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
