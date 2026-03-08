@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NutrientBar } from '@/components/NutrientBar';
-import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, CustomNutrient } from '@/types/nutrients';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import {
 interface NutrientsSummaryProps {
   todayNutrients: NutrientData;
   dailyGoals: NutrientData;
+  customNutrients?: CustomNutrient[];
 }
 
 type SortOption = 'name' | 'progress' | 'amount';
@@ -91,7 +92,7 @@ const SORT_LABELS: Record<SortOption, string> = {
   amount: 'Amount',
 };
 
-export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummaryProps) {
+export function NutrientsSummary({ todayNutrients, dailyGoals, customNutrients = [] }: NutrientsSummaryProps) {
   const [showMore, setShowMore] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
@@ -109,12 +110,12 @@ export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummar
     return goal > 0 ? (current / goal) * 100 : 0;
   };
 
-  const sortNutrients = (nutrients: readonly string[]) => {
+  const sortNutrients = (nutrients: string[]) => {
     return [...nutrients].sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          const nameA = NUTRIENT_LABELS[a] || a;
-          const nameB = NUTRIENT_LABELS[b] || b;
+          const nameA = customNutrients.find(n => n.id === a)?.label || NUTRIENT_LABELS[a] || a;
+          const nameB = customNutrients.find(n => n.id === b)?.label || NUTRIENT_LABELS[b] || b;
           return nameA.localeCompare(nameB);
         case 'progress':
           return getProgress(b) - getProgress(a);
@@ -126,19 +127,26 @@ export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummar
     });
   };
 
+  // Combine built-in + custom nutrient keys
+  const allNutrientKeys = useMemo(() => {
+    const builtIn = [...ALL_VITAMINS_MINERALS] as string[];
+    const customKeys = customNutrients.map(n => n.id);
+    return [...builtIn, ...customKeys];
+  }, [customNutrients]);
+
   // Separate tracked (has value > 0) and untracked nutrients
   const { trackedNutrients, untrackedNutrients } = useMemo(() => {
-    const tracked = ALL_VITAMINS_MINERALS.filter(
+    const tracked = allNutrientKeys.filter(
       nutrient => (todayNutrients[nutrient] || 0) > 0
     );
-    const untracked = ALL_VITAMINS_MINERALS.filter(
+    const untracked = allNutrientKeys.filter(
       nutrient => (todayNutrients[nutrient] || 0) === 0
     );
     return {
       trackedNutrients: sortNutrients(tracked),
       untrackedNutrients: sortNutrients(untracked),
     };
-  }, [todayNutrients, sortBy]);
+  }, [todayNutrients, sortBy, allNutrientKeys]);
 
   return (
     <section className="glass-card rounded-2xl p-4 space-y-4">
@@ -175,26 +183,36 @@ export function NutrientsSummary({ todayNutrients, dailyGoals }: NutrientsSummar
       ) : (
         <div className="space-y-4">
           {/* Tracked nutrients (always visible) */}
-          {trackedNutrients.map(nutrient => (
-            <NutrientBar
-              key={nutrient}
-              nutrient={nutrient}
-              current={todayNutrients[nutrient] || 0}
-              goal={getGoal(nutrient)}
-              colorClass={getColor(nutrient)}
-            />
-          ))}
+          {trackedNutrients.map(nutrient => {
+            const custom = customNutrients.find(n => n.id === nutrient);
+            return (
+              <NutrientBar
+                key={nutrient}
+                nutrient={nutrient}
+                current={todayNutrients[nutrient] || 0}
+                goal={getGoal(nutrient)}
+                colorClass={getColor(nutrient)}
+                customLabel={custom?.label}
+                customUnit={custom?.unit}
+              />
+            );
+          })}
 
           {/* Untracked nutrients (behind show more) */}
-          {showMore && untrackedNutrients.map(nutrient => (
-            <NutrientBar
-              key={nutrient}
-              nutrient={nutrient}
-              current={0}
-              goal={getGoal(nutrient)}
-              colorClass={getColor(nutrient)}
-            />
-          ))}
+          {showMore && untrackedNutrients.map(nutrient => {
+            const custom = customNutrients.find(n => n.id === nutrient);
+            return (
+              <NutrientBar
+                key={nutrient}
+                nutrient={nutrient}
+                current={0}
+                goal={getGoal(nutrient)}
+                colorClass={getColor(nutrient)}
+                customLabel={custom?.label}
+                customUnit={custom?.unit}
+              />
+            );
+          })}
         </div>
       )}
 

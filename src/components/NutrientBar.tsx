@@ -6,13 +6,15 @@ interface NutrientBarProps {
   current: number;
   goal: number;
   colorClass?: string;
+  customLabel?: string;
+  customUnit?: string;
 }
 
-export function NutrientBar({ nutrient, current, goal, colorClass = 'bg-primary' }: NutrientBarProps) {
+export function NutrientBar({ nutrient, current, goal, colorClass = 'bg-primary', customLabel, customUnit }: NutrientBarProps) {
   const percentage = Math.min((current / goal) * 100, 100);
   const isOver = current > goal;
-  const label = NUTRIENT_LABELS[nutrient] || nutrient;
-  const unit = NUTRIENT_UNITS[nutrient] || '';
+  const label = customLabel || NUTRIENT_LABELS[nutrient] || nutrient;
+  const unit = customUnit || NUTRIENT_UNITS[nutrient] || '';
 
   return (
     <div className="space-y-2">

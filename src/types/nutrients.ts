@@ -1,3 +1,10 @@
+export interface CustomNutrient {
+  id: string;       // kebab-case key like "custom-omega-3"
+  label: string;    // Display name like "Omega-3"
+  unit: string;     // "g", "mg", "μg", "IU", "ml", etc.
+  goal: number;     // Daily goal amount
+}
+
 export interface NutrientData {
   // Basic macros
   "energy-kcal"?: number;
@@ -53,6 +60,9 @@ export interface NutrientData {
   // Supplements
   "electrolyte-mix"?: number;
   "ashwaganda"?: number;
+  
+  // Index signature for custom nutrients
+  [key: string]: number | undefined;
 }
 
 export interface FoodItem {
@@ -117,6 +127,8 @@ export interface UserSettings {
   weekdayGoalsEnabled?: boolean;
   /** Per-weekday goal overrides. Keys are 0 (Sun) – 6 (Sat). */
   weekdayGoals?: Partial<Record<Weekday, NutrientData>>;
+  /** User-defined custom nutrients */
+  customNutrients?: CustomNutrient[];
 }
 
 export const NUTRIENT_CATEGORIES = {

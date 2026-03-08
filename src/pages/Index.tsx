@@ -343,6 +343,7 @@ export default function Index() {
             <NutrientsSummary 
               todayNutrients={todayNutrients}
               dailyGoals={dailyGoals}
+              customNutrients={settings.customNutrients}
             />
 
             {/* Quick Add */}
@@ -466,6 +467,7 @@ export default function Index() {
         onAdd={handleAddFood}
         initialData={editingFood?.nutrients}
         initialName={editingFood?.name}
+        customNutrients={settings.customNutrients}
       />
 
       <BarcodeScannerModal

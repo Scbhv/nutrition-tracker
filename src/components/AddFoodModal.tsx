@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Beaker } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_CATEGORIES, NUTRIENT_LABELS, NUTRIENT_UNITS, CustomNutrient } from '@/types/nutrients';
 import { validateFoodName, validateBarcode, validateBrand, validateServingSize, validateServingUnit, validateNutrientValue, sanitizeText } from '@/lib/inputSanitization';
 
 interface AddFoodModalProps {
@@ -14,9 +14,10 @@ interface AddFoodModalProps {
   onAdd: (food: { name: string; barcode?: string; brand?: string; servingSize: number; servingUnit: string; nutrients: NutrientData }) => void;
   initialData?: Partial<NutrientData>;
   initialName?: string;
+  customNutrients?: CustomNutrient[];
 }
 
-export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }: AddFoodModalProps) {
+export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, customNutrients = [] }: AddFoodModalProps) {
   const [name, setName] = useState(initialName || '');
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
@@ -201,6 +202,48 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName }:
                     )}
                   </div>
                 ))}
+
+                {/* Custom Nutrients */}
+                {customNutrients.length > 0 && (
+                  <div className="rounded-2xl overflow-hidden bg-secondary">
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory('custom')}
+                      className="w-full flex items-center justify-between p-4"
+                    >
+                      <span className="font-medium flex items-center gap-1.5">
+                        <Beaker className="h-4 w-4 text-accent" />
+                        Custom
+                      </span>
+                      {expandedCategories.includes('custom') ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+
+                    {expandedCategories.includes('custom') && (
+                      <div className="px-4 pb-4 grid grid-cols-2 gap-3">
+                        {customNutrients.map(n => (
+                          <div key={n.id} className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">
+                              {n.label} ({n.unit})
+                            </Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={nutrients[n.id] ?? ''}
+                              onChange={e => updateNutrient(n.id, e.target.value)}
+                              placeholder="0"
+                              className="h-9 bg-muted border-0 rounded-xl text-sm"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </ScrollArea>

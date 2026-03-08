@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { Plus, Trash2, Beaker } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   UserSettings,
@@ -13,6 +14,7 @@ import {
   NutrientData,
   Weekday,
   WEEKDAY_LABELS,
+  CustomNutrient,
 } from '@/types/nutrients';
 
 interface SettingsModalProps {
@@ -27,7 +29,18 @@ const COMMON_GOALS = [
   'sodium', 'potassium', 'calcium', 'vitamin-c', 'vitamin-d', 'iron',
 ];
 
-const WEEKDAYS: Weekday[] = [1, 2, 3, 4, 5, 6, 0]; // Mon–Sun display order
+const UNIT_OPTIONS = ['g', 'mg', 'μg', 'ml', 'IU', 'kcal', 'mcg', 'oz', 'cups'];
+
+const WEEKDAYS: Weekday[] = [1, 2, 3, 4, 5, 6, 0];
+
+// Validation
+const MAX_NUTRIENT_NAME = 50;
+const MAX_UNIT_LENGTH = 10;
+const SAFE_TEXT = /^[a-zA-Z0-9\s\-_()./]+$/;
+
+function toKebabCase(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 export function SettingsModal({ open, onClose, settings, onSave }: SettingsModalProps) {
   const [goals, setGoals] = useState<NutrientData>(settings.dailyGoals);
@@ -37,6 +50,16 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
     settings.weekdayGoals ?? {}
   );
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null);
+  const [customNutrients, setCustomNutrients] = useState<CustomNutrient[]>(
+    settings.customNutrients ?? []
+  );
+
+  // New custom nutrient form state
+  const [newName, setNewName] = useState('');
+  const [newUnit, setNewUnit] = useState('mg');
+  const [newGoal, setNewGoal] = useState('');
+  const [customError, setCustomError] = useState('');
+  const [showAddCustom, setShowAddCustom] = useState(false);
 
   const handleSave = () => {
     onSave({
@@ -44,6 +67,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
       dailyGoals: goals,
       weekdayGoalsEnabled: weekdayEnabled,
       weekdayGoals: weekdayEnabled ? weekdayGoals : undefined,
+      customNutrients,
     });
     onClose();
   };
@@ -87,6 +111,80 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
     return weekdayGoals[day] && Object.keys(weekdayGoals[day]!).length > 0;
   };
 
+  // Custom nutrient management
+  const handleAddCustomNutrient = () => {
+    setCustomError('');
+    const trimmedName = newName.trim();
+
+    if (!trimmedName) {
+      setCustomError('Name is required');
+      return;
+    }
+    if (trimmedName.length > MAX_NUTRIENT_NAME) {
+      setCustomError(`Name must be ${MAX_NUTRIENT_NAME} characters or less`);
+      return;
+    }
+    if (!SAFE_TEXT.test(trimmedName)) {
+      setCustomError('Name contains invalid characters');
+      return;
+    }
+    if (newUnit.trim().length > MAX_UNIT_LENGTH) {
+      setCustomError(`Unit must be ${MAX_UNIT_LENGTH} characters or less`);
+      return;
+    }
+
+    const goalNum = parseFloat(newGoal);
+    if (isNaN(goalNum) || goalNum <= 0) {
+      setCustomError('Goal must be a positive number');
+      return;
+    }
+
+    const id = `custom-${toKebabCase(trimmedName)}`;
+
+    // Check for duplicates
+    const allKeys = [...Object.keys(NUTRIENT_LABELS), ...customNutrients.map(n => n.id)];
+    if (allKeys.includes(id)) {
+      setCustomError('A nutrient with this name already exists');
+      return;
+    }
+
+    const nutrient: CustomNutrient = {
+      id,
+      label: trimmedName,
+      unit: newUnit.trim() || 'mg',
+      goal: goalNum,
+    };
+
+    setCustomNutrients(prev => [...prev, nutrient]);
+    setGoals(prev => ({ ...prev, [id]: goalNum }));
+    setNewName('');
+    setNewUnit('mg');
+    setNewGoal('');
+    setShowAddCustom(false);
+  };
+
+  const removeCustomNutrient = (id: string) => {
+    setCustomNutrients(prev => prev.filter(n => n.id !== id));
+    setGoals(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  // Build the goals list including custom nutrients
+  const allGoalKeys = [...COMMON_GOALS, ...customNutrients.map(n => n.id)];
+
+  const getLabel = (key: string) => {
+    const custom = customNutrients.find(n => n.id === key);
+    return custom?.label || NUTRIENT_LABELS[key] || key;
+  };
+
+  const getUnit = (key: string) => {
+    const custom = customNutrients.find(n => n.id === key);
+    return custom?.unit || NUTRIENT_UNITS[key] || '';
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] p-0 gap-0 bg-card border-border rounded-3xl">
@@ -111,27 +209,141 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
             {/* Default Daily Goals */}
             <div className="space-y-4">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                Default Daily Goals
+                Daily Goals
               </h3>
               <div className="space-y-3">
-                {COMMON_GOALS.map(key => (
-                  <div key={key} className="flex items-center gap-4">
-                    <Label className="flex-1 text-sm">{NUTRIENT_LABELS[key]}</Label>
-                    <div className="flex items-center gap-2">
+                {allGoalKeys.map(key => {
+                  const isCustom = customNutrients.some(n => n.id === key);
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <Label className="flex-1 text-sm truncate">
+                        {isCustom && (
+                          <Beaker className="inline h-3.5 w-3.5 mr-1.5 text-accent opacity-70" />
+                        )}
+                        {getLabel(key)}
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={goals[key as keyof NutrientData] ?? ''}
+                          onChange={e => updateGoal(key, e.target.value)}
+                          className="w-24 text-right bg-secondary border-0 rounded-xl"
+                          min="0"
+                        />
+                        <span className="text-sm text-muted-foreground w-10">
+                          {getUnit(key)}
+                        </span>
+                        {isCustom && (
+                          <button
+                            onClick={() => removeCustomNutrient(key)}
+                            className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                            title="Remove custom nutrient"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Add Custom Nutrient */}
+            <div className="glass-card rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
+                    <Beaker className="h-4 w-4 text-accent" />
+                    Custom Nutrients
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Track anything not in the default list
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setShowAddCustom(!showAddCustom); setCustomError(''); }}
+                  className="h-8 text-xs gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add
+                </Button>
+              </div>
+
+              {showAddCustom && (
+                <div className="space-y-3 animate-fade-in pt-1">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Nutrient Name</Label>
+                    <Input
+                      value={newName}
+                      onChange={e => setNewName(e.target.value)}
+                      placeholder="e.g. Omega-3, Collagen, CoQ10"
+                      className="bg-secondary border-0 rounded-xl"
+                      maxLength={MAX_NUTRIENT_NAME}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Unit</Label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {UNIT_OPTIONS.map(u => (
+                          <button
+                            key={u}
+                            onClick={() => setNewUnit(u)}
+                            className={cn(
+                              "px-2.5 py-1 rounded-lg text-xs font-medium transition-all",
+                              newUnit === u
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Daily Goal</Label>
                       <Input
                         type="number"
-                        value={goals[key as keyof NutrientData] ?? ''}
-                        onChange={e => updateGoal(key, e.target.value)}
-                        className="w-24 text-right bg-secondary border-0 rounded-xl"
+                        value={newGoal}
+                        onChange={e => setNewGoal(e.target.value)}
+                        placeholder="Amount"
                         min="0"
+                        className="bg-secondary border-0 rounded-xl"
                       />
-                      <span className="text-sm text-muted-foreground w-10">
-                        {NUTRIENT_UNITS[key]}
-                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  {customError && (
+                    <p className="text-xs text-destructive">{customError}</p>
+                  )}
+
+                  <Button
+                    onClick={handleAddCustomNutrient}
+                    className="w-full ios-button-primary h-10"
+                    disabled={!newName.trim() || !newGoal}
+                  >
+                    Add Nutrient
+                  </Button>
+                </div>
+              )}
+
+              {customNutrients.length > 0 && !showAddCustom && (
+                <div className="space-y-1.5 pt-1">
+                  {customNutrients.map(n => (
+                    <div key={n.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-secondary/50">
+                      <span className="text-sm font-medium text-foreground">{n.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {n.goal} {n.unit}/day
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Weekday Goals Toggle */}
@@ -213,7 +425,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
 
                       {hasDayOverrides(selectedDay) && (
                         <div className="space-y-3">
-                          {COMMON_GOALS.map(key => {
+                          {allGoalKeys.map(key => {
                             const hasOverride = weekdayGoals[selectedDay]?.[key as keyof NutrientData] !== undefined;
                             return (
                               <div key={key} className="flex items-center gap-4">
@@ -221,7 +433,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                                   "flex-1 text-sm",
                                   hasOverride ? "text-foreground" : "text-muted-foreground"
                                 )}>
-                                  {NUTRIENT_LABELS[key]}
+                                  {getLabel(key)}
                                 </Label>
                                 <div className="flex items-center gap-2">
                                   <Input
@@ -236,7 +448,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                                     placeholder={String(goals[key as keyof NutrientData] ?? '')}
                                   />
                                   <span className="text-sm text-muted-foreground w-10">
-                                    {NUTRIENT_UNITS[key]}
+                                    {getUnit(key)}
                                   </span>
                                 </div>
                               </div>
