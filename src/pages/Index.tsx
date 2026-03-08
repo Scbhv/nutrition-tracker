@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Plus, Sparkles, Apple, Settings } from 'lucide-react';
+import { useAppearance } from '@/hooks/useAppearance';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +19,7 @@ import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { TrendsView } from '@/components/TrendsView';
+import { AppearanceSettings } from '@/components/AppearanceSettings';
 import { FoodItem, NutrientData } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -25,6 +27,7 @@ type Tab = 'today' | 'database' | 'trends' | 'profile';
 export default function Index() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { appearance, updateAppearance } = useAppearance();
   const {
     foods,
     logs,
@@ -284,6 +287,10 @@ export default function Index() {
       case 'profile':
         return (
           <div className="space-y-4 animate-fade-in">
+            <AppearanceSettings
+              appearance={appearance}
+              onUpdate={updateAppearance}
+            />
             <Button 
               onClick={() => setShowSettings(true)} 
               className="w-full ios-button-secondary h-14 justify-start px-4"
