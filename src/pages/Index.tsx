@@ -639,6 +639,11 @@ export default function Index() {
           setShowAddExercise(false);
         }}
       />
+
+      <DonationGateModal
+        open={showDonationGate}
+        onClose={() => setShowDonationGate(false)}
+      />
     </div>
   );
 }
