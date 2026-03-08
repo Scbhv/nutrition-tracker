@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const ALLOWED_ORIGINS = [
   "https://food-whisperer-health.lovable.app",
   "https://id-preview--1764e644-44c7-4500-bf0b-0dd59c1a1055.lovable.app",
+  "https://1764e644-44c7-4500-bf0b-0dd59c1a1055.lovableproject.com",
 ];
 
 function getCorsHeaders(req: Request) {
