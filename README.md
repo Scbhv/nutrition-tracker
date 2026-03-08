@@ -85,7 +85,7 @@ This enables:
 
 ---
 
-##Editing the Application
+Editing the Application
 
 ## 1. Use Lovable (Recommended)
 The easiest way to edit the application is through **Lovable**.
