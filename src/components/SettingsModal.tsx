@@ -61,7 +61,8 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
   const [newGoal, setNewGoal] = useState('');
   const [customError, setCustomError] = useState('');
   const [showAddCustom, setShowAddCustom] = useState(false);
-
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const goalsLocked = true; // Goals are locked until donation
   const handleSave = () => {
     onSave({
       defaultServingSize: parseFloat(servingSize) || 100,
