@@ -327,6 +327,45 @@ export function FoodDatabaseView({
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Portion Dialog */}
+      <Dialog open={!!portionFood} onOpenChange={(open) => !open && setPortionFood(null)}>
+        <DialogContent className="max-w-xs rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {portionFood?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="text-center text-sm text-muted-foreground">
+              {portionFood?.servingSize}{portionFood?.servingUnit} per serving •{' '}
+              {portionFood?.nutrients['energy-kcal'] || 0} kcal/100g
+            </div>
+            <div className="flex items-center gap-3">
+              <Input
+                ref={portionInputRef}
+                type="number"
+                inputMode="decimal"
+                min="1"
+                value={portionGrams}
+                onChange={(e) => setPortionGrams(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && confirmPortion()}
+                className="text-center text-lg font-semibold rounded-xl"
+                placeholder="100"
+              />
+              <span className="text-muted-foreground font-medium shrink-0">grams</span>
+            </div>
+            {portionGrams && parseFloat(portionGrams) > 0 && portionFood && (
+              <div className="text-center text-sm text-muted-foreground">
+                ≈ {Math.round((portionFood.nutrients['energy-kcal'] || 0) * parseFloat(portionGrams) / 100)} kcal
+              </div>
+            )}
+            <Button onClick={confirmPortion} className="w-full rounded-xl">
+              Add to Today
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
