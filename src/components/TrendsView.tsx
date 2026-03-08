@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { format, subDays, parseISO } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ReferenceLine, ComposedChart, Line } from 'recharts';
-import { TrendingUp, PieChartIcon, CalendarIcon, Flame, Download } from 'lucide-react';
+import { TrendingUp, PieChartIcon, CalendarIcon, Flame, Download, Lock } from 'lucide-react';
+import { DonationGateModal } from '@/components/DonationGateModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,8 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
   const [averagePeriod, setAveragePeriod] = useState<'week' | 'month'>('week');
+  const [showDonationGate, setShowDonationGate] = useState(false);
+  const trendsLocked = true; // Extended ranges locked until donation
 
   // Calculate nutrients for a specific date
   const getNutrientsForDate = (date: string): NutrientData => {
@@ -264,14 +267,25 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={daysToShow.toString()} onValueChange={(v) => setDaysToShow(Number(v))}>
+            <Select value={daysToShow.toString()} onValueChange={(v) => {
+              const num = Number(v);
+              if (num > 14 && trendsLocked) {
+                setShowDonationGate(true);
+                return;
+              }
+              setDaysToShow(num);
+            }}>
               <SelectTrigger className="w-24 bg-secondary border-0 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="7">7 days</SelectItem>
                 <SelectItem value="14">14 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="30" className={trendsLocked ? "opacity-50" : ""}>
+                  <span className="flex items-center gap-1">
+                    30 days {trendsLocked && <Lock className="h-3 w-3" />}
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -461,10 +475,16 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
               <Button
                 variant={averagePeriod === 'month' ? 'default' : 'outline'}
                 size="sm"
-                className="rounded-xl"
-                onClick={() => setAveragePeriod('month')}
+                className={cn("rounded-xl", trendsLocked && "opacity-50")}
+                onClick={() => {
+                  if (trendsLocked) {
+                    setShowDonationGate(true);
+                    return;
+                  }
+                  setAveragePeriod('month');
+                }}
               >
-                Month
+                Month {trendsLocked && <Lock className="h-3 w-3 ml-1" />}
               </Button>
             </div>
           </div>
@@ -624,6 +644,7 @@ export function TrendsView({ foods, logs, dailyGoals }: TrendsViewProps) {
           )}
         </CardContent>
       </Card>
+      <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
 }
