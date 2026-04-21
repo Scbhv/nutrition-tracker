@@ -48,6 +48,7 @@ export default function Index() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    updateFoodEntry,
     addExerciseEntry,
     removeExerciseEntry,
     getTodayLog,
