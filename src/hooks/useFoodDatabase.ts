@@ -280,6 +280,7 @@ export function useFoodDatabase() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    updateFoodEntry,
     addExerciseEntry,
     removeExerciseEntry,
     getTodayLog,
