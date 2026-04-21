@@ -532,11 +532,12 @@ export default function Index() {
               onShowDonationGate={() => setShowDonationGate(true)}
             />
             <Button 
-              onClick={() => setShowSettings(true)} 
-              className="w-full ios-button-secondary h-14 justify-start px-4"
+              onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)} 
+              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
             >
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
+              {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
             </Button>
             {isPremium ? (
               <HealthKitExport
