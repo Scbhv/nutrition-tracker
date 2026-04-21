@@ -89,6 +89,10 @@ export interface FoodEntry {
   foodId: string;
   servingAmount: number; // multiplier of serving size
   timestamp: string;
+  /** Last time the portion was edited */
+  editedAt?: string;
+  /** Previous serving amount before the most recent edit */
+  previousServingAmount?: number;
 }
 
 export interface ExerciseEntry {
