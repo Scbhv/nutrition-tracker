@@ -294,6 +294,9 @@ export default function Index() {
               </p>
             </section>
 
+            {/* Week View — date context right under the ring */}
+            <WeekView />
+
             {/* Net Calorie Summary */}
             {burnedCalories > 0 && (
               <section className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 border border-border/30 shadow-sm animate-slide-up">
@@ -331,35 +334,7 @@ export default function Index() {
               </section>
             )}
 
-            {/* Action Buttons */}
-            <section className="flex gap-2.5 px-1">
-              <button 
-                onClick={() => setShowAddFood(true)} 
-                className="flex-1 h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
-              >
-                <Plus className="h-[18px] w-[18px] text-primary" />
-                Add Food
-              </button>
-              <button 
-                onClick={() => setShowAddExercise(true)} 
-                className="flex-[0.7] h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
-              >
-                <Flame className="h-[18px] w-[18px] text-destructive" />
-                Burn
-              </button>
-              <button 
-                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
-                className={`flex-1 h-12 rounded-[16px] bg-primary/15 backdrop-blur-2xl border border-primary/20 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-primary tracking-tight active:scale-[0.97] transition-all ${aiLocked ? 'opacity-40' : ''}`}
-              >
-                <Sparkles className="h-[18px] w-[18px]" />
-                Generate
-              </button>
-            </section>
-
-            {/* Week View */}
-            <WeekView />
-
-            {/* Macros Grid */}
+            {/* Macros Grid — quick visual progress */}
             <section className="grid grid-cols-2 gap-3">
               <MacroCard
                 label="Protein"
@@ -393,6 +368,31 @@ export default function Index() {
                 color="bg-nutrient-fiber"
                 icon
               />
+            </section>
+
+            {/* Action Buttons — sit right above the log they create */}
+            <section className="flex gap-2.5 px-1">
+              <button 
+                onClick={() => setShowAddFood(true)} 
+                className="flex-1 h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
+              >
+                <Plus className="h-[18px] w-[18px] text-primary" />
+                Add Food
+              </button>
+              <button 
+                onClick={() => setShowAddExercise(true)} 
+                className="flex-[0.7] h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
+              >
+                <Flame className="h-[18px] w-[18px] text-destructive" />
+                Burn
+              </button>
+              <button 
+                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
+                className={`flex-1 h-12 rounded-[16px] bg-primary/15 backdrop-blur-2xl border border-primary/20 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-primary tracking-tight active:scale-[0.97] transition-all ${aiLocked ? 'opacity-40' : ''}`}
+              >
+                <Sparkles className="h-[18px] w-[18px]" />
+                Generate
+              </button>
             </section>
 
             {/* Today's Food */}
