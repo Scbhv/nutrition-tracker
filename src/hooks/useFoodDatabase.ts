@@ -140,7 +140,26 @@ export function useFoodDatabase() {
   const updateFoodEntry = useCallback((date: string, entryId: string, updates: Partial<FoodEntry>) => {
     setLogs(prev => prev.map(log =>
       log.date === date
-        ? { ...log, entries: log.entries.map(e => e.id === entryId ? { ...e, ...updates } : e) }
+        ? {
+            ...log,
+            entries: log.entries.map(e => {
+              if (e.id !== entryId) return e;
+              // If servingAmount is changing, capture history
+              const portionChanged =
+                updates.servingAmount !== undefined &&
+                updates.servingAmount !== e.servingAmount;
+              return {
+                ...e,
+                ...updates,
+                ...(portionChanged
+                  ? {
+                      previousServingAmount: e.servingAmount,
+                      editedAt: new Date().toISOString(),
+                    }
+                  : {}),
+              };
+            }),
+          }
         : log
     ));
   }, []);
