@@ -471,15 +471,15 @@ export default function Index() {
               </section>
             )}
 
-            {/* Nutrients Summary with Show More */}
+            {/* Quick Add — discoverable shortcuts before the deep dive */}
+            <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
+
+            {/* Nutrients Summary — detailed micros at the bottom */}
             <NutrientsSummary 
               todayNutrients={todayNutrients}
               dailyGoals={dailyGoals}
               customNutrients={settings.customNutrients}
             />
-
-            {/* Quick Add */}
-            <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
           </div>
         );
 
