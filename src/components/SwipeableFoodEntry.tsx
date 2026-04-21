@@ -41,6 +41,23 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
     minute: '2-digit' 
   });
 
+  const editedLabel = (() => {
+    if (!entry.editedAt) return null;
+    const diffMs = Date.now() - new Date(entry.editedAt).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(entry.editedAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
+  })();
+
+  const previousGrams = entry.previousServingAmount !== undefined
+    ? Math.round(entry.previousServingAmount * food.servingSize)
+    : null;
+
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
@@ -141,11 +158,23 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
                 <h4 className="font-semibold text-[15px] text-foreground truncate tracking-tight">{food.name}</h4>
               </div>
               
-              <p className="text-[13px] text-muted-foreground/70 mb-3 flex items-center gap-1.5">
+              <p className="text-[13px] text-muted-foreground/70 mb-1.5 flex items-center gap-1.5">
                 {currentGrams}{food.servingUnit} • {time}
                 {onUpdatePortion && <Pencil className="h-3 w-3 opacity-50" />}
               </p>
-              
+
+              {editedLabel && (
+                <p className="text-[11px] text-primary/70 mb-2 flex items-center gap-1">
+                  <Pencil className="h-2.5 w-2.5" />
+                  Edited {editedLabel}
+                  {previousGrams !== null && (
+                    <span className="text-muted-foreground/60">
+                      (was {previousGrams}{food.servingUnit})
+                    </span>
+                  )}
+                </p>
+              )}
+
               <div className="flex flex-wrap gap-1.5">
                 <span className="nutrient-pill bg-nutrient-energy/15 text-nutrient-energy">
                   {calories.toFixed(0)} kcal
