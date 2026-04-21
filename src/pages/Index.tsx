@@ -415,6 +415,11 @@ export default function Index() {
                         food={food}
                         entry={entry}
                         onRemove={() => removeFoodEntry(todayLog.date, entry.id)}
+                        onUpdatePortion={(grams) => {
+                          const newServingAmount = grams / food.servingSize;
+                          updateFoodEntry(todayLog.date, entry.id, { servingAmount: newServingAmount });
+                          toast({ title: 'Updated', description: `${food.name} — ${grams}g` });
+                        }}
                       />
                     );
                   })}
