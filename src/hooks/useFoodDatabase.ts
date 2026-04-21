@@ -1,11 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FoodItem, DailyLog, FoodEntry, ExerciseEntry, UserSettings, NutrientData, Weekday } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
-const STORAGE_KEYS = {
-  foods: 'nutrient-tracker-foods',
-  logs: 'nutrient-tracker-logs',
-  settings: 'nutrient-tracker-settings',
-};
+import { readJSONFile, writeJSONFile, STORAGE_FILES } from '@/lib/nativeStorage';
 
 const DEFAULT_SETTINGS: UserSettings = {
   defaultServingSize: 100,
