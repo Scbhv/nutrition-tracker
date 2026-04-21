@@ -1,11 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FoodItem, DailyLog, FoodEntry, ExerciseEntry, UserSettings, NutrientData, Weekday } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
-const STORAGE_KEYS = {
-  foods: 'nutrient-tracker-foods',
-  logs: 'nutrient-tracker-logs',
-  settings: 'nutrient-tracker-settings',
-};
+import { readJSONFile, writeJSONFile, STORAGE_FILES } from '@/lib/nativeStorage';
 
 const DEFAULT_SETTINGS: UserSettings = {
   defaultServingSize: 100,
@@ -33,44 +29,53 @@ export function useFoodDatabase() {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const hasLoaded = useRef(false);
 
-  // Load data from localStorage
+  // Load data from local JSON files (or localStorage on web)
   useEffect(() => {
-    try {
-      const storedFoods = localStorage.getItem(STORAGE_KEYS.foods);
-      const storedLogs = localStorage.getItem(STORAGE_KEYS.logs);
-      const storedSettings = localStorage.getItem(STORAGE_KEYS.settings);
+    (async () => {
+      try {
+        const [storedFoods, storedLogs, storedSettings] = await Promise.all([
+          readJSONFile<FoodItem[]>(STORAGE_FILES.foods),
+          readJSONFile<DailyLog[]>(STORAGE_FILES.logs),
+          readJSONFile<Partial<UserSettings>>(STORAGE_FILES.settings),
+        ]);
 
-      if (storedFoods) setFoods(JSON.parse(storedFoods));
-      if (storedLogs) setLogs(JSON.parse(storedLogs));
-      if (storedSettings) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) });
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setIsLoading(false);
-    }
+        if (storedFoods) setFoods(storedFoods);
+        if (storedLogs) setLogs(storedLogs);
+        if (storedSettings) setSettings({ ...DEFAULT_SETTINGS, ...storedSettings });
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        hasLoaded.current = true;
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
-  // Save foods to localStorage
+  // Save foods automatically
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEYS.foods, JSON.stringify(foods));
-    }
-  }, [foods, isLoading]);
+    if (!hasLoaded.current) return;
+    writeJSONFile(STORAGE_FILES.foods, foods).catch(err =>
+      console.error('Failed to save foods:', err)
+    );
+  }, [foods]);
 
-  // Save logs to localStorage
+  // Save logs automatically
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-    }
-  }, [logs, isLoading]);
+    if (!hasLoaded.current) return;
+    writeJSONFile(STORAGE_FILES.logs, logs).catch(err =>
+      console.error('Failed to save logs:', err)
+    );
+  }, [logs]);
 
-  // Save settings to localStorage
+  // Save settings automatically
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
-    }
-  }, [settings, isLoading]);
+    if (!hasLoaded.current) return;
+    writeJSONFile(STORAGE_FILES.settings, settings).catch(err =>
+      console.error('Failed to save settings:', err)
+    );
+  }, [settings]);
 
   const addFood = useCallback((food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newFood: FoodItem = {
