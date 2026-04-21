@@ -48,6 +48,7 @@ export default function Index() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    updateFoodEntry,
     addExerciseEntry,
     removeExerciseEntry,
     getTodayLog,
@@ -293,6 +294,9 @@ export default function Index() {
               </p>
             </section>
 
+            {/* Week View — date context right under the ring */}
+            <WeekView />
+
             {/* Net Calorie Summary */}
             {burnedCalories > 0 && (
               <section className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 border border-border/30 shadow-sm animate-slide-up">
@@ -330,35 +334,7 @@ export default function Index() {
               </section>
             )}
 
-            {/* Action Buttons */}
-            <section className="flex gap-2.5 px-1">
-              <button 
-                onClick={() => setShowAddFood(true)} 
-                className="flex-1 h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
-              >
-                <Plus className="h-[18px] w-[18px] text-primary" />
-                Add Food
-              </button>
-              <button 
-                onClick={() => setShowAddExercise(true)} 
-                className="flex-[0.7] h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
-              >
-                <Flame className="h-[18px] w-[18px] text-destructive" />
-                Burn
-              </button>
-              <button 
-                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
-                className={`flex-1 h-12 rounded-[16px] bg-primary/15 backdrop-blur-2xl border border-primary/20 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-primary tracking-tight active:scale-[0.97] transition-all ${aiLocked ? 'opacity-40' : ''}`}
-              >
-                <Sparkles className="h-[18px] w-[18px]" />
-                Generate
-              </button>
-            </section>
-
-            {/* Week View */}
-            <WeekView />
-
-            {/* Macros Grid */}
+            {/* Macros Grid — quick visual progress */}
             <section className="grid grid-cols-2 gap-3">
               <MacroCard
                 label="Protein"
@@ -394,6 +370,31 @@ export default function Index() {
               />
             </section>
 
+            {/* Action Buttons — sit right above the log they create */}
+            <section className="flex gap-2.5 px-1">
+              <button 
+                onClick={() => setShowAddFood(true)} 
+                className="flex-1 h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
+              >
+                <Plus className="h-[18px] w-[18px] text-primary" />
+                Add Food
+              </button>
+              <button 
+                onClick={() => setShowAddExercise(true)} 
+                className="flex-[0.7] h-12 rounded-[16px] bg-card/60 backdrop-blur-2xl border border-border/30 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-foreground tracking-tight active:scale-[0.97] transition-all"
+              >
+                <Flame className="h-[18px] w-[18px] text-destructive" />
+                Burn
+              </button>
+              <button 
+                onClick={() => aiLocked ? setShowDonationGate(true) : setShowAILookup(true)} 
+                className={`flex-1 h-12 rounded-[16px] bg-primary/15 backdrop-blur-2xl border border-primary/20 shadow-sm flex items-center justify-center gap-2 text-[14px] font-medium text-primary tracking-tight active:scale-[0.97] transition-all ${aiLocked ? 'opacity-40' : ''}`}
+              >
+                <Sparkles className="h-[18px] w-[18px]" />
+                Generate
+              </button>
+            </section>
+
             {/* Today's Food */}
             <section className="space-y-3">
               <h2 className="text-[17px] font-semibold text-foreground px-1 tracking-tight">Today's Food</h2>
@@ -414,6 +415,11 @@ export default function Index() {
                         food={food}
                         entry={entry}
                         onRemove={() => removeFoodEntry(todayLog.date, entry.id)}
+                        onUpdatePortion={(grams) => {
+                          const newServingAmount = grams / food.servingSize;
+                          updateFoodEntry(todayLog.date, entry.id, { servingAmount: newServingAmount });
+                          toast({ title: 'Updated', description: `${food.name} — ${grams}g` });
+                        }}
                       />
                     );
                   })}
@@ -465,15 +471,15 @@ export default function Index() {
               </section>
             )}
 
-            {/* Nutrients Summary with Show More */}
+            {/* Quick Add — discoverable shortcuts before the deep dive */}
+            <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
+
+            {/* Nutrients Summary — detailed micros at the bottom */}
             <NutrientsSummary 
               todayNutrients={todayNutrients}
               dailyGoals={dailyGoals}
               customNutrients={settings.customNutrients}
             />
-
-            {/* Quick Add */}
-            <QuickAddPanel foods={foods} onSelect={handleQuickAdd} />
           </div>
         );
 
@@ -526,11 +532,12 @@ export default function Index() {
               onShowDonationGate={() => setShowDonationGate(true)}
             />
             <Button 
-              onClick={() => setShowSettings(true)} 
-              className="w-full ios-button-secondary h-14 justify-start px-4"
+              onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)} 
+              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
             >
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
+              {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
             </Button>
             {isPremium ? (
               <HealthKitExport

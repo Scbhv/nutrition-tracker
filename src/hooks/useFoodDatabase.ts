@@ -132,6 +132,14 @@ export function useFoodDatabase() {
     ));
   }, []);
 
+  const updateFoodEntry = useCallback((date: string, entryId: string, updates: Partial<FoodEntry>) => {
+    setLogs(prev => prev.map(log =>
+      log.date === date
+        ? { ...log, entries: log.entries.map(e => e.id === entryId ? { ...e, ...updates } : e) }
+        : log
+    ));
+  }, []);
+
   const addExerciseEntry = useCallback((name: string, caloriesBurned: number, durationMinutes?: number) => {
     const today = new Date().toISOString().split('T')[0];
     const entry: ExerciseEntry = {
@@ -272,6 +280,7 @@ export function useFoodDatabase() {
     getFoodByBarcode,
     addFoodEntry,
     removeFoodEntry,
+    updateFoodEntry,
     addExerciseEntry,
     removeExerciseEntry,
     getTodayLog,
