@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { FoodItem, DailyLog, NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, NUTRIENT_CATEGORIES } from '@/types/nutrients';
+import { FoodItem, DailyLog, NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, NUTRIENT_CATEGORIES, CustomNutrient } from '@/types/nutrients';
+import { NutrientsSummary } from '@/components/NutrientsSummary';
 
 // Custom tooltip for Net Calories chart
 function NetCalorieTooltip({ active, payload, label }: any) {
@@ -41,6 +42,7 @@ interface TrendsViewProps {
   logs: DailyLog[];
   dailyGoals: NutrientData;
   isPremium?: boolean;
+  customNutrients?: CustomNutrient[];
 }
 
 // Calorie conversion factors
@@ -65,7 +67,7 @@ const ALL_NUTRIENTS = [
   ...NUTRIENT_CATEGORIES.other,
 ];
 
-export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function TrendsView({ foods, logs, dailyGoals, isPremium = false }, ref) {
+export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function TrendsView({ foods, logs, dailyGoals, isPremium = false, customNutrients = [] }, ref) {
   const [selectedNutrient, setSelectedNutrient] = useState<string>('energy-kcal');
   const [daysToShow, setDaysToShow] = useState<number>(7);
   const [pieChartDate, setPieChartDate] = useState<Date>(new Date());
@@ -684,6 +686,13 @@ export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function T
           )}
         </CardContent>
       </Card>
+      {/* Vitamins & Minerals (for selected pie chart date) */}
+      <NutrientsSummary
+        todayNutrients={selectedDateNutrients}
+        dailyGoals={dailyGoals}
+        customNutrients={customNutrients}
+      />
+
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );

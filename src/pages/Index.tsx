@@ -519,6 +519,7 @@ export default function Index() {
             logs={logs}
             dailyGoals={dailyGoals}
             isPremium={isPremium}
+            customNutrients={settings.customNutrients}
           />
         );
 
