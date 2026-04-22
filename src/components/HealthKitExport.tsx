@@ -120,6 +120,9 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
   const [exportDate, setExportDate] = useState(new Date().toISOString().split('T')[0]);
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [autoSync, setAutoSync] = useState<boolean>(
+    () => localStorage.getItem(AUTO_SYNC_KEY) === 'true'
+  );
 
   // All nutrients enabled by default
   const [enabledNutrients, setEnabledNutrients] = useState<Record<string, boolean>>(() => {
@@ -129,6 +132,11 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
     }
     return defaults;
   });
+
+  // Persist auto-sync preference
+  useEffect(() => {
+    localStorage.setItem(AUTO_SYNC_KEY, autoSync ? 'true' : 'false');
+  }, [autoSync]);
 
   const isToday = exportDate === new Date().toISOString().split('T')[0];
   const nutrients = isToday
