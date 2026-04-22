@@ -169,7 +169,41 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
     toast({ title: 'Downloaded', description: `Health export for ${exportDate}` });
   };
 
-  const toggleNutrient = (key: string) => {
+  // Auto-sync: when enabled, silently download a fresh export every time today's
+  // logged servings change. Skips the very first render so we don't spam on mount.
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  const todayEntryCount = logs.find(l => l.date === todayDateStr)?.entries.length ?? 0;
+  const lastSyncedCount = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!autoSync) {
+      lastSyncedCount.current = null;
+      return;
+    }
+    if (lastSyncedCount.current === null) {
+      lastSyncedCount.current = todayEntryCount;
+      return;
+    }
+    if (todayEntryCount === lastSyncedCount.current) return;
+
+    lastSyncedCount.current = todayEntryCount;
+    const todayNutrients = getTodayNutrients();
+    const autoPayload = buildHealthKitPayload(todayNutrients, todayDateStr, enabledNutrients);
+    if (autoPayload.samples.length === 0) return;
+
+    const blob = new Blob([JSON.stringify(autoPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nutritrack-health-${todayDateStr}-auto.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: 'Auto-synced',
+      description: `${autoPayload.samples.length} health samples exported`,
+    });
+  }, [autoSync, todayEntryCount, todayDateStr, enabledNutrients, getTodayNutrients, toast]);
+
     setEnabledNutrients(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
