@@ -1,3 +1,4 @@
+// Storage migrated to nativeStorage (Capacitor Filesystem + localStorage fallback).
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { FoodItem, DailyLog, FoodEntry, ExerciseEntry, UserSettings, NutrientData, Weekday } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
