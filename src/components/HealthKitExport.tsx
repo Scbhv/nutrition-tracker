@@ -204,6 +204,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
     });
   }, [autoSync, todayEntryCount, todayDateStr, enabledNutrients, getTodayNutrients, toast]);
 
+  const toggleNutrient = (key: string) => {
     setEnabledNutrients(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
