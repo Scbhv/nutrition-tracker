@@ -557,19 +557,12 @@ export default function Index() {
                 <Lock className="h-3.5 w-3.5 ml-auto" />
               </Button>
             )}
-            <Button 
-              onClick={() => isPremium ? handleExport() : setShowDonationGate(true)} 
-              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
-            >
-              Export Database (JSON)
-              {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
-            </Button>
-            <Button 
-              onClick={handleImport} 
-              className="w-full ios-button-secondary h-14 justify-start px-4"
-            >
-              Import Database
-            </Button>
+            <BackupCard
+              exportDatabase={exportDatabase}
+              importDatabase={importDatabase}
+              foodsCount={foods.length}
+              logsCount={logs.length}
+            />
 
             {isLoggedIn ? (
               <Button
