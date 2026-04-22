@@ -128,7 +128,7 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
           </>
         ) : (
           <>
-            <AlertCircle className="h-3 w-3 text-amber-500" />
+            <AlertCircle className="h-3 w-3 text-destructive/70" />
             <span>No backup yet — export one to be safe.</span>
           </>
         )}
