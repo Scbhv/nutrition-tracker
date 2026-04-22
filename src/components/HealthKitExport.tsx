@@ -262,6 +262,30 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
                 </div>
               </div>
 
+              {/* Auto-sync toggle */}
+              <div className="glass-card rounded-2xl p-4 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Zap className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="health-autosync" className="text-sm font-semibold text-foreground cursor-pointer">
+                      Auto-sync servings
+                    </Label>
+                    <Switch
+                      id="health-autosync"
+                      checked={autoSync}
+                      onCheckedChange={setAutoSync}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                    {autoSync
+                      ? 'A new health export downloads automatically each time you log a serving today.'
+                      : 'Sync only happens when you tap Copy or Download below.'}
+                  </p>
+                </div>
+              </div>
+
               {/* Summary Card */}
               <div className="glass-card rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
