@@ -686,6 +686,13 @@ export const TrendsView = forwardRef<HTMLDivElement, TrendsViewProps>(function T
           )}
         </CardContent>
       </Card>
+      {/* Vitamins & Minerals (for selected pie chart date) */}
+      <NutrientsSummary
+        todayNutrients={selectedDateNutrients}
+        dailyGoals={dailyGoals}
+        customNutrients={customNutrients}
+      />
+
       <DonationGateModal open={showDonationGate} onClose={() => setShowDonationGate(false)} />
     </div>
   );
