@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { FoodItem, DailyLog, NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, NUTRIENT_CATEGORIES } from '@/types/nutrients';
+import { FoodItem, DailyLog, NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, NUTRIENT_CATEGORIES, CustomNutrient } from '@/types/nutrients';
+import { NutrientsSummary } from '@/components/NutrientsSummary';
 
 // Custom tooltip for Net Calories chart
 function NetCalorieTooltip({ active, payload, label }: any) {
