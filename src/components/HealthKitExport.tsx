@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Heart, Copy, Check, Download, Calendar, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Heart, Copy, Check, Download, Calendar, ChevronDown, ChevronUp, Info, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { NutrientData, FoodItem, DailyLog } from '@/types/nutrients';
 import { cn } from '@/lib/utils';
+
+const AUTO_SYNC_KEY = 'nutritrack-health-autosync';
 
 /**
  * Maps internal nutrient keys → Apple HealthKit HKQuantityTypeIdentifier names
