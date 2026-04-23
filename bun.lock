@@ -91,11 +91,11 @@
 
     "@babel/runtime": ["@babel/runtime@7.28.2", "", {}, "sha512-KHp2IflsnGywDjBWDkR9iEqiWSpc8GIi0lgTT3mOElT0PP1tG26P4tmFI2YvAdzgq9RGyoHZQEIEdZy6Ec5xCA=="],
 
-    "@capacitor/core": ["@capacitor/core@8.3.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/core/-/core-8.3.1.tgz", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-UF8ItlHguU1Z6GXfPTeT2gakf+ctNI8pAS1kwSBQlsJMlfD4OPoto/SmKnOxKCQvnF4WRcdWeg6C0zREUNaAQg=="],
+    "@capacitor/core": ["@capacitor/core@8.3.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/core/-/core-8.3.1.tgz", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-UF8ItlHguU1Z6GXfPTeT2gakf+ctNI8pAS1kwSBQlsJMlfD4OPoto/SmKnOxKCQvnF4WRcdWeg6C0zREUNaAQg=="],
 
-    "@capacitor/filesystem": ["@capacitor/filesystem@8.1.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/filesystem/-/filesystem-8.1.2.tgz", { "dependencies": { "@capacitor/synapse": "^1.0.4" }, "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-doaaMfGoFR2hWU6aV6u83I+5ZsGyJVq+Gz4r9lMpJzUKMm1eMu0hLnFdV1aXZlU9FlK/RndFrVD8oRZfNOqWgQ=="],
+    "@capacitor/filesystem": ["@capacitor/filesystem@8.1.2", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/filesystem/-/filesystem-8.1.2.tgz", { "dependencies": { "@capacitor/synapse": "^1.0.4" }, "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-doaaMfGoFR2hWU6aV6u83I+5ZsGyJVq+Gz4r9lMpJzUKMm1eMu0hLnFdV1aXZlU9FlK/RndFrVD8oRZfNOqWgQ=="],
 
-    "@capacitor/synapse": ["@capacitor/synapse@1.0.4", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/synapse/-/synapse-1.0.4.tgz", {}, "sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw=="],
+    "@capacitor/synapse": ["@capacitor/synapse@1.0.4", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/synapse/-/synapse-1.0.4.tgz", {}, "sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 
@@ -195,7 +195,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@lovable.dev/cloud-auth-js": ["@lovable.dev/cloud-auth-js@1.1.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@lovable.dev/cloud-auth-js/-/cloud-auth-js-1.1.1.tgz", {}, "sha512-80elU8dSJG6bho0Xnfj2oy53wp883nYXrG1Wy948LC/ZUaUQ0i9EGXQFmwTLOBFrWqxb6aNaOlZUvQ8BVGhjMQ=="],
+    "@lovable.dev/cloud-auth-js": ["@lovable.dev/cloud-auth-js@1.1.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@lovable.dev/cloud-auth-js/-/cloud-auth-js-1.1.1.tgz", {}, "sha512-80elU8dSJG6bho0Xnfj2oy53wp883nYXrG1Wy948LC/ZUaUQ0i9EGXQFmwTLOBFrWqxb6aNaOlZUvQ8BVGhjMQ=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
