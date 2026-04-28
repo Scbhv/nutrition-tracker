@@ -603,15 +603,20 @@ export default function Index() {
               <Button
                 onClick={handleSignOut}
                 variant="outline"
-                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+                disabled={signingOut}
+                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
               >
-                <LogOut className="h-5 w-5 mr-3" />
-                Sign Out
+                {signingOut ? (
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5 mr-3" />
+                )}
+                {signingOut ? 'Signing out…' : 'Sign Out'}
               </Button>
             ) : (
               <Button
                 onClick={() => navigate('/auth')}
-                className="w-full h-14 justify-start px-4 rounded-2xl"
+                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
               >
                 <LogOut className="h-5 w-5 mr-3 rotate-180" />
                 Log In
