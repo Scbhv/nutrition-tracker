@@ -680,21 +680,38 @@ export default function Index() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={deletingAccount} className="rounded-xl">Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={async () => {
-                        const { error } = await supabase.rpc('delete_own_account' as any);
-                        if (error) {
-                          toast({ title: 'Error', description: 'Could not delete account. Please try again.', variant: 'destructive' });
-                        } else {
+                      disabled={deletingAccount}
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-70"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (deletingAccount) return;
+                        setDeletingAccount(true);
+                        try {
+                          const { error } = await supabase.rpc('delete_own_account' as any);
+                          if (error) throw error;
                           await supabase.auth.signOut();
-                          navigate('/auth');
                           toast({ title: 'Account deleted', description: 'Your account has been permanently removed.' });
+                          navigate('/auth');
+                        } catch (err) {
+                          toast({
+                            title: 'Could not delete account',
+                            description: err instanceof Error ? err.message : 'Please try again.',
+                            variant: 'destructive',
+                          });
+                          setDeletingAccount(false);
                         }
                       }}
                     >
-                      Delete Forever
+                      {deletingAccount ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Deleting…
+                        </>
+                      ) : (
+                        'Delete Forever'
+                      )}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
