@@ -564,6 +564,7 @@ export default function Index() {
               foodsCount={foods.length}
               logsCount={logs.length}
             />
+            <FeedbackCard isLoggedIn={isLoggedIn} />
 
             {isLoggedIn ? (
               <Button
