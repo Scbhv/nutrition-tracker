@@ -38,9 +38,9 @@ export function usePremium() {
     return () => subscription.unsubscribe();
   }, [checkPremium]);
 
-  const recheck = useCallback(() => {
+  const recheck = useCallback(async () => {
     setLoading(true);
-    checkPremium();
+    await checkPremium();
   }, [checkPremium]);
 
   return { isPremium, loading, recheck };
