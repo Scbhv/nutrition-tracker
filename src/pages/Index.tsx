@@ -28,6 +28,7 @@ import { AddExerciseModal } from '@/components/AddExerciseModal';
 import { HealthKitExport } from '@/components/HealthKitExport';
 import { DonationGateModal } from '@/components/DonationGateModal';
 import { BackupCard } from '@/components/BackupCard';
+import { FeedbackCard } from '@/components/FeedbackCard';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -563,6 +564,7 @@ export default function Index() {
               foodsCount={foods.length}
               logsCount={logs.length}
             />
+            <FeedbackCard isLoggedIn={isLoggedIn} />
 
             {isLoggedIn ? (
               <Button
