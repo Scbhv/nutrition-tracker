@@ -89,9 +89,42 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [restoringPurchase, setRestoringPurchase] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({ title: 'Signed out', description: 'See you soon.' });
+      navigate('/auth');
+    } catch (err) {
+      toast({
+        title: 'Could not sign out',
+        description: err instanceof Error ? err.message : 'Please try again',
+        variant: 'destructive',
+      });
+      setSigningOut(false);
+    }
+  };
+
+  const handleRestorePurchase = async () => {
+    if (restoringPurchase) return;
+    setRestoringPurchase(true);
+    try {
+      await recheckPremium();
+      toast({
+        title: isPremium ? 'Premium restored' : 'All set',
+        description: isPremium
+          ? 'Your premium status is active.'
+          : 'No active premium found on this account.',
+      });
+    } finally {
+      setTimeout(() => setRestoringPurchase(false), 400);
+    }
   };
 
   const todayNutrients = getTodayNutrients();
@@ -536,7 +569,7 @@ export default function Index() {
             />
             <Button 
               onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)} 
-              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
+              className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
             >
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
@@ -570,15 +603,20 @@ export default function Index() {
               <Button
                 onClick={handleSignOut}
                 variant="outline"
-                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10"
+                disabled={signingOut}
+                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
               >
-                <LogOut className="h-5 w-5 mr-3" />
-                Sign Out
+                {signingOut ? (
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5 mr-3" />
+                )}
+                {signingOut ? 'Signing out…' : 'Sign Out'}
               </Button>
             ) : (
               <Button
                 onClick={() => navigate('/auth')}
-                className="w-full h-14 justify-start px-4 rounded-2xl"
+                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
               >
                 <LogOut className="h-5 w-5 mr-3 rotate-180" />
                 Log In
@@ -610,14 +648,16 @@ export default function Index() {
                 <>
                   <span className="text-muted-foreground/30">·</span>
                   <button
-                    onClick={() => {
-                      recheckPremium();
-                      toast({ title: 'Checking...', description: 'Looking up your premium status' });
-                    }}
-                    className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
+                    onClick={handleRestorePurchase}
+                    disabled={restoringPurchase}
+                    className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors disabled:opacity-60 disabled:cursor-wait"
                   >
-                    <RotateCcw className="h-3 w-3" />
-                    Restore Purchase
+                    {restoringPurchase ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-3 w-3" />
+                    )}
+                    {restoringPurchase ? 'Checking…' : 'Restore Purchase'}
                   </button>
                 </>
               )}
@@ -640,21 +680,38 @@ export default function Index() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={deletingAccount} className="rounded-xl">Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={async () => {
-                        const { error } = await supabase.rpc('delete_own_account' as any);
-                        if (error) {
-                          toast({ title: 'Error', description: 'Could not delete account. Please try again.', variant: 'destructive' });
-                        } else {
+                      disabled={deletingAccount}
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-70"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (deletingAccount) return;
+                        setDeletingAccount(true);
+                        try {
+                          const { error } = await supabase.rpc('delete_own_account' as any);
+                          if (error) throw error;
                           await supabase.auth.signOut();
-                          navigate('/auth');
                           toast({ title: 'Account deleted', description: 'Your account has been permanently removed.' });
+                          navigate('/auth');
+                        } catch (err) {
+                          toast({
+                            title: 'Could not delete account',
+                            description: err instanceof Error ? err.message : 'Please try again.',
+                            variant: 'destructive',
+                          });
+                          setDeletingAccount(false);
                         }
                       }}
                     >
-                      Delete Forever
+                      {deletingAccount ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Deleting…
+                        </>
+                      ) : (
+                        'Delete Forever'
+                      )}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
