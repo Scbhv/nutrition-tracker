@@ -569,7 +569,7 @@ export default function Index() {
             />
             <Button 
               onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)} 
-              className={`w-full ios-button-secondary h-14 justify-start px-4 ${!isPremium ? 'opacity-50' : ''}`}
+              className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
             >
               <Settings className="h-5 w-5 mr-3" />
               Daily Goals & Settings
