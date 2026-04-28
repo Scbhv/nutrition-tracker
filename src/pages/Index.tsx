@@ -648,14 +648,16 @@ export default function Index() {
                 <>
                   <span className="text-muted-foreground/30">·</span>
                   <button
-                    onClick={() => {
-                      recheckPremium();
-                      toast({ title: 'Checking...', description: 'Looking up your premium status' });
-                    }}
-                    className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors"
+                    onClick={handleRestorePurchase}
+                    disabled={restoringPurchase}
+                    className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-primary transition-colors disabled:opacity-60 disabled:cursor-wait"
                   >
-                    <RotateCcw className="h-3 w-3" />
-                    Restore Purchase
+                    {restoringPurchase ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-3 w-3" />
+                    )}
+                    {restoringPurchase ? 'Checking…' : 'Restore Purchase'}
                   </button>
                 </>
               )}
