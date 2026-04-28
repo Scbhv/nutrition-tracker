@@ -89,9 +89,42 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [restoringPurchase, setRestoringPurchase] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({ title: 'Signed out', description: 'See you soon.' });
+      navigate('/auth');
+    } catch (err) {
+      toast({
+        title: 'Could not sign out',
+        description: err instanceof Error ? err.message : 'Please try again',
+        variant: 'destructive',
+      });
+      setSigningOut(false);
+    }
+  };
+
+  const handleRestorePurchase = async () => {
+    if (restoringPurchase) return;
+    setRestoringPurchase(true);
+    try {
+      await recheckPremium();
+      toast({
+        title: isPremium ? 'Premium restored' : 'All set',
+        description: isPremium
+          ? 'Your premium status is active.'
+          : 'No active premium found on this account.',
+      });
+    } finally {
+      setTimeout(() => setRestoringPurchase(false), 400);
+    }
   };
 
   const todayNutrients = getTodayNutrients();
