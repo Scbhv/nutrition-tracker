@@ -4,6 +4,7 @@ import { FoodItem, DailyLog, FoodEntry, ExerciseEntry, UserSettings, NutrientDat
 import { validateImportData } from '@/lib/schemas/importValidation';
 import { readJSONFile, writeJSONFile, STORAGE_FILES } from '@/lib/nativeStorage';
 import { reportSource } from '@/lib/offlineMode';
+import { logError } from '@/lib/errorLog';
 
 const DEFAULT_SETTINGS: UserSettings = {
   defaultServingSize: 100,

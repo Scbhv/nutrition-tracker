@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { NutrientData, FoodItem, DailyLog } from '@/types/nutrients';
 import { cn } from '@/lib/utils';
+import { logError } from '@/lib/errorLog';
 
 const AUTO_SYNC_KEY = 'nutritrack-health-autosync';
 
@@ -153,7 +154,8 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
       setCopied(true);
       toast({ title: 'Copied', description: 'Health data JSON copied to clipboard' });
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } catch (err) {
+      logError('HealthKit Export', err, `Failed to write JSON to clipboard. Date: ${exportDate}, samples: ${samplesWithData}.`);
       toast({ title: 'Error', description: 'Could not copy to clipboard', variant: 'destructive' });
     }
   };
