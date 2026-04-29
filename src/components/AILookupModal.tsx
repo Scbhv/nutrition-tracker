@@ -7,6 +7,7 @@ import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, FoodItem } from '@/types
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { isOfflineMode, reportSource } from '@/lib/offlineMode';
+import { logError } from '@/lib/errorLog';
 
 interface AILookupModalProps {
   open: boolean;
@@ -82,6 +83,7 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
           ok: false,
           detail: `No local match for "${trimmedQuery}"`,
         });
+        logError('Offline Lookup', `No local match for "${trimmedQuery}"`, `Searched ${localFoods.length} local foods.`);
         toast({
           title: 'Offline mode',
           description: 'No local match found. Disable offline simulation to use online lookup.',
@@ -142,6 +144,11 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
           ok: false,
           detail: data.error || `HTTP ${response.status}`,
         });
+        logError(
+          'AI Lookup',
+          data.error || `HTTP ${response.status}`,
+          `Query: "${trimmedQuery}"\nStatus: ${response.status}\nBody: ${JSON.stringify(data).slice(0, 500)}`
+        );
         toast({
           title: 'Lookup failed',
           description: data.error || 'Could not find nutrition data',
@@ -156,11 +163,11 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
       });
       setResult(data);
     } catch (error) {
-      console.error('Lookup error:', error);
       reportSource('AI Lookup', 'error', {
         ok: false,
         detail: error instanceof Error ? error.message : 'Network error',
       });
+      logError('AI Lookup', error, `Query: "${trimmedQuery}"`);
       toast({
         title: 'Error',
         description: 'Failed to lookup food. Please try again.',

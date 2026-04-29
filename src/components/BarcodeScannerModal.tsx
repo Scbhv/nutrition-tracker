@@ -3,6 +3,7 @@ import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { logError } from '@/lib/errorLog';
 
 interface BarcodeScannerModalProps {
   open: boolean;
@@ -28,7 +29,8 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch {
+    } catch (err) {
+      logError('Barcode Scan', err, 'getUserMedia({ video: { facingMode: "environment" } }) failed — likely permission denied or no camera available.');
       setError('Camera access denied');
       setIsScanning(false);
     }
@@ -56,6 +58,7 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
     if (!trimmed) return;
     // Validate: alphanumeric + hyphens, max 50 chars
     if (!/^[a-zA-Z0-9-]+$/.test(trimmed) || trimmed.length > 50) {
+      logError('Barcode Parsing', `Invalid barcode format: "${trimmed}"`, `Expected /^[a-zA-Z0-9-]+$/ with length ≤ 50.`);
       setError('Invalid barcode format');
       return;
     }

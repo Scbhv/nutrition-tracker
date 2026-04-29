@@ -30,6 +30,7 @@ import { DonationGateModal } from '@/components/DonationGateModal';
 import { BackupCard } from '@/components/BackupCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { OfflineSimulationCard } from '@/components/OfflineSimulationCard';
+import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -600,6 +601,7 @@ export default function Index() {
             />
             <FeedbackCard isLoggedIn={isLoggedIn} />
             <OfflineSimulationCard />
+            <ErrorLogCard />
 
             <Button
               onClick={() => navigate('/test-checklist')}
