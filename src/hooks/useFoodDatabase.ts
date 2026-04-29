@@ -46,8 +46,16 @@ export function useFoodDatabase() {
         if (storedFoods) setFoods(storedFoods);
         if (storedLogs) setLogs(storedLogs);
         if (storedSettings) setSettings({ ...DEFAULT_SETTINGS, ...storedSettings });
+
+        reportSource('Startup load', 'local-files', {
+          detail: `${storedFoods?.length ?? 0} foods · ${storedLogs?.length ?? 0} logs`,
+        });
       } catch (error) {
         console.error('Error loading data:', error);
+        reportSource('Startup load', 'error', {
+          ok: false,
+          detail: error instanceof Error ? error.message : 'Unknown error',
+        });
       } finally {
         hasLoaded.current = true;
         setIsLoading(false);
