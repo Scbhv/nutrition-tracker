@@ -52,7 +52,7 @@ export function useFoodDatabase() {
           detail: `${storedFoods?.length ?? 0} foods · ${storedLogs?.length ?? 0} logs`,
         });
       } catch (error) {
-        console.error('Error loading data:', error);
+        logError('Local Files', error, 'Failed to load NutriTrack JSON files at startup.');
         reportSource('Startup load', 'error', {
           ok: false,
           detail: error instanceof Error ? error.message : 'Unknown error',
@@ -68,7 +68,7 @@ export function useFoodDatabase() {
   useEffect(() => {
     if (!hasLoaded.current) return;
     writeJSONFile(STORAGE_FILES.foods, foods).catch(err =>
-      console.error('Failed to save foods:', err)
+      logError('Local Files', err, `Failed to save ${STORAGE_FILES.foods} (${foods.length} foods)`)
     );
   }, [foods]);
 
@@ -76,7 +76,7 @@ export function useFoodDatabase() {
   useEffect(() => {
     if (!hasLoaded.current) return;
     writeJSONFile(STORAGE_FILES.logs, logs).catch(err =>
-      console.error('Failed to save logs:', err)
+      logError('Local Files', err, `Failed to save ${STORAGE_FILES.logs} (${logs.length} logs)`)
     );
   }, [logs]);
 
@@ -84,7 +84,7 @@ export function useFoodDatabase() {
   useEffect(() => {
     if (!hasLoaded.current) return;
     writeJSONFile(STORAGE_FILES.settings, settings).catch(err =>
-      console.error('Failed to save settings:', err)
+      logError('Local Files', err, `Failed to save ${STORAGE_FILES.settings}`)
     );
   }, [settings]);
 
@@ -254,7 +254,7 @@ export function useFoodDatabase() {
     const validation = validateImportData(jsonString);
     
     if (!validation.success) {
-      console.error('Import validation failed:', validation.errorMessage);
+      logError('Import Parser', validation.errorMessage || 'Validation failed', `Input length: ${jsonString.length} chars.`);
       return { success: false, errorMessage: validation.errorMessage };
     }
     
