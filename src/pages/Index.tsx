@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle, ClipboardCheck } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
@@ -598,6 +598,16 @@ export default function Index() {
               logsCount={logs.length}
             />
             <FeedbackCard isLoggedIn={isLoggedIn} />
+
+            <Button
+              onClick={() => navigate('/test-checklist')}
+              variant="outline"
+              className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+            >
+              <ClipboardCheck className="h-5 w-5 mr-3" />
+              Test Checklist
+              <span className="ml-auto text-xs text-muted-foreground">QA workflows</span>
+            </Button>
 
             {isLoggedIn ? (
               <Button
