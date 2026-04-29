@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { FoodItem, DailyLog, FoodEntry, ExerciseEntry, UserSettings, NutrientData, Weekday } from '@/types/nutrients';
 import { validateImportData } from '@/lib/schemas/importValidation';
 import { readJSONFile, writeJSONFile, STORAGE_FILES } from '@/lib/nativeStorage';
+import { reportSource } from '@/lib/offlineMode';
 
 const DEFAULT_SETTINGS: UserSettings = {
   defaultServingSize: 100,
