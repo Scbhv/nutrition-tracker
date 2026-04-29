@@ -599,6 +599,7 @@ export default function Index() {
               logsCount={logs.length}
             />
             <FeedbackCard isLoggedIn={isLoggedIn} />
+            <OfflineSimulationCard />
 
             <Button
               onClick={() => navigate('/test-checklist')}
@@ -822,6 +823,7 @@ export default function Index() {
       <AILookupModal
         open={showAILookup}
         onClose={() => setShowAILookup(false)}
+        localFoods={foods}
         onResult={(data) => {
           addFood({ ...data, servingSize: 100, servingUnit: 'g' });
           setShowAILookup(false);
