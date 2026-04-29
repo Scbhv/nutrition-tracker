@@ -138,6 +138,10 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
       const data = await response.json();
 
       if (!response.ok) {
+        reportSource('AI Lookup', 'error', {
+          ok: false,
+          detail: data.error || `HTTP ${response.status}`,
+        });
         toast({
           title: 'Lookup failed',
           description: data.error || 'Could not find nutrition data',
@@ -147,9 +151,16 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
         return;
       }
 
+      reportSource('AI Lookup', data.source === 'ai' ? 'ai' : 'openfoodfacts', {
+        detail: data.name,
+      });
       setResult(data);
     } catch (error) {
       console.error('Lookup error:', error);
+      reportSource('AI Lookup', 'error', {
+        ok: false,
+        detail: error instanceof Error ? error.message : 'Network error',
+      });
       toast({
         title: 'Error',
         description: 'Failed to lookup food. Please try again.',
