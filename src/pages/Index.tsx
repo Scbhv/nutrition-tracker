@@ -820,6 +820,7 @@ export default function Index() {
         open={showScanner}
         onClose={() => setShowScanner(false)}
         onScan={handleBarcodeScan}
+        localFoods={foods}
       />
 
       <AILookupModal
