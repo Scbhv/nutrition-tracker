@@ -240,15 +240,22 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
           <div className="flex-1 overflow-y-auto space-y-4 mt-4">
             {/* Source badge */}
             <div className="flex items-center gap-2">
-              {result.source === 'openfoodfacts' ? (
+              {result.source === 'openfoodfacts' && (
                 <span className="flex items-center gap-1.5 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
                   <Database className="h-3 w-3" />
                   Open Food Facts
                 </span>
-              ) : (
+              )}
+              {result.source === 'ai' && (
                 <span className="flex items-center gap-1.5 text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">
                   <Cpu className="h-3 w-3" />
                   AI Estimated
+                </span>
+              )}
+              {result.source === 'local-db' && (
+                <span className="flex items-center gap-1.5 text-xs bg-muted text-foreground px-2 py-1 rounded-full">
+                  <WifiOff className="h-3 w-3" />
+                  Local database (offline)
                 </span>
               )}
             </div>
