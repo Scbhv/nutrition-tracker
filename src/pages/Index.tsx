@@ -601,6 +601,7 @@ export default function Index() {
             />
             <FeedbackCard isLoggedIn={isLoggedIn} />
             <OfflineSimulationCard />
+            <ErrorLogCard />
 
             <Button
               onClick={() => navigate('/test-checklist')}
