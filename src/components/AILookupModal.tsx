@@ -7,6 +7,7 @@ import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, FoodItem } from '@/types
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { isOfflineMode, reportSource } from '@/lib/offlineMode';
+import { logError } from '@/lib/errorLog';
 
 interface AILookupModalProps {
   open: boolean;
