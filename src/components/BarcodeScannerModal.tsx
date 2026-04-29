@@ -58,6 +58,7 @@ export function BarcodeScannerModal({ open, onClose, onScan }: BarcodeScannerMod
     if (!trimmed) return;
     // Validate: alphanumeric + hyphens, max 50 chars
     if (!/^[a-zA-Z0-9-]+$/.test(trimmed) || trimmed.length > 50) {
+      logError('Barcode Parsing', `Invalid barcode format: "${trimmed}"`, `Expected /^[a-zA-Z0-9-]+$/ with length ≤ 50.`);
       setError('Invalid barcode format');
       return;
     }
