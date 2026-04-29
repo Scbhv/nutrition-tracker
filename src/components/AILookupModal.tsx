@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, Check, Database, Cpu } from 'lucide-react';
+import { Sparkles, Loader2, Check, Database, Cpu, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS } from '@/types/nutrients';
+import { NutrientData, NUTRIENT_LABELS, NUTRIENT_UNITS, FoodItem } from '@/types/nutrients';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { isOfflineMode, reportSource } from '@/lib/offlineMode';
 
 interface AILookupModalProps {
   open: boolean;
   onClose: () => void;
   onResult: (data: { name: string; nutrients: NutrientData }) => void;
+  localFoods?: FoodItem[];
 }
 
 interface LookupResult {
-  source: 'openfoodfacts' | 'ai';
+  source: 'openfoodfacts' | 'ai' | 'local-db';
   name: string;
   brand?: string;
   nutrients: NutrientData;
@@ -26,7 +28,7 @@ const FOOD_LOOKUP_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/food-
 const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 200;
 
-export function AILookupModal({ open, onClose, onResult }: AILookupModalProps) {
+export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILookupModalProps) {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<LookupResult | null>(null);
