@@ -61,6 +61,37 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
     setIsLoading(true);
     setResult(null);
 
+    // Always try local DB first — useful for offline mode and faster lookups.
+    const q = trimmedQuery.toLowerCase();
+    const localMatch = localFoods.find(
+      (f) => f.name.toLowerCase() === q || f.name.toLowerCase().includes(q)
+    );
+
+    if (isOfflineMode()) {
+      if (localMatch) {
+        reportSource('AI Lookup', 'local-db', { detail: `Matched "${localMatch.name}"` });
+        setResult({
+          source: 'local-db',
+          name: localMatch.name,
+          brand: localMatch.brand,
+          nutrients: localMatch.nutrients,
+          barcode: localMatch.barcode,
+        });
+      } else {
+        reportSource('AI Lookup', 'offline-skip', {
+          ok: false,
+          detail: `No local match for "${trimmedQuery}"`,
+        });
+        toast({
+          title: 'Offline mode',
+          description: 'No local match found. Disable offline simulation to use online lookup.',
+          variant: 'destructive',
+        });
+      }
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Get authenticated user session
       const { data: { session } } = await supabase.auth.getSession();
