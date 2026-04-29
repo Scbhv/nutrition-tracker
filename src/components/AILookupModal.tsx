@@ -83,6 +83,7 @@ export function AILookupModal({ open, onClose, onResult, localFoods = [] }: AILo
           ok: false,
           detail: `No local match for "${trimmedQuery}"`,
         });
+        logError('Offline Lookup', `No local match for "${trimmedQuery}"`, `Searched ${localFoods.length} local foods.`);
         toast({
           title: 'Offline mode',
           description: 'No local match found. Disable offline simulation to use online lookup.',
