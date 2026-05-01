@@ -754,3 +754,32 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
+
+/* ============== Theme Pack Textures ============== */
+body.has-theme-pack::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--theme-pack-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+body.has-theme-pack > #root { position: relative; z-index: 1; }
+
+body.has-theme-pack-card .glass-card {
+  background-image: var(--theme-pack-card, none);
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+}
+
+body.has-theme-pack-button button.ios-button-primary,
+body.has-theme-pack-button .bg-primary {
+  background-image: var(--theme-pack-button, none);
+  background-size: cover;
+  background-blend-mode: overlay;
+}

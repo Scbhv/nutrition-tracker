@@ -31,6 +31,8 @@ import { BackupCard } from '@/components/BackupCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { OfflineSimulationCard } from '@/components/OfflineSimulationCard';
 import { ErrorLogCard } from '@/components/ErrorLogCard';
+import { ThemePackCard } from '@/components/ThemePackCard';
+import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
@@ -42,6 +44,7 @@ export default function Index() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
+  useThemePack(); // applies persisted texture pack on mount
   const {
     foods,
     logs,
@@ -600,6 +603,7 @@ export default function Index() {
               logsCount={logs.length}
             />
             <FeedbackCard isLoggedIn={isLoggedIn} />
+            <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
             <OfflineSimulationCard />
             <ErrorLogCard />
 

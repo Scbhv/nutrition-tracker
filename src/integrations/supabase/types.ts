@@ -86,6 +86,54 @@ export type Database = {
         }
         Relationships: []
       }
+      theme_packs: {
+        Row: {
+          accent_hue: number
+          accent_path: string | null
+          background_path: string | null
+          button_path: string | null
+          card_path: string | null
+          created_at: string
+          description: string | null
+          downloads: number
+          id: string
+          is_published: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_hue?: number
+          accent_path?: string | null
+          background_path?: string | null
+          button_path?: string | null
+          card_path?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number
+          id?: string
+          is_published?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_hue?: number
+          accent_path?: string | null
+          background_path?: string | null
+          button_path?: string | null
+          card_path?: string | null
+          created_at?: string
+          description?: string | null
+          downloads?: number
+          id?: string
+          is_published?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       unlock_codes: {
         Row: {
           code: string
