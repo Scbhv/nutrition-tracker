@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logError } from '@/lib/errorLog';
 import { useThemePack, type AppliedThemePack } from '@/hooks/useThemePack';
+import { ThemePackLibrary } from '@/components/ThemePackLibrary';
 import { cn } from '@/lib/utils';
 
 interface ThemePackRow {
@@ -257,11 +258,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
 
       {loading && <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>}
 
-      {!loading && tab === 'gallery' && (
-        gallery.length === 0
-          ? <p className="text-xs text-muted-foreground text-center py-6">No published packs yet.</p>
-          : <div className="space-y-2">{gallery.map((p) => renderPack(p, p.user_id === userId))}</div>
-      )}
+      {!loading && tab === 'gallery' && <ThemePackLibrary />}
 
       {!loading && tab === 'mine' && (
         !userId
