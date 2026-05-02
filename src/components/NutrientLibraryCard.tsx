@@ -44,7 +44,8 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
 
   const handleLoadSeed = () => {
     if (!seedLibrary.success) {
-      toast({ title: 'Seed catalog unavailable', description: seedLibrary.error, variant: 'destructive' });
+      const err = 'error' in seedLibrary ? seedLibrary.error : 'Unknown error';
+      toast({ title: 'Seed catalog unavailable', description: err, variant: 'destructive' });
       return;
     }
     const newCount = countNew(seedLibrary.foods);
@@ -77,8 +78,8 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
     if (!file) return;
     const text = await file.text();
     const result = parseNutrientLibrary(text);
-    if (!result.success) {
-      toast({ title: 'Import failed', description: result.error, variant: 'destructive' });
+    if (result.success !== true) {
+      toast({ title: 'Import failed', description: ('error' in result ? result.error : 'Invalid file'), variant: 'destructive' });
       return;
     }
     setPreview({ source: file.name, library: result.library, foods: result.foods });
@@ -89,8 +90,8 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
     setFetching(true);
     const result = await fetchRemoteLibrary(url.trim());
     setFetching(false);
-    if (!result.success) {
-      toast({ title: 'Could not load library', description: result.error, variant: 'destructive' });
+    if (result.success !== true) {
+      toast({ title: 'Could not load library', description: ('error' in result ? result.error : 'Network error'), variant: 'destructive' });
       return;
     }
     setPreview({ source: url.trim(), library: result.library, foods: result.foods });
