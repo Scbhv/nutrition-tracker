@@ -32,6 +32,7 @@ import { FeedbackCard } from '@/components/FeedbackCard';
 import { OfflineSimulationCard } from '@/components/OfflineSimulationCard';
 import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
+import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
@@ -602,6 +603,7 @@ export default function Index() {
               foodsCount={foods.length}
               logsCount={logs.length}
             />
+            <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
             <FeedbackCard isLoggedIn={isLoggedIn} />
             <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
             <OfflineSimulationCard />
