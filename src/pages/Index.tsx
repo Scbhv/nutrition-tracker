@@ -32,6 +32,7 @@ import { FeedbackCard } from '@/components/FeedbackCard';
 import { OfflineSimulationCard } from '@/components/OfflineSimulationCard';
 import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
+import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
 
@@ -93,6 +94,28 @@ export default function Index() {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Auto-seed the starter food catalog on first launch (only when DB is empty).
+  useEffect(() => {
+    if (isLoading) return;
+    if (foods.length > 0) return;
+    if (localStorage.getItem('nutritrack-seed-loaded') === '1') return;
+    import('@/data/seedFoods.json').then(mod => {
+      const seed = (mod.default as { foods: any[] }).foods;
+      const items = seed.map(f => ({
+        ...f,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+      mergeFoods(items as any);
+      localStorage.setItem('nutritrack-seed-loaded', '1');
+      toast({
+        title: 'Starter foods loaded',
+        description: `${items.length} common foods added to your library.`,
+      });
+    }).catch(() => {/* ignore */});
+  }, [isLoading, foods.length, mergeFoods, toast]);
 
   const [signingOut, setSigningOut] = useState(false);
   const [restoringPurchase, setRestoringPurchase] = useState(false);
@@ -602,6 +625,7 @@ export default function Index() {
               foodsCount={foods.length}
               logsCount={logs.length}
             />
+            <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
             <FeedbackCard isLoggedIn={isLoggedIn} />
             <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
             <OfflineSimulationCard />
