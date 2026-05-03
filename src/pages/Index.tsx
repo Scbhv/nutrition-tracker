@@ -19,6 +19,7 @@ import { QuickAddPanel } from '@/components/QuickAddPanel';
 import { NutrientsSummary } from '@/components/NutrientsSummary';
 import { FoodDatabaseView } from '@/components/FoodDatabaseView';
 import { AddFoodModal } from '@/components/AddFoodModal';
+import { RecipeBuilderModal } from '@/components/RecipeBuilderModal';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
@@ -34,7 +35,8 @@ import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { useThemePack } from '@/hooks/useThemePack';
-import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
+import { FoodItem, NutrientData, NUTRIENT_UNITS, Recipe } from '@/types/nutrients';
+import { buildRecipeFoodFields } from '@/lib/recipe';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
 
