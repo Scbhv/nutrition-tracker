@@ -577,6 +577,8 @@ export default function Index() {
             onExport={handleExport}
             onImport={handleImport}
             onImportFoods={handleImportFoods}
+            onAddRecipe={() => { setEditingRecipe(null); setShowRecipeBuilder(true); }}
+            onEditRecipe={(food) => { setEditingRecipe(food); setShowRecipeBuilder(true); }}
           />
         );
 
