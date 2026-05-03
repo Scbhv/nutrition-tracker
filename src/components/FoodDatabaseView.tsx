@@ -208,6 +208,33 @@ export function FoodDatabaseView({
           </ScrollArea>
         </TabsContent>
 
+        <TabsContent value="recipes" className="space-y-4 mt-4">
+          <ScrollArea className="h-[calc(100vh-340px)]">
+            <div className="space-y-2 pr-4">
+              {filteredRecipes.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <ChefHat className="h-10 w-10 mx-auto mb-3 opacity-60" />
+                  <p className="text-lg font-medium">No recipes yet</p>
+                  <p className="text-sm mt-1">Combine foods from your library into a recipe.</p>
+                  <Button onClick={onAddRecipe} className="ios-button-primary mt-4 rounded-full">
+                    <Plus className="h-4 w-4 mr-2" /> New recipe
+                  </Button>
+                </div>
+              ) : (
+                filteredRecipes.map(food => (
+                  <RecipeCard
+                    key={food.id}
+                    food={food}
+                    onEdit={() => onEditRecipe(food)}
+                    onDelete={() => onDeleteFood(food.id)}
+                    onLog={() => openPortionDialog(food)}
+                  />
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
         <TabsContent value="files" className="space-y-4 mt-4">
           {!fileSystem.isSupported ? (
             <div className="glass-card rounded-2xl p-6 text-center">
