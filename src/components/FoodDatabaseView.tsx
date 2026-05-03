@@ -142,25 +142,33 @@ export function FoodDatabaseView({
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search foods..."
+            placeholder={activeSubTab === 'recipes' ? 'Search recipes…' : 'Search foods…'}
             className="pl-10 bg-secondary border-0 rounded-xl"
           />
         </div>
-        <Button onClick={onAddFood} className="ios-button-primary">
-          <Plus className="h-4 w-4" />
+        <Button
+          onClick={activeSubTab === 'recipes' ? onAddRecipe : onAddFood}
+          className="ios-button-primary"
+          aria-label={activeSubTab === 'recipes' ? 'New recipe' : 'New food'}
+        >
+          {activeSubTab === 'recipes' ? <ChefHat className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         </Button>
       </div>
 
-      {/* Sub-tabs for Database vs Files */}
-      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'files')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="database" className="gap-2">
+      {/* Sub-tabs for Database vs Recipes vs Files */}
+      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'files')}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="database" className="gap-1.5">
             <FileJson className="h-4 w-4" />
-            Database ({foods.length})
+            <span className="hidden sm:inline">Foods</span> ({plainFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="files" className="gap-2">
+          <TabsTrigger value="recipes" className="gap-1.5">
+            <ChefHat className="h-4 w-4" />
+            <span className="hidden sm:inline">Recipes</span> ({recipeFoods.length})
+          </TabsTrigger>
+          <TabsTrigger value="files" className="gap-1.5">
             <FolderOpen className="h-4 w-4" />
-            Files {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
+            <span className="hidden sm:inline">Files</span> {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
           </TabsTrigger>
         </TabsList>
 
