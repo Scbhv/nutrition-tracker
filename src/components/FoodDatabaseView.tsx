@@ -22,6 +22,8 @@ interface FoodDatabaseViewProps {
   onExport: () => void;
   onImport: () => void;
   onImportFoods: (foods: FoodItem[]) => void;
+  onAddRecipe: () => void;
+  onEditRecipe: (food: FoodItem) => void;
 }
 
 export function FoodDatabaseView({
