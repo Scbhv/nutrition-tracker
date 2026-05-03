@@ -62,11 +62,17 @@ export function FoodDatabaseView({
     }
   }, [fileSystem.hasPermission]);
 
-  const filteredFoods = foods.filter(food =>
+  const plainFoods = useMemo(() => foods.filter(f => !f.recipe), [foods]);
+  const recipeFoods = useMemo(() => foods.filter(f => !!f.recipe), [foods]);
+
+  const matchesQuery = (food: FoodItem) =>
     food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     food.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    food.barcode?.includes(searchQuery)
-  );
+    food.barcode?.includes(searchQuery) ||
+    food.recipe?.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const filteredFoods = plainFoods.filter(matchesQuery);
+  const filteredRecipes = recipeFoods.filter(matchesQuery);
 
   const handleConnectFolder = async () => {
     const success = await fileSystem.requestAccess();
