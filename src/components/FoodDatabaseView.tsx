@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson, ChefHat, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,6 +22,8 @@ interface FoodDatabaseViewProps {
   onExport: () => void;
   onImport: () => void;
   onImportFoods: (foods: FoodItem[]) => void;
+  onAddRecipe: () => void;
+  onEditRecipe: (food: FoodItem) => void;
 }
 
 export function FoodDatabaseView({
@@ -35,9 +37,11 @@ export function FoodDatabaseView({
   onExport,
   onImport,
   onImportFoods,
+  onAddRecipe,
+  onEditRecipe,
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSubTab, setActiveSubTab] = useState<'database' | 'files'>('database');
+  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'files'>('database');
   const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
   const [portionGrams, setPortionGrams] = useState('');
   const portionInputRef = useRef<HTMLInputElement>(null);
@@ -58,11 +62,17 @@ export function FoodDatabaseView({
     }
   }, [fileSystem.hasPermission]);
 
-  const filteredFoods = foods.filter(food =>
+  const plainFoods = useMemo(() => foods.filter(f => !f.recipe), [foods]);
+  const recipeFoods = useMemo(() => foods.filter(f => !!f.recipe), [foods]);
+
+  const matchesQuery = (food: FoodItem) =>
     food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     food.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    food.barcode?.includes(searchQuery)
-  );
+    food.barcode?.includes(searchQuery) ||
+    food.recipe?.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const filteredFoods = plainFoods.filter(matchesQuery);
+  const filteredRecipes = recipeFoods.filter(matchesQuery);
 
   const handleConnectFolder = async () => {
     const success = await fileSystem.requestAccess();
@@ -132,25 +142,33 @@ export function FoodDatabaseView({
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search foods..."
+            placeholder={activeSubTab === 'recipes' ? 'Search recipes…' : 'Search foods…'}
             className="pl-10 bg-secondary border-0 rounded-xl"
           />
         </div>
-        <Button onClick={onAddFood} className="ios-button-primary">
-          <Plus className="h-4 w-4" />
+        <Button
+          onClick={activeSubTab === 'recipes' ? onAddRecipe : onAddFood}
+          className="ios-button-primary"
+          aria-label={activeSubTab === 'recipes' ? 'New recipe' : 'New food'}
+        >
+          {activeSubTab === 'recipes' ? <ChefHat className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         </Button>
       </div>
 
-      {/* Sub-tabs for Database vs Files */}
-      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'files')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="database" className="gap-2">
+      {/* Sub-tabs for Database vs Recipes vs Files */}
+      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'files')}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="database" className="gap-1.5">
             <FileJson className="h-4 w-4" />
-            Database ({foods.length})
+            <span className="hidden sm:inline">Foods</span> ({plainFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="files" className="gap-2">
+          <TabsTrigger value="recipes" className="gap-1.5">
+            <ChefHat className="h-4 w-4" />
+            <span className="hidden sm:inline">Recipes</span> ({recipeFoods.length})
+          </TabsTrigger>
+          <TabsTrigger value="files" className="gap-1.5">
             <FolderOpen className="h-4 w-4" />
-            Files {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
+            <span className="hidden sm:inline">Files</span> {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
           </TabsTrigger>
         </TabsList>
 
@@ -181,6 +199,33 @@ export function FoodDatabaseView({
                     key={food.id}
                     food={food}
                     onEdit={() => onEditFood(food)}
+                    onDelete={() => onDeleteFood(food.id)}
+                    onLog={() => openPortionDialog(food)}
+                  />
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="recipes" className="space-y-4 mt-4">
+          <ScrollArea className="h-[calc(100vh-340px)]">
+            <div className="space-y-2 pr-4">
+              {filteredRecipes.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <ChefHat className="h-10 w-10 mx-auto mb-3 opacity-60" />
+                  <p className="text-lg font-medium">No recipes yet</p>
+                  <p className="text-sm mt-1">Combine foods from your library into a recipe.</p>
+                  <Button onClick={onAddRecipe} className="ios-button-primary mt-4 rounded-full">
+                    <Plus className="h-4 w-4 mr-2" /> New recipe
+                  </Button>
+                </div>
+              ) : (
+                filteredRecipes.map(food => (
+                  <RecipeCard
+                    key={food.id}
+                    food={food}
+                    onEdit={() => onEditRecipe(food)}
                     onDelete={() => onDeleteFood(food.id)}
                     onLog={() => openPortionDialog(food)}
                   />
@@ -438,6 +483,62 @@ function FoodDatabaseCard({
             <span className="text-primary">{food.nutrients['energy-kcal'] || 0} kcal</span>
             <span className="text-nutrient-protein">{food.nutrients['proteins'] || 0}g P</span>
           </div>
+        </div>
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="icon" onClick={onLog} className="rounded-full">
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onEdit} className="rounded-full">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onDelete} className="rounded-full hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecipeCard({
+  food,
+  onEdit,
+  onDelete,
+  onLog,
+}: {
+  food: FoodItem;
+  onEdit: () => void;
+  onDelete: () => void;
+  onLog: () => void;
+}) {
+  const recipe = food.recipe!;
+  const perServingKcal = Math.round(((food.nutrients['energy-kcal'] || 0) * food.servingSize) / 100);
+  return (
+    <div className="glass-card rounded-2xl p-4 group">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0" onClick={onLog}>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <ChefHat className="h-3.5 w-3.5 text-primary shrink-0" />
+            <h4 className="font-semibold text-foreground truncate">{food.name}</h4>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-1.5 text-xs">
+            <span className="text-primary">{perServingKcal} kcal / serving</span>
+            <span className="text-muted-foreground">{recipe.ingredients.length} ingredients</span>
+            <span className="text-muted-foreground">yields {recipe.servings}</span>
+            {recipe.prepMinutes ? (
+              <span className="text-muted-foreground inline-flex items-center gap-0.5">
+                <Clock className="h-3 w-3" /> {recipe.prepMinutes}m
+              </span>
+            ) : null}
+          </div>
+          {recipe.tags && recipe.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {recipe.tags.slice(0, 4).map(t => (
+                <Badge key={t} variant="secondary" className="text-[10px] py-0 px-1.5 rounded-full">{t}</Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

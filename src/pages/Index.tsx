@@ -19,6 +19,7 @@ import { QuickAddPanel } from '@/components/QuickAddPanel';
 import { NutrientsSummary } from '@/components/NutrientsSummary';
 import { FoodDatabaseView } from '@/components/FoodDatabaseView';
 import { AddFoodModal } from '@/components/AddFoodModal';
+import { RecipeBuilderModal } from '@/components/RecipeBuilderModal';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { AILookupModal } from '@/components/AILookupModal';
 import { SettingsModal } from '@/components/SettingsModal';
@@ -34,7 +35,8 @@ import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { useThemePack } from '@/hooks/useThemePack';
-import { FoodItem, NutrientData, NUTRIENT_UNITS } from '@/types/nutrients';
+import { FoodItem, NutrientData, NUTRIENT_UNITS, Recipe } from '@/types/nutrients';
+import { buildRecipeFoodFields } from '@/lib/recipe';
 
 type Tab = 'today' | 'database' | 'trends' | 'profile';
 
@@ -52,6 +54,7 @@ export default function Index() {
     settings,
     isLoading,
     addFood,
+    updateFood,
     deleteFood,
     getFoodByBarcode,
     addFoodEntry,
@@ -71,6 +74,8 @@ export default function Index() {
 
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
+  const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<FoodItem | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showAILookup, setShowAILookup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -572,6 +577,8 @@ export default function Index() {
             onExport={handleExport}
             onImport={handleImport}
             onImportFoods={handleImportFoods}
+            onAddRecipe={() => { setEditingRecipe(null); setShowRecipeBuilder(true); }}
+            onEditRecipe={(food) => { setEditingRecipe(food); setShowRecipeBuilder(true); }}
           />
         );
 
@@ -842,6 +849,23 @@ export default function Index() {
         initialData={editingFood?.nutrients}
         initialName={editingFood?.name}
         customNutrients={settings.customNutrients}
+      />
+
+      <RecipeBuilderModal
+        open={showRecipeBuilder}
+        onClose={() => { setShowRecipeBuilder(false); setEditingRecipe(null); }}
+        foods={foods}
+        initial={editingRecipe}
+        onSave={({ name, recipe }) => {
+          const fields = buildRecipeFoodFields(name, recipe, foods);
+          if (editingRecipe) {
+            updateFood(editingRecipe.id, fields);
+            toast({ title: 'Recipe updated', description: name });
+          } else {
+            addFood(fields);
+            toast({ title: 'Recipe created', description: name });
+          }
+        }}
       />
 
       <BarcodeScannerModal

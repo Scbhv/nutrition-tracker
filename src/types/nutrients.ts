@@ -75,6 +75,32 @@ export interface FoodItem {
   nutrients: NutrientData; // per 100g
   createdAt: string;
   updatedAt: string;
+  /** Present when this food item is a user-defined recipe. */
+  recipe?: Recipe;
+}
+
+export interface RecipeIngredient {
+  /** Source food id from the user's food database. */
+  foodId: string;
+  /** Snapshot of the food name in case the source is later deleted. */
+  name: string;
+  /** Amount of the ingredient in grams. */
+  grams: number;
+}
+
+export interface Recipe {
+  /** Ingredients used to assemble the recipe. */
+  ingredients: RecipeIngredient[];
+  /** Total servings the full recipe yields. */
+  servings: number;
+  /** Optional ordered preparation steps. */
+  instructions?: string[];
+  /** Optional prep + cook time in minutes. */
+  prepMinutes?: number;
+  /** Free-form tags (e.g., breakfast, vegan). */
+  tags?: string[];
+  /** Optional notes / description. */
+  notes?: string;
 }
 
 export interface DailyLog {
