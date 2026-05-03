@@ -851,6 +851,31 @@ export default function Index() {
         customNutrients={settings.customNutrients}
       />
 
+      <RecipeBuilderModal
+        open={showRecipeBuilder}
+        onClose={() => { setShowRecipeBuilder(false); setEditingRecipe(null); }}
+        foods={foods}
+        initial={editingRecipe}
+        onSave={({ name, recipe }) => {
+          const fields = buildRecipeFoodFields(name, recipe, foods);
+          if (editingRecipe) {
+            updateFood(editingRecipe.id, fields);
+            toast({ title: 'Recipe updated', description: name });
+          } else {
+            addFood(fields);
+            toast({ title: 'Recipe created', description: name });
+          }
+        }}
+      />
+          setShowAddFood(false);
+          setEditingFood(null);
+        }}
+        onAdd={handleAddFood}
+        initialData={editingFood?.nutrients}
+        initialName={editingFood?.name}
+        customNutrients={settings.customNutrients}
+      />
+
       <BarcodeScannerModal
         open={showScanner}
         onClose={() => setShowScanner(false)}
