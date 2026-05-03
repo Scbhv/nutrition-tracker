@@ -867,14 +867,6 @@ export default function Index() {
           }
         }}
       />
-          setShowAddFood(false);
-          setEditingFood(null);
-        }}
-        onAdd={handleAddFood}
-        initialData={editingFood?.nutrients}
-        initialName={editingFood?.name}
-        customNutrients={settings.customNutrients}
-      />
 
       <BarcodeScannerModal
         open={showScanner}
