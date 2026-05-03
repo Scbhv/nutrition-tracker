@@ -37,9 +37,11 @@ export function FoodDatabaseView({
   onExport,
   onImport,
   onImportFoods,
+  onAddRecipe,
+  onEditRecipe,
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSubTab, setActiveSubTab] = useState<'database' | 'files'>('database');
+  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'files'>('database');
   const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
   const [portionGrams, setPortionGrams] = useState('');
   const portionInputRef = useRef<HTMLInputElement>(null);
