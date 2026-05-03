@@ -54,6 +54,7 @@ export default function Index() {
     settings,
     isLoading,
     addFood,
+    updateFood,
     deleteFood,
     getFoodByBarcode,
     addFoodEntry,
@@ -73,6 +74,8 @@ export default function Index() {
 
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
+  const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<FoodItem | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showAILookup, setShowAILookup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
