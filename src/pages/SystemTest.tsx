@@ -23,18 +23,43 @@ import type { FoodItem } from "@/types/nutrients";
 
 type Status = "idle" | "running" | "pass" | "fail";
 
+export interface HealthReportRow {
+  label: string;
+  identifier: string;
+  value: number;
+  unit: string;
+  written: boolean;
+  reason?: string;
+}
+
+export interface HealthReport {
+  date: string;
+  exportedAt: string;
+  attempted: number;
+  succeeded: number;
+  failed: number;
+  handoff: "clipboard" | "shortcuts" | "none";
+  rows: HealthReportRow[];
+}
+
 interface TestDef {
   id: string;
   title: string;
   description: string;
   icon: typeof Camera;
-  run: () => Promise<string>; // returns success detail or throws Error
+  run: () => Promise<TestOutcome>;
+}
+
+interface TestOutcome {
+  detail: string;
+  report?: HealthReport;
 }
 
 interface TestResult {
   status: Status;
   detail?: string;
   durationMs?: number;
+  report?: HealthReport;
 }
 
 // ---------- Test implementations ----------
