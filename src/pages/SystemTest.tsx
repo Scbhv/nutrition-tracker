@@ -384,6 +384,7 @@ export default function SystemTest() {
                     {r.detail}
                   </p>
                 )}
+                {r.report && <HealthReportDetail report={r.report} />}
               </div>
               <Button
                 size="sm"
@@ -443,5 +444,53 @@ function StatusBadge({ status }: { status: Status }) {
     <Badge variant="outline" className="h-5">
       Idle
     </Badge>
+  );
+}
+
+function HealthReportDetail({ report }: { report: HealthReport }) {
+  const handoffLabel =
+    report.handoff === "shortcuts"
+      ? "Shortcuts hand-off (iOS)"
+      : report.handoff === "clipboard"
+      ? "Copied to clipboard for Shortcuts"
+      : "No hand-off available";
+
+  return (
+    <div className="mt-3 rounded-xl border border-border/60 bg-muted/20 p-3 space-y-2">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+        <span>Date: <span className="text-foreground font-medium">{report.date}</span></span>
+        <span>
+          Wrote: <span className="text-foreground font-medium">{report.succeeded}/{report.attempted}</span>
+        </span>
+        {report.failed > 0 && (
+          <span>Skipped: <span className="text-destructive font-medium">{report.failed}</span></span>
+        )}
+        <span>Hand-off: <span className="text-foreground font-medium">{handoffLabel}</span></span>
+      </div>
+      <div className="divide-y divide-border/40">
+        {report.rows.map((row) => (
+          <div key={row.identifier} className="flex items-center gap-2 py-1.5">
+            {row.written ? (
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+            ) : (
+              <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+            )}
+            <span className="text-xs font-medium text-foreground flex-1 min-w-0 truncate">
+              {row.label}
+            </span>
+            <span className="text-[11px] text-muted-foreground tabular-nums">
+              {row.value} {row.unit}
+            </span>
+            <span
+              className={`text-[10px] font-medium uppercase tracking-wide ${
+                row.written ? "text-primary" : "text-destructive"
+              }`}
+            >
+              {row.written ? "OK" : row.reason ?? "fail"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
