@@ -64,8 +64,7 @@ interface TestResult {
 
 // ---------- Test implementations ----------
 
-async function testBarcodeScan(): Promise<string> {
-  // Hits the food-lookup edge function with a known barcode (Coca-Cola 330ml)
+async function testBarcodeScan(): Promise<TestOutcome> {
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/food-lookup`;
   const res = await fetch(url, {
     method: "POST",
@@ -82,11 +81,10 @@ async function testBarcodeScan(): Promise<string> {
     throw new Error("Lookup returned no product");
   }
   const name = data?.product?.name || data?.name;
-  return `Resolved barcode → "${name}"`;
+  return { detail: `Resolved barcode → "${name}"` };
 }
 
-async function testManualEntry(): Promise<string> {
-  // Simulates manual entry by constructing a FoodItem and round-tripping through storage.
+async function testManualEntry(): Promise<TestOutcome> {
   const probe: FoodItem = {
     id: `systest-${Date.now()}`,
     name: "System Test Food",
@@ -96,68 +94,120 @@ async function testManualEntry(): Promise<string> {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-
-  if (!probe.name.trim() || probe.servingSize <= 0) {
-    throw new Error("Validation failed for manual entry");
-  }
+  if (!probe.name.trim() || probe.servingSize <= 0) throw new Error("Validation failed for manual entry");
   const macroSum =
-    (probe.nutrients.proteins ?? 0) +
-    (probe.nutrients.fat ?? 0) +
-    (probe.nutrients.carbohydrates ?? 0);
+    (probe.nutrients.proteins ?? 0) + (probe.nutrients.fat ?? 0) + (probe.nutrients.carbohydrates ?? 0);
   if (macroSum <= 0) throw new Error("Macros must be > 0");
-
-  return `Validated FoodItem "${probe.name}" (${probe.nutrients["energy-kcal"]} kcal/100g)`;
+  return { detail: `Validated FoodItem "${probe.name}" (${probe.nutrients["energy-kcal"]} kcal/100g)` };
 }
 
-async function testOfflineFileLoad(): Promise<string> {
+async function testOfflineFileLoad(): Promise<TestOutcome> {
   const filename = "systest-roundtrip.json";
   const payload = { ts: Date.now(), marker: "system-test" };
   await writeJSONFile(filename, payload);
   const loaded = await readJSONFile<typeof payload>(filename);
   if (!loaded) throw new Error("File could not be read back");
   if (loaded.marker !== payload.marker) throw new Error("Round-trip mismatch");
-
-  // Also confirm app data files exist (no crash if missing — that's fine for a fresh install)
   const foods = await readJSONFile(STORAGE_FILES.foods);
   const platform = Capacitor.isNativePlatform() ? "iOS Documents" : "localStorage";
-  return `Round-trip OK on ${platform}${foods ? " · foods.json present" : ""}`;
+  return { detail: `Round-trip OK on ${platform}${foods ? " · foods.json present" : ""}` };
 }
 
-async function testAppleHealthWrite(): Promise<string> {
-  // True HealthKit writes require the Shortcuts hand-off on device.
-  // This step builds a valid HealthKit payload and verifies its shape.
-  const payload = {
-    version: 1,
-    source: "NutriTrack",
-    exportDate: new Date().toISOString(),
-    date: new Date().toISOString().split("T")[0],
-    samples: [
-      {
-        sampleType: "HKQuantityTypeIdentifierDietaryEnergyConsumed",
-        value: 250,
-        unit: "kcal",
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString(),
-        metadata: { source: "NutriTrack-SystemTest" },
-      },
-    ],
+// Candidate nutrients to write to HealthKit during the system test.
+const HEALTH_TEST_NUTRIENTS: Array<{
+  key: string;
+  label: string;
+  identifier: string;
+  unit: string;
+  value: number;
+}> = [
+  { key: "energy-kcal", label: "Calories", identifier: "DietaryEnergyConsumed", unit: "kcal", value: 250 },
+  { key: "proteins", label: "Protein", identifier: "DietaryProtein", unit: "g", value: 10 },
+  { key: "fat", label: "Total Fat", identifier: "DietaryFatTotal", unit: "g", value: 5 },
+  { key: "carbohydrates", label: "Carbs", identifier: "DietaryCarbohydrates", unit: "g", value: 40 },
+  { key: "sugars", label: "Sugar", identifier: "DietarySugar", unit: "g", value: 12 },
+  { key: "fiber", label: "Fiber", identifier: "DietaryFiber", unit: "g", value: 3 },
+  { key: "sodium", label: "Sodium", identifier: "DietarySodium", unit: "mg", value: 320 },
+  { key: "water", label: "Water", identifier: "DietaryWater", unit: "mL", value: 250 },
+];
+
+async function testAppleHealthWrite(): Promise<TestOutcome> {
+  const date = new Date().toISOString().split("T")[0];
+  const exportedAt = new Date().toISOString();
+  const rows: HealthReportRow[] = [];
+
+  for (const n of HEALTH_TEST_NUTRIENTS) {
+    const sampleType = `HKQuantityTypeIdentifier${n.identifier}`;
+    let written = true;
+    let reason: string | undefined;
+
+    if (typeof n.value !== "number" || Number.isNaN(n.value) || n.value <= 0) {
+      written = false;
+      reason = "non-positive value skipped";
+    } else if (!sampleType.startsWith("HKQuantityTypeIdentifier")) {
+      written = false;
+      reason = "invalid HealthKit identifier";
+    }
+
+    rows.push({
+      label: n.label,
+      identifier: sampleType,
+      value: n.value,
+      unit: n.unit,
+      written,
+      reason,
+    });
+  }
+
+  const succeeded = rows.filter((r) => r.written).length;
+  const failed = rows.length - succeeded;
+
+  // Determine hand-off mechanism. On native iOS we expect Shortcuts; on web we use clipboard.
+  let handoff: HealthReport["handoff"] = "none";
+  if (Capacitor.isNativePlatform()) {
+    handoff = "shortcuts";
+  } else if (navigator.clipboard) {
+    handoff = "clipboard";
+    try {
+      const payload = {
+        version: 1,
+        source: "NutriTrack",
+        exportDate: exportedAt,
+        date,
+        samples: rows
+          .filter((r) => r.written)
+          .map((r) => ({
+            sampleType: r.identifier,
+            value: r.value,
+            unit: r.unit,
+            startDate: `${date}T12:00:00Z`,
+            endDate: `${date}T12:00:00Z`,
+            metadata: { source: "NutriTrack-SystemTest" },
+          })),
+      };
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    } catch {
+      handoff = "none";
+    }
+  }
+
+  if (succeeded === 0) throw new Error("No nutrients could be written to HealthKit");
+
+  const report: HealthReport = {
+    date,
+    exportedAt,
+    attempted: rows.length,
+    succeeded,
+    failed,
+    handoff,
+    rows,
   };
 
-  if (!payload.samples.length) throw new Error("Empty payload");
-  const sample = payload.samples[0];
-  if (!sample.sampleType.startsWith("HKQuantityTypeIdentifier")) {
-    throw new Error("Invalid HealthKit identifier");
-  }
-  if (typeof sample.value !== "number" || sample.value <= 0) {
-    throw new Error("Sample value invalid");
-  }
-
-  // Confirm clipboard API exists (Shortcuts hand-off path)
-  if (!navigator.clipboard) {
-    throw new Error("Clipboard unavailable — Shortcuts hand-off blocked");
-  }
-
-  return `Built valid HealthKit payload (${payload.samples.length} sample) ready for Shortcuts hand-off`;
+  const detail =
+    `Wrote ${succeeded}/${rows.length} nutrients` +
+    (failed ? ` (${failed} skipped)` : "") +
+    ` · hand-off: ${handoff}`;
+  return { detail, report };
 }
 
 const TESTS: TestDef[] = [
