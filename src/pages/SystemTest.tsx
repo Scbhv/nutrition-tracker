@@ -254,11 +254,16 @@ export default function SystemTest() {
     setResults((r) => ({ ...r, [test.id]: { status: "running" } }));
     const started = performance.now();
     try {
-      const detail = await test.run();
+      const outcome = await test.run();
       const durationMs = Math.round(performance.now() - started);
       setResults((r) => ({
         ...r,
-        [test.id]: { status: "pass", detail, durationMs },
+        [test.id]: {
+          status: "pass",
+          detail: outcome.detail,
+          report: outcome.report,
+          durationMs,
+        },
       }));
       return true;
     } catch (err) {
