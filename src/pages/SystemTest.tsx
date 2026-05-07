@@ -11,6 +11,9 @@ import {
   PenLine,
   HardDrive,
   Heart,
+  ShieldCheck,
+  ShieldAlert,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
