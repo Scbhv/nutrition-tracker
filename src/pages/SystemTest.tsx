@@ -484,6 +484,12 @@ export default function SystemTest() {
           Runs each integration in sequence and reports pass/fail per step.
         </p>
 
+        <PreflightCard
+          report={preflight}
+          loading={preflightLoading}
+          onRun={runPreflight}
+        />
+
         {TESTS.map((test) => {
           const r = results[test.id];
           const Icon = test.icon;
