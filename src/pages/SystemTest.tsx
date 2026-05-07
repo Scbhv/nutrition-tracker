@@ -641,3 +641,99 @@ function HealthReportDetail({ report }: { report: HealthReport }) {
     </div>
   );
 }
+
+function PreflightCard({
+  report,
+  loading,
+  onRun,
+}: {
+  report: PreflightReport | null;
+  loading: boolean;
+  onRun: () => void;
+}) {
+  const overall = report?.overall;
+  const headerTone =
+    overall === "ok"
+      ? "bg-primary/15 text-primary"
+      : overall === "warn"
+      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+      : overall === "fail"
+      ? "bg-destructive/15 text-destructive"
+      : "bg-muted text-muted-foreground";
+
+  return (
+    <Card className="rounded-2xl border-border/60 p-4 space-y-3">
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${headerTone}`}>
+          {overall === "fail" ? (
+            <ShieldAlert className="h-5 w-5" />
+          ) : (
+            <ShieldCheck className="h-5 w-5" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold tracking-tight text-sm">HealthKit Preflight</h3>
+            {overall && <PreflightBadge status={overall} />}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Verifies platform, clipboard, Shortcuts, and payload before writing to Apple Health.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onRun}
+          disabled={loading}
+          className="shrink-0 active:scale-[0.96] transition-transform"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {report && (
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 space-y-1.5">
+          {report.checks.map((c) => (
+            <div key={c.id} className="flex items-start gap-2 py-1">
+              {c.status === "ok" ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+              ) : c.status === "warn" ? (
+                <ShieldAlert className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+              ) : (
+                <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-foreground">{c.label}</span>
+                  <PreflightBadge status={c.status} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{c.detail}</p>
+                {c.remediation && c.status !== "ok" && (
+                  <p className="text-[11px] text-foreground/80 mt-0.5">→ {c.remediation}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function PreflightBadge({ status }: { status: PreflightStatus }) {
+  if (status === "ok")
+    return (
+      <Badge className="h-5 bg-primary/15 text-primary hover:bg-primary/15 border-0">Ready</Badge>
+    );
+  if (status === "warn")
+    return (
+      <Badge className="h-5 bg-amber-500/15 text-amber-600 hover:bg-amber-500/15 border-0 dark:text-amber-400">
+        Warning
+      </Badge>
+    );
+  return (
+    <Badge className="h-5 bg-destructive/15 text-destructive hover:bg-destructive/15 border-0">
+      Missing
+    </Badge>
+  );
+}
