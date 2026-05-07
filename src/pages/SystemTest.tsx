@@ -375,6 +375,21 @@ export default function SystemTest() {
     Object.fromEntries(TESTS.map((t) => [t.id, { status: "idle" as Status }]))
   );
   const [running, setRunning] = useState(false);
+  const [preflight, setPreflight] = useState<PreflightReport | null>(null);
+  const [preflightLoading, setPreflightLoading] = useState(false);
+
+  const runPreflight = async () => {
+    setPreflightLoading(true);
+    try {
+      const report = await runHealthPreflight();
+      setPreflight(report);
+      if (report.overall === "ok") toast.success("HealthKit preflight passed");
+      else if (report.overall === "warn") toast.message("Preflight: review warnings");
+      else toast.error("Preflight failed — see details");
+    } finally {
+      setPreflightLoading(false);
+    }
+  };
 
   const runOne = async (test: TestDef) => {
     setResults((r) => ({ ...r, [test.id]: { status: "running" } }));
