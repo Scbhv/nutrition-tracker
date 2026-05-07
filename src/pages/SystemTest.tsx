@@ -45,6 +45,129 @@ export interface HealthReport {
   rows: HealthReportRow[];
 }
 
+export type PreflightStatus = "ok" | "warn" | "fail";
+
+export interface PreflightCheck {
+  id: string;
+  label: string;
+  status: PreflightStatus;
+  detail: string;
+  remediation?: string;
+}
+
+export interface PreflightReport {
+  checkedAt: string;
+  overall: PreflightStatus;
+  checks: PreflightCheck[];
+}
+
+async function runHealthPreflight(): Promise<PreflightReport> {
+  const checks: PreflightCheck[] = [];
+  const isNative = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
+
+  // 1. Platform
+  if (isNative && platform === "ios") {
+    checks.push({
+      id: "platform",
+      label: "Platform",
+      status: "ok",
+      detail: "Running on native iOS — HealthKit available",
+    });
+  } else if (isNative) {
+    checks.push({
+      id: "platform",
+      label: "Platform",
+      status: "fail",
+      detail: `Native platform "${platform}" detected — HealthKit is iOS-only`,
+      remediation: "Run on an iPhone or iPad to write to Apple Health.",
+    });
+  } else {
+    checks.push({
+      id: "platform",
+      label: "Platform",
+      status: "warn",
+      detail: "Running in the browser — HealthKit writes are simulated via clipboard hand-off",
+      remediation: "Install the iOS build to write directly to HealthKit.",
+    });
+  }
+
+  // 2. Clipboard hand-off (web fallback for Shortcuts)
+  const clipboardOk =
+    typeof navigator !== "undefined" &&
+    !!navigator.clipboard &&
+    typeof navigator.clipboard.writeText === "function";
+  if (clipboardOk) {
+    try {
+      await navigator.clipboard.writeText("");
+      checks.push({
+        id: "clipboard",
+        label: "Clipboard hand-off",
+        status: "ok",
+        detail: "Clipboard write permission granted",
+      });
+    } catch {
+      checks.push({
+        id: "clipboard",
+        label: "Clipboard hand-off",
+        status: isNative ? "warn" : "fail",
+        detail: "Clipboard write was blocked by the browser",
+        remediation: "Allow clipboard access for this site, or use the native app.",
+      });
+    }
+  } else {
+    checks.push({
+      id: "clipboard",
+      label: "Clipboard hand-off",
+      status: isNative ? "warn" : "fail",
+      detail: "Clipboard API unavailable",
+      remediation: "Use a modern browser over HTTPS, or install the native app.",
+    });
+  }
+
+  // 3. Shortcuts URL scheme (only meaningful on iOS)
+  if (isNative && platform === "ios") {
+    // We can't truly probe installed apps from the webview; report best-effort.
+    checks.push({
+      id: "shortcuts",
+      label: "Shortcuts app",
+      status: "warn",
+      detail: "Cannot verify the Shortcuts app from the webview",
+      remediation:
+        "Ensure the 'NutriTrack → Health' shortcut is installed and 'Allow Untrusted Shortcuts' is enabled in Settings → Shortcuts.",
+    });
+  } else {
+    checks.push({
+      id: "shortcuts",
+      label: "Shortcuts app",
+      status: "warn",
+      detail: "Shortcuts is iOS-only — skipped",
+    });
+  }
+
+  // 4. Hand-off payload schema (sanity check on the constants used by the writer)
+  const allValid = HEALTH_TEST_NUTRIENTS.every(
+    (n) => n.identifier.length > 0 && n.unit.length > 0 && n.value > 0,
+  );
+  checks.push({
+    id: "schema",
+    label: "Payload schema",
+    status: allValid ? "ok" : "fail",
+    detail: allValid
+      ? `${HEALTH_TEST_NUTRIENTS.length} HealthKit identifiers configured`
+      : "One or more nutrient mappings are invalid",
+    remediation: allValid ? undefined : "Fix HEALTH_TEST_NUTRIENTS entries.",
+  });
+
+  const overall: PreflightStatus = checks.some((c) => c.status === "fail")
+    ? "fail"
+    : checks.some((c) => c.status === "warn")
+    ? "warn"
+    : "ok";
+
+  return { checkedAt: new Date().toISOString(), overall, checks };
+}
+
 interface TestDef {
   id: string;
   title: string;
