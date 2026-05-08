@@ -555,7 +555,7 @@ export default function TestChecklist() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground pt-4">
-          Progress is saved locally on this device.
+          {syncEnabled ? "Progress is synced to your account." : "Progress is saved locally on this device."}
         </p>
       </main>
     </div>
