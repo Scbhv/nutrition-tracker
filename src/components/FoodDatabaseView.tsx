@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson, ChefHat, Clock } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson, ChefHat, Clock, Users } from 'lucide-react';
+import { CommunityFoodTab } from './CommunityFoodTab';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -41,7 +42,7 @@ export function FoodDatabaseView({
   onEditRecipe,
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'files'>('database');
+  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'community' | 'files'>('database');
   const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
   const [portionGrams, setPortionGrams] = useState('');
   const portionInputRef = useRef<HTMLInputElement>(null);
@@ -156,19 +157,23 @@ export function FoodDatabaseView({
       </div>
 
       {/* Sub-tabs for Database vs Recipes vs Files */}
-      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'files')}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="database" className="gap-1.5">
-            <FileJson className="h-4 w-4" />
-            <span className="hidden sm:inline">Foods</span> ({plainFoods.length})
+      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'community' | 'files')}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="database" className="gap-1 text-xs">
+            <FileJson className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Foods</span>({plainFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="recipes" className="gap-1.5">
-            <ChefHat className="h-4 w-4" />
-            <span className="hidden sm:inline">Recipes</span> ({recipeFoods.length})
+          <TabsTrigger value="recipes" className="gap-1 text-xs">
+            <ChefHat className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Recipes</span>({recipeFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="files" className="gap-1.5">
-            <FolderOpen className="h-4 w-4" />
-            <span className="hidden sm:inline">Files</span> {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
+          <TabsTrigger value="community" className="gap-1 text-xs">
+            <Users className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Community</span>
+          </TabsTrigger>
+          <TabsTrigger value="files" className="gap-1 text-xs">
+            <FolderOpen className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Files</span>{fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
           </TabsTrigger>
         </TabsList>
 
@@ -233,6 +238,19 @@ export function FoodDatabaseView({
               )}
             </div>
           </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="community" className="mt-4">
+          <CommunityFoodTab
+            onImportToLibrary={(food) => {
+              onImportFoods([{
+                ...food,
+                id: crypto.randomUUID(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              }]);
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="files" className="space-y-4 mt-4">
