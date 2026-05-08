@@ -269,11 +269,46 @@ export default function TestChecklist() {
       lastRun: new Date().toISOString(),
     }));
 
-  const reset = () => {
+  const reset = async () => {
     setState(EMPTY_STATE);
     localStorage.removeItem(STORAGE_KEY);
+    if (syncEnabled && userId) {
+      const { error } = await supabase
+        .from("test_checklist_progress")
+        .delete()
+        .eq("user_id", userId);
+      if (error) toast.error("Cloud reset failed", { description: error.message });
+    }
     toast.success("Checklist reset");
   };
+
+  const pullFromCloud = async () => {
+    if (!userId) return;
+    setSyncStatus("loading");
+    const { data, error } = await supabase
+      .from("test_checklist_progress")
+      .select("checked, notes, last_run, updated_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) {
+      setSyncStatus("error");
+      toast.error("Pull failed", { description: error.message });
+      return;
+    }
+    if (data) {
+      setState({
+        checked: (data.checked as Record<string, boolean>) ?? {},
+        notes: data.notes ?? "",
+        lastRun: data.last_run ?? null,
+      });
+      setLastSynced(data.updated_at ? new Date(data.updated_at) : new Date());
+      toast.success("Pulled latest from your account");
+    } else {
+      toast.info("No cloud copy yet");
+    }
+    setSyncStatus("synced");
+  };
+
 
   const markSectionPass = (section: Section) => {
     setState((s) => {
