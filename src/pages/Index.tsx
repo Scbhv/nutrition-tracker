@@ -46,6 +46,7 @@ export default function Index() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   useThemePack(); // applies persisted texture pack on mount
   const {
