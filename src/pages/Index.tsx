@@ -645,15 +645,17 @@ export default function Index() {
             <OfflineSimulationCard />
             <ErrorLogCard />
 
-            <Button
-              onClick={() => navigate('/test-checklist')}
-              variant="outline"
-              className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-            >
-              <ClipboardCheck className="h-5 w-5 mr-3" />
-              Test Checklist
-              <span className="ml-auto text-xs text-muted-foreground">QA workflows</span>
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => navigate('/test-checklist')}
+                variant="outline"
+                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+              >
+                <ClipboardCheck className="h-5 w-5 mr-3" />
+                Test Checklist
+                <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+              </Button>
+            )}
 
             {isLoggedIn ? (
               <Button
