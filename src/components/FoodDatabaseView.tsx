@@ -240,6 +240,19 @@ export function FoodDatabaseView({
           </ScrollArea>
         </TabsContent>
 
+        <TabsContent value="community" className="mt-4">
+          <CommunityFoodTab
+            onImportToLibrary={(food) => {
+              onImportFoods([{
+                ...food,
+                id: crypto.randomUUID(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              }]);
+            }}
+          />
+        </TabsContent>
+
         <TabsContent value="files" className="space-y-4 mt-4">
           {!fileSystem.isSupported ? (
             <div className="glass-card rounded-2xl p-6 text-center">
