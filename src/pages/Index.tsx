@@ -46,6 +46,7 @@ export default function Index() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { appearance, updateAppearance } = useAppearance();
   useThemePack(); // applies persisted texture pack on mount
   const {
@@ -96,6 +97,12 @@ export default function Index() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
       setAuthChecked(true);
+      const email = session?.user?.email?.toLowerCase();
+      setIsAdmin(!!email && ['simonstechprojects@gmail.com'].includes(email));
+    });
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email?.toLowerCase();
+      setIsAdmin(!!email && ['simonstechprojects@gmail.com'].includes(email));
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -638,15 +645,17 @@ export default function Index() {
             <OfflineSimulationCard />
             <ErrorLogCard />
 
-            <Button
-              onClick={() => navigate('/test-checklist')}
-              variant="outline"
-              className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-            >
-              <ClipboardCheck className="h-5 w-5 mr-3" />
-              Test Checklist
-              <span className="ml-auto text-xs text-muted-foreground">QA workflows</span>
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => navigate('/test-checklist')}
+                variant="outline"
+                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+              >
+                <ClipboardCheck className="h-5 w-5 mr-3" />
+                Test Checklist
+                <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+              </Button>
+            )}
 
             {isLoggedIn ? (
               <Button
