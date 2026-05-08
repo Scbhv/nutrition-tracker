@@ -129,6 +129,7 @@ const SECTIONS: Section[] = [
 
 const TOTAL_STEPS = SECTIONS.reduce((n, s) => n + s.steps.length, 0);
 const STORAGE_KEY = "nutrient-tracker-test-checklist-v1";
+const SYNC_PREF_KEY = "nutrient-tracker-test-checklist-sync";
 
 type State = {
   checked: Record<string, boolean>;
@@ -148,21 +149,112 @@ function loadState(): State {
   }
 }
 
+type SyncStatus = "idle" | "loading" | "saving" | "synced" | "offline" | "error";
+
 export default function TestChecklist() {
   const navigate = useNavigate();
   const [state, setState] = useState<State>(EMPTY_STATE);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(SECTIONS.map((s) => [s.id, true]))
   );
+  const [userId, setUserId] = useState<string | null>(null);
+  const [syncEnabled, setSyncEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem(SYNC_PREF_KEY) === "1"; } catch { return false; }
+  });
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const initialPullDone = useRef(false);
+  const saveTimer = useRef<number | null>(null);
 
+  // Load auth + local state
   useEffect(() => {
     setState(loadState());
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Persist sync preference
+  useEffect(() => {
+    try { localStorage.setItem(SYNC_PREF_KEY, syncEnabled ? "1" : "0"); } catch {}
+  }, [syncEnabled]);
+
+  // Initial pull from cloud when sync turns on / user logs in
+  useEffect(() => {
+    if (!syncEnabled || !userId) {
+      initialPullDone.current = false;
+      return;
+    }
+    if (initialPullDone.current) return;
+    initialPullDone.current = true;
+    (async () => {
+      setSyncStatus("loading");
+      const { data, error } = await supabase
+        .from("test_checklist_progress")
+        .select("checked, notes, last_run, updated_at")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) {
+        setSyncStatus("error");
+        toast.error("Couldn't load synced progress", { description: error.message });
+        return;
+      }
+      if (data) {
+        setState({
+          checked: (data.checked as Record<string, boolean>) ?? {},
+          notes: data.notes ?? "",
+          lastRun: data.last_run ?? null,
+        });
+        setLastSynced(data.updated_at ? new Date(data.updated_at) : new Date());
+        toast.success("Loaded progress from your account");
+      } else {
+        // Push current local state up as the first cloud copy
+        await pushNow(loadState(), userId, true);
+      }
+      setSyncStatus("synced");
+    })();
+  }, [syncEnabled, userId]);
+
+  // Save locally
   useEffect(() => {
     if (state === EMPTY_STATE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  // Debounced cloud save
+  useEffect(() => {
+    if (!syncEnabled || !userId || !initialPullDone.current) return;
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => {
+      pushNow(state, userId);
+    }, 800);
+    return () => {
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, syncEnabled, userId]);
+
+  async function pushNow(s: State, uid: string, silent = false) {
+    setSyncStatus("saving");
+    const { error } = await supabase
+      .from("test_checklist_progress")
+      .upsert({
+        user_id: uid,
+        checked: s.checked,
+        notes: s.notes,
+        last_run: s.lastRun,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    if (error) {
+      setSyncStatus("error");
+      if (!silent) toast.error("Sync failed", { description: error.message });
+    } else {
+      setLastSynced(new Date());
+      setSyncStatus("synced");
+    }
+  }
 
   const completed = useMemo(
     () => Object.values(state.checked).filter(Boolean).length,
