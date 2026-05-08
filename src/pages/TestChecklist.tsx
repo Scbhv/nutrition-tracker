@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RotateCcw, CheckCircle2, Circle, ChevronDown } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2, Circle, ChevronDown, Cloud, CloudOff, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type Step = { id: string; text: string; expected: string };
 type Section = { id: string; title: string; emoji: string; steps: Step[] };
@@ -127,6 +129,7 @@ const SECTIONS: Section[] = [
 
 const TOTAL_STEPS = SECTIONS.reduce((n, s) => n + s.steps.length, 0);
 const STORAGE_KEY = "nutrient-tracker-test-checklist-v1";
+const SYNC_PREF_KEY = "nutrient-tracker-test-checklist-sync";
 
 type State = {
   checked: Record<string, boolean>;
@@ -146,21 +149,112 @@ function loadState(): State {
   }
 }
 
+type SyncStatus = "idle" | "loading" | "saving" | "synced" | "offline" | "error";
+
 export default function TestChecklist() {
   const navigate = useNavigate();
   const [state, setState] = useState<State>(EMPTY_STATE);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(SECTIONS.map((s) => [s.id, true]))
   );
+  const [userId, setUserId] = useState<string | null>(null);
+  const [syncEnabled, setSyncEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem(SYNC_PREF_KEY) === "1"; } catch { return false; }
+  });
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const initialPullDone = useRef(false);
+  const saveTimer = useRef<number | null>(null);
 
+  // Load auth + local state
   useEffect(() => {
     setState(loadState());
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Persist sync preference
+  useEffect(() => {
+    try { localStorage.setItem(SYNC_PREF_KEY, syncEnabled ? "1" : "0"); } catch {}
+  }, [syncEnabled]);
+
+  // Initial pull from cloud when sync turns on / user logs in
+  useEffect(() => {
+    if (!syncEnabled || !userId) {
+      initialPullDone.current = false;
+      return;
+    }
+    if (initialPullDone.current) return;
+    initialPullDone.current = true;
+    (async () => {
+      setSyncStatus("loading");
+      const { data, error } = await supabase
+        .from("test_checklist_progress")
+        .select("checked, notes, last_run, updated_at")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) {
+        setSyncStatus("error");
+        toast.error("Couldn't load synced progress", { description: error.message });
+        return;
+      }
+      if (data) {
+        setState({
+          checked: (data.checked as Record<string, boolean>) ?? {},
+          notes: data.notes ?? "",
+          lastRun: data.last_run ?? null,
+        });
+        setLastSynced(data.updated_at ? new Date(data.updated_at) : new Date());
+        toast.success("Loaded progress from your account");
+      } else {
+        // Push current local state up as the first cloud copy
+        await pushNow(loadState(), userId, true);
+      }
+      setSyncStatus("synced");
+    })();
+  }, [syncEnabled, userId]);
+
+  // Save locally
   useEffect(() => {
     if (state === EMPTY_STATE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  // Debounced cloud save
+  useEffect(() => {
+    if (!syncEnabled || !userId || !initialPullDone.current) return;
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => {
+      pushNow(state, userId);
+    }, 800);
+    return () => {
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, syncEnabled, userId]);
+
+  async function pushNow(s: State, uid: string, silent = false) {
+    setSyncStatus("saving");
+    const { error } = await supabase
+      .from("test_checklist_progress")
+      .upsert({
+        user_id: uid,
+        checked: s.checked,
+        notes: s.notes,
+        last_run: s.lastRun,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    if (error) {
+      setSyncStatus("error");
+      if (!silent) toast.error("Sync failed", { description: error.message });
+    } else {
+      setLastSynced(new Date());
+      setSyncStatus("synced");
+    }
+  }
 
   const completed = useMemo(
     () => Object.values(state.checked).filter(Boolean).length,
@@ -175,11 +269,46 @@ export default function TestChecklist() {
       lastRun: new Date().toISOString(),
     }));
 
-  const reset = () => {
+  const reset = async () => {
     setState(EMPTY_STATE);
     localStorage.removeItem(STORAGE_KEY);
+    if (syncEnabled && userId) {
+      const { error } = await supabase
+        .from("test_checklist_progress")
+        .delete()
+        .eq("user_id", userId);
+      if (error) toast.error("Cloud reset failed", { description: error.message });
+    }
     toast.success("Checklist reset");
   };
+
+  const pullFromCloud = async () => {
+    if (!userId) return;
+    setSyncStatus("loading");
+    const { data, error } = await supabase
+      .from("test_checklist_progress")
+      .select("checked, notes, last_run, updated_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) {
+      setSyncStatus("error");
+      toast.error("Pull failed", { description: error.message });
+      return;
+    }
+    if (data) {
+      setState({
+        checked: (data.checked as Record<string, boolean>) ?? {},
+        notes: data.notes ?? "",
+        lastRun: data.last_run ?? null,
+      });
+      setLastSynced(data.updated_at ? new Date(data.updated_at) : new Date());
+      toast.success("Pulled latest from your account");
+    } else {
+      toast.info("No cloud copy yet");
+    }
+    setSyncStatus("synced");
+  };
+
 
   const markSectionPass = (section: Section) => {
     setState((s) => {
@@ -255,6 +384,60 @@ export default function TestChecklist() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+        <Card className="rounded-2xl border-border/60 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5">
+              {syncEnabled ? (
+                <Cloud className="h-5 w-5 text-primary" />
+              ) : (
+                <CloudOff className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-semibold tracking-tight text-sm">Sync to my account</h2>
+                <Switch
+                  checked={syncEnabled}
+                  onCheckedChange={(v) => {
+                    if (v && !userId) {
+                      toast.error("Sign in first to enable sync");
+                      return;
+                    }
+                    setSyncEnabled(v);
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {syncEnabled
+                  ? "Progress and notes save to your account so they follow you across devices."
+                  : "Off — progress is stored only on this device."}
+              </p>
+              {syncEnabled && (
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  {syncStatus === "saving" || syncStatus === "loading" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : syncStatus === "error" ? (
+                    <span className="text-destructive">Sync error</span>
+                  ) : (
+                    <span>
+                      {lastSynced ? `Synced ${lastSynced.toLocaleTimeString()}` : "Connecting…"}
+                    </span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 ml-auto"
+                    onClick={pullFromCloud}
+                    disabled={!userId || syncStatus === "loading"}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" /> Pull
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
         {state.lastRun && (
           <p className="text-xs text-muted-foreground px-1">
             Last updated {new Date(state.lastRun).toLocaleString()}
@@ -372,7 +555,7 @@ export default function TestChecklist() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground pt-4">
-          Progress is saved locally on this device.
+          {syncEnabled ? "Progress is synced to your account." : "Progress is saved locally on this device."}
         </p>
       </main>
     </div>
