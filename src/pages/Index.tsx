@@ -97,6 +97,12 @@ export default function Index() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
       setAuthChecked(true);
+      const email = session?.user?.email?.toLowerCase();
+      setIsAdmin(!!email && ['simonstechprojects@gmail.com'].includes(email));
+    });
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email?.toLowerCase();
+      setIsAdmin(!!email && ['simonstechprojects@gmail.com'].includes(email));
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
