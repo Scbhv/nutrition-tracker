@@ -157,19 +157,23 @@ export function FoodDatabaseView({
       </div>
 
       {/* Sub-tabs for Database vs Recipes vs Files */}
-      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'files')}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="database" className="gap-1.5">
-            <FileJson className="h-4 w-4" />
-            <span className="hidden sm:inline">Foods</span> ({plainFoods.length})
+      <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'database' | 'recipes' | 'community' | 'files')}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="database" className="gap-1 text-xs">
+            <FileJson className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Foods</span>({plainFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="recipes" className="gap-1.5">
-            <ChefHat className="h-4 w-4" />
-            <span className="hidden sm:inline">Recipes</span> ({recipeFoods.length})
+          <TabsTrigger value="recipes" className="gap-1 text-xs">
+            <ChefHat className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Recipes</span>({recipeFoods.length})
           </TabsTrigger>
-          <TabsTrigger value="files" className="gap-1.5">
-            <FolderOpen className="h-4 w-4" />
-            <span className="hidden sm:inline">Files</span> {fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
+          <TabsTrigger value="community" className="gap-1 text-xs">
+            <Users className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Community</span>
+          </TabsTrigger>
+          <TabsTrigger value="files" className="gap-1 text-xs">
+            <FolderOpen className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Files</span>{fileSystem.hasPermission && `(${fileSystem.savedFiles.length})`}
           </TabsTrigger>
         </TabsList>
 
