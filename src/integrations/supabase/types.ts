@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_food_approvals: {
+        Row: {
+          created_at: string
+          food_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_food_approvals_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "community_foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_foods: {
+        Row: {
+          approval_count: number
+          approved_at: string | null
+          barcode: string | null
+          brand: string | null
+          created_at: string
+          id: string
+          image_path: string | null
+          name: string
+          nutrients: Json
+          serving_size: number
+          serving_unit: string
+          status: Database["public"]["Enums"]["community_food_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_count?: number
+          approved_at?: string | null
+          barcode?: string | null
+          brand?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          name: string
+          nutrients?: Json
+          serving_size?: number
+          serving_unit?: string
+          status?: Database["public"]["Enums"]["community_food_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_count?: number
+          approved_at?: string | null
+          barcode?: string | null
+          brand?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          name?: string
+          nutrients?: Json
+          serving_size?: number
+          serving_unit?: string
+          status?: Database["public"]["Enums"]["community_food_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -182,6 +262,7 @@ export type Database = {
       }
     }
     Enums: {
+      community_food_status: "pending" | "approved" | "rejected"
       feedback_type: "bug" | "feature" | "other"
     }
     CompositeTypes: {
@@ -310,6 +391,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      community_food_status: ["pending", "approved", "rejected"],
       feedback_type: ["bug", "feature", "other"],
     },
   },
