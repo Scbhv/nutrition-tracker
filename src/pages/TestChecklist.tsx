@@ -384,6 +384,60 @@ export default function TestChecklist() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+        <Card className="rounded-2xl border-border/60 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5">
+              {syncEnabled ? (
+                <Cloud className="h-5 w-5 text-primary" />
+              ) : (
+                <CloudOff className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-semibold tracking-tight text-sm">Sync to my account</h2>
+                <Switch
+                  checked={syncEnabled}
+                  onCheckedChange={(v) => {
+                    if (v && !userId) {
+                      toast.error("Sign in first to enable sync");
+                      return;
+                    }
+                    setSyncEnabled(v);
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {syncEnabled
+                  ? "Progress and notes save to your account so they follow you across devices."
+                  : "Off — progress is stored only on this device."}
+              </p>
+              {syncEnabled && (
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  {syncStatus === "saving" || syncStatus === "loading" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : syncStatus === "error" ? (
+                    <span className="text-destructive">Sync error</span>
+                  ) : (
+                    <span>
+                      {lastSynced ? `Synced ${lastSynced.toLocaleTimeString()}` : "Connecting…"}
+                    </span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 ml-auto"
+                    onClick={pullFromCloud}
+                    disabled={!userId || syncStatus === "loading"}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" /> Pull
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
         {state.lastRun && (
           <p className="text-xs text-muted-foreground px-1">
             Last updated {new Date(state.lastRun).toLocaleString()}
