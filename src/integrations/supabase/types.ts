@@ -166,6 +166,33 @@ export type Database = {
         }
         Relationships: []
       }
+      test_checklist_progress: {
+        Row: {
+          checked: Json
+          id: string
+          last_run: string | null
+          notes: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checked?: Json
+          id?: string
+          last_run?: string | null
+          notes?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checked?: Json
+          id?: string
+          last_run?: string | null
+          notes?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       theme_packs: {
         Row: {
           accent_hue: number
