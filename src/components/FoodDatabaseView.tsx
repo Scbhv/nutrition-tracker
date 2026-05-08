@@ -42,7 +42,7 @@ export function FoodDatabaseView({
   onEditRecipe,
 }: FoodDatabaseViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'files'>('database');
+  const [activeSubTab, setActiveSubTab] = useState<'database' | 'recipes' | 'community' | 'files'>('database');
   const [portionFood, setPortionFood] = useState<FoodItem | null>(null);
   const [portionGrams, setPortionGrams] = useState('');
   const portionInputRef = useRef<HTMLInputElement>(null);
