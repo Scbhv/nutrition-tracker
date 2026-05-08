@@ -9,6 +9,7 @@ import Admin from "./pages/Admin";
 import TestChecklist from "./pages/TestChecklist";
 import SystemTest from "./pages/SystemTest";
 import NotFound from "./pages/NotFound";
+import { AdminRoute } from "./components/AdminRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
