@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import TestChecklist from "./pages/TestChecklist";
 import SystemTest from "./pages/SystemTest";
+import NutrientEditor from "./pages/NutrientEditor";
 import NotFound from "./pages/NotFound";
 import { AdminRoute } from "./components/AdminRoute";
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/test-checklist" element={<AdminRoute><TestChecklist /></AdminRoute>} />
           <Route path="/system-test" element={<AdminRoute><SystemTest /></AdminRoute>} />
+          <Route path="/nutrient-editor" element={<NutrientEditor />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
