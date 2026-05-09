@@ -146,8 +146,8 @@ export default function NutrientEditor() {
     if (!file) return;
     const text = await file.text();
     const result = parseNutrientLibrary(text);
-    if (!result.success) {
-      toast({ title: 'Import failed', description: result.error, variant: 'destructive' });
+    if (result.success !== true) {
+      toast({ title: 'Import failed', description: 'error' in result ? result.error : 'Invalid file', variant: 'destructive' });
       return;
     }
     setFoods(curr => {
