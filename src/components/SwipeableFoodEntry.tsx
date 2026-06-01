@@ -280,6 +280,14 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
             })()}
 
             <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => { setEditOpen(false); handleDelete(); }}
+                className="h-11 rounded-2xl text-destructive border-destructive/40 hover:bg-destructive/10 px-3"
+                aria-label="Delete entry"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
               <Button variant="secondary" onClick={() => setEditOpen(false)} className="flex-1 h-11 rounded-2xl">
                 Cancel
               </Button>
