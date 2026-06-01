@@ -1,6 +1,24 @@
 import { z } from 'zod';
-import { FoodItem, NutrientData } from '@/types/nutrients';
+import { FoodItem, NutrientData, Recipe } from '@/types/nutrients';
 import { logError } from '@/lib/errorLog';
+
+/** Recipe payload embedded inside a library food entry. */
+const LibraryRecipeSchema = z.object({
+  ingredients: z
+    .array(
+      z.object({
+        foodId: z.string(),
+        name: z.string().min(1),
+        grams: z.number().nonnegative(),
+      }),
+    )
+    .default([]),
+  servings: z.number().positive().default(1),
+  instructions: z.array(z.string()).optional(),
+  prepMinutes: z.number().nonnegative().optional(),
+  tags: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+});
 
 /** Shape of an entry inside a nutrient library file. ID/timestamps optional. */
 const LibraryFoodSchema = z.object({
@@ -13,6 +31,8 @@ const LibraryFoodSchema = z.object({
   nutrients: z.record(z.string(), z.number().nonnegative()).default({}),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  /** Optional recipe metadata — present only for user recipes. */
+  recipe: LibraryRecipeSchema.optional(),
 });
 
 export const NutrientLibrarySchema = z.object({
@@ -37,6 +57,7 @@ export function libraryEntryToFoodItem(entry: z.infer<typeof LibraryFoodSchema>)
     nutrients: entry.nutrients as NutrientData,
     createdAt: entry.createdAt || now,
     updatedAt: now,
+    recipe: entry.recipe as Recipe | undefined,
   };
 }
 
@@ -70,12 +91,13 @@ export function parseNutrientLibrary(jsonString: string): ParseResult {
   }
 }
 
-/** Build an exportable library payload from current foods. */
+/** Build an exportable library payload from current foods. Recipes are preserved. */
 export function buildExportLibrary(foods: FoodItem[], name = 'My Nutrient Library'): string {
+  const recipeCount = foods.filter(f => !!f.recipe).length;
   const payload: NutrientLibrary = {
-    version: '1.0',
+    version: '1.1',
     name,
-    description: `Exported ${new Date().toISOString()} · ${foods.length} foods`,
+    description: `Exported ${new Date().toISOString()} · ${foods.length} foods${recipeCount ? ` · ${recipeCount} recipes` : ''}`,
     foods: foods.map(f => ({
       id: f.id,
       name: f.name,
@@ -88,6 +110,20 @@ export function buildExportLibrary(foods: FoodItem[], name = 'My Nutrient Librar
       ) as Record<string, number>,
       createdAt: f.createdAt,
       updatedAt: f.updatedAt,
+      recipe: f.recipe
+        ? {
+            ingredients: f.recipe.ingredients.map(i => ({
+              foodId: i.foodId,
+              name: i.name,
+              grams: i.grams,
+            })),
+            servings: f.recipe.servings,
+            instructions: f.recipe.instructions,
+            prepMinutes: f.recipe.prepMinutes,
+            tags: f.recipe.tags,
+            notes: f.recipe.notes,
+          }
+        : undefined,
     })),
   };
   return JSON.stringify(payload, null, 2);
