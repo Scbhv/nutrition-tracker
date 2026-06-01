@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
 import { useFileSystemSync } from '@/hooks/useFileSystemSync';
+import { getWholeUnitPresets } from '@/lib/wholeUnitPresets';
 import { cn } from '@/lib/utils';
 
 interface FoodDatabaseViewProps {
@@ -419,6 +420,33 @@ export function FoodDatabaseView({
               {portionFood?.servingSize}{portionFood?.servingUnit} per serving •{' '}
               {portionFood?.nutrients['energy-kcal'] || 0} kcal/100g
             </div>
+            {portionFood && (() => {
+              const wholePresets = getWholeUnitPresets(portionFood.name);
+              if (wholePresets.length === 0) return null;
+              return (
+                <div className="space-y-1.5">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground/80 text-center font-semibold">
+                    Whole units
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {wholePresets.map(p => (
+                      <button
+                        key={p.label}
+                        onClick={() => setPortionGrams(String(p.grams))}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                          portionGrams === String(p.grams)
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-secondary text-secondary-foreground border-border hover:bg-accent"
+                        )}
+                      >
+                        {p.label} <span className="opacity-60 text-xs">· {p.grams}g</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
             <div className="flex flex-wrap gap-2 justify-center">
               {portionFood && lastPortions[portionFood.id] && ![50, 100, 150, 200].includes(lastPortions[portionFood.id]) && (
                 <button

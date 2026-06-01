@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { getWholeUnitPresets } from '@/lib/wholeUnitPresets';
 
 interface SwipeableFoodEntryProps {
   food: FoodItem;
@@ -248,6 +249,29 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
                 autoFocus
               />
             </div>
+
+            {(() => {
+              const wholePresets = getWholeUnitPresets(food.name);
+              if (wholePresets.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1.5">
+                  {wholePresets.map(p => (
+                    <button
+                      key={p.label}
+                      onClick={() => setDraftGrams(String(p.grams))}
+                      className={cn(
+                        "px-2.5 py-1.5 rounded-full text-xs font-medium transition-all",
+                        parseFloat(draftGrams) === p.grams
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {p.label} <span className="opacity-60">· {p.grams}g</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
 
             <div className="grid grid-cols-4 gap-2">
               {presets.map(p => (
