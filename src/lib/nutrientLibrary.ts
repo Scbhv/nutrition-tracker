@@ -91,12 +91,13 @@ export function parseNutrientLibrary(jsonString: string): ParseResult {
   }
 }
 
-/** Build an exportable library payload from current foods. */
+/** Build an exportable library payload from current foods. Recipes are preserved. */
 export function buildExportLibrary(foods: FoodItem[], name = 'My Nutrient Library'): string {
+  const recipeCount = foods.filter(f => !!f.recipe).length;
   const payload: NutrientLibrary = {
-    version: '1.0',
+    version: '1.1',
     name,
-    description: `Exported ${new Date().toISOString()} · ${foods.length} foods`,
+    description: `Exported ${new Date().toISOString()} · ${foods.length} foods${recipeCount ? ` · ${recipeCount} recipes` : ''}`,
     foods: foods.map(f => ({
       id: f.id,
       name: f.name,
@@ -109,6 +110,20 @@ export function buildExportLibrary(foods: FoodItem[], name = 'My Nutrient Librar
       ) as Record<string, number>,
       createdAt: f.createdAt,
       updatedAt: f.updatedAt,
+      recipe: f.recipe
+        ? {
+            ingredients: f.recipe.ingredients.map(i => ({
+              foodId: i.foodId,
+              name: i.name,
+              grams: i.grams,
+            })),
+            servings: f.recipe.servings,
+            instructions: f.recipe.instructions,
+            prepMinutes: f.recipe.prepMinutes,
+            tags: f.recipe.tags,
+            notes: f.recipe.notes,
+          }
+        : undefined,
     })),
   };
   return JSON.stringify(payload, null, 2);
