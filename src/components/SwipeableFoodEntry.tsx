@@ -83,6 +83,30 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
     }
   };
 
+  // Mouse drag — desktop fallback so the delete affordance is reachable without touch.
+  const handleMouseDown = (e: React.MouseEvent) => {
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    currentX.current = translateX;
+    swipedRef.current = false;
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX.current;
+    if (Math.abs(diff) > 6) swipedRef.current = true;
+    const newTranslate = Math.max(MAX_SWIPE, Math.min(0, currentX.current + diff));
+    setTranslateX(newTranslate);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (translateX < DELETE_THRESHOLD) setTranslateX(MAX_SWIPE);
+    else setTranslateX(0);
+  };
+
   const handleCardClick = () => {
     if (swipedRef.current || translateX !== 0) {
       setTranslateX(0);
@@ -150,6 +174,10 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
           onClick={handleCardClick}
         >
           <div className="flex items-start justify-between gap-4">
@@ -252,6 +280,14 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
             })()}
 
             <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => { setEditOpen(false); handleDelete(); }}
+                className="h-11 rounded-2xl text-destructive border-destructive/40 hover:bg-destructive/10 px-3"
+                aria-label="Delete entry"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
               <Button variant="secondary" onClick={() => setEditOpen(false)} className="flex-1 h-11 rounded-2xl">
                 Cancel
               </Button>

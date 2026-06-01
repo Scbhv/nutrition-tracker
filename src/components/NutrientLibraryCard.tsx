@@ -211,18 +211,36 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
               </p>
             </div>
           </div>
-          <ScrollArea className="h-32 rounded-xl bg-background/40 p-2">
-            <ul className="text-[11px] space-y-0.5">
-              {preview.foods.slice(0, 50).map((f, i) => (
-                <li key={i} className="flex justify-between gap-2 text-muted-foreground">
-                  <span className="truncate">{f.name}{f.brand ? ` · ${f.brand}` : ''}</span>
-                  <span className="shrink-0 text-foreground/70">
-                    {f.nutrients['energy-kcal'] ?? '–'} kcal
-                  </span>
-                </li>
-              ))}
+          <ScrollArea className="h-56 rounded-xl bg-background/40 p-2">
+            <ul className="space-y-1.5">
+              {preview.foods.slice(0, 50).map((f, i) => {
+                const n = f.nutrients;
+                const pills: { label: string; value: string; tone: string }[] = [
+                  { label: 'kcal', value: n['energy-kcal'] != null ? `${Math.round(n['energy-kcal'])}` : '–', tone: 'bg-nutrient-energy/15 text-nutrient-energy' },
+                  { label: 'P', value: n['proteins'] != null ? `${n['proteins']!.toFixed(1)}g` : '–', tone: 'bg-nutrient-protein/15 text-nutrient-protein' },
+                  { label: 'F', value: n['fat'] != null ? `${n['fat']!.toFixed(1)}g` : '–', tone: 'bg-nutrient-fat/15 text-nutrient-fat' },
+                ];
+                if (n['vitamin-a'] != null) pills.push({ label: 'Vit A', value: `${Math.round(n['vitamin-a'])}μg`, tone: 'bg-primary/10 text-primary' });
+                if (n['vitamin-c'] != null) pills.push({ label: 'Vit C', value: `${Math.round(n['vitamin-c'])}mg`, tone: 'bg-primary/10 text-primary' });
+                if (n['vitamin-d'] != null) pills.push({ label: 'Vit D', value: `${Math.round(n['vitamin-d'])}μg`, tone: 'bg-primary/10 text-primary' });
+                return (
+                  <li key={i} className="rounded-lg bg-card/40 border border-border/20 p-2 space-y-1">
+                    <div className="flex justify-between gap-2 text-[12px]">
+                      <span className="truncate font-medium text-foreground">{f.name}{f.brand ? ` · ${f.brand}` : ''}</span>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">per {f.servingSize}{f.servingUnit}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {pills.map(p => (
+                        <span key={p.label} className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${p.tone}`}>
+                          {p.label} {p.value}
+                        </span>
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
               {preview.foods.length > 50 && (
-                <li className="text-muted-foreground/60 italic">…and {preview.foods.length - 50} more</li>
+                <li className="text-[11px] text-muted-foreground/60 italic text-center pt-1">…and {preview.foods.length - 50} more</li>
               )}
             </ul>
           </ScrollArea>
