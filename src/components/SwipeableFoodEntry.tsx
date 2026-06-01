@@ -174,6 +174,10 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
           onClick={handleCardClick}
         >
           <div className="flex items-start justify-between gap-4">
