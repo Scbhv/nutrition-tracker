@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { getWholeUnitPresets } from '@/lib/wholeUnitPresets';
 
 interface SwipeableFoodEntryProps {
   food: FoodItem;
