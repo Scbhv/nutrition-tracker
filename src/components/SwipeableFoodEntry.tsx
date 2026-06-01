@@ -83,6 +83,30 @@ export function SwipeableFoodEntry({ food, entry, onRemove, onUpdatePortion }: S
     }
   };
 
+  // Mouse drag — desktop fallback so the delete affordance is reachable without touch.
+  const handleMouseDown = (e: React.MouseEvent) => {
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    currentX.current = translateX;
+    swipedRef.current = false;
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX.current;
+    if (Math.abs(diff) > 6) swipedRef.current = true;
+    const newTranslate = Math.max(MAX_SWIPE, Math.min(0, currentX.current + diff));
+    setTranslateX(newTranslate);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (translateX < DELETE_THRESHOLD) setTranslateX(MAX_SWIPE);
+    else setTranslateX(0);
+  };
+
   const handleCardClick = () => {
     if (swipedRef.current || translateX !== 0) {
       setTranslateX(0);
