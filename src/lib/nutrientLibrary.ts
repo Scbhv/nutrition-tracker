@@ -1,6 +1,24 @@
 import { z } from 'zod';
-import { FoodItem, NutrientData } from '@/types/nutrients';
+import { FoodItem, NutrientData, Recipe } from '@/types/nutrients';
 import { logError } from '@/lib/errorLog';
+
+/** Recipe payload embedded inside a library food entry. */
+const LibraryRecipeSchema = z.object({
+  ingredients: z
+    .array(
+      z.object({
+        foodId: z.string(),
+        name: z.string().min(1),
+        grams: z.number().nonnegative(),
+      }),
+    )
+    .default([]),
+  servings: z.number().positive().default(1),
+  instructions: z.array(z.string()).optional(),
+  prepMinutes: z.number().nonnegative().optional(),
+  tags: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+});
 
 /** Shape of an entry inside a nutrient library file. ID/timestamps optional. */
 const LibraryFoodSchema = z.object({
@@ -13,6 +31,8 @@ const LibraryFoodSchema = z.object({
   nutrients: z.record(z.string(), z.number().nonnegative()).default({}),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  /** Optional recipe metadata — present only for user recipes. */
+  recipe: LibraryRecipeSchema.optional(),
 });
 
 export const NutrientLibrarySchema = z.object({
@@ -37,6 +57,7 @@ export function libraryEntryToFoodItem(entry: z.infer<typeof LibraryFoodSchema>)
     nutrients: entry.nutrients as NutrientData,
     createdAt: entry.createdAt || now,
     updatedAt: now,
+    recipe: entry.recipe as Recipe | undefined,
   };
 }
 
