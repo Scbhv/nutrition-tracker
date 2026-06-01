@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
 import { useFileSystemSync } from '@/hooks/useFileSystemSync';
+import { getWholeUnitPresets } from '@/lib/wholeUnitPresets';
 import { cn } from '@/lib/utils';
 
 interface FoodDatabaseViewProps {
