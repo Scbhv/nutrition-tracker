@@ -481,7 +481,8 @@ export function FoodDatabaseView({
                 ref={portionInputRef}
                 type="number"
                 inputMode="decimal"
-                min="1"
+                min="0.1"
+                step="0.1"
                 value={portionGrams}
                 onChange={(e) => setPortionGrams(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && confirmPortion()}
