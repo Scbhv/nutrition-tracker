@@ -351,7 +351,7 @@ export default function TestChecklist() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-svh bg-background pb-32">
       <header className="sticky top-0 z-10 backdrop-blur-xl bg-background/70 border-b border-border/40">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button
