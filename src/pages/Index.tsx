@@ -719,52 +719,6 @@ export default function Index() {
             </SettingsSection>
 
 
-            {isAdmin && (
-              <Button
-                onClick={() => navigate('/test-checklist')}
-                variant="outline"
-                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-              >
-                <ClipboardCheck className="h-5 w-5 mr-3" />
-                Test Checklist
-                <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
-              </Button>
-            )}
-
-            {isLoggedIn ? (
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                disabled={signingOut}
-                className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
-              >
-                {signingOut ? (
-                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-                ) : (
-                  <LogOut className="h-5 w-5 mr-3" />
-                )}
-                {signingOut ? 'Signing out…' : 'Sign Out'}
-              </Button>
-            ) : (
-              <Button
-                onClick={() => navigate('/auth')}
-                className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-              >
-                <LogOut className="h-5 w-5 mr-3 rotate-180" />
-                Log In
-              </Button>
-            )}
-
-            {/* Premium Status */}
-            {isPremium && (
-              <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
-                <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-                <div className="flex-1">
-                  <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
-                  <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
-                </div>
-              </div>
-            )}
 
             {/* Footer links */}
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 pb-4">
