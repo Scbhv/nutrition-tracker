@@ -117,12 +117,38 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    height: -webkit-fill-available;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
+    /* Native-feeling mobile scroll behaviour */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    touch-action: manipulation;
+    min-height: 100svh;
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Avoid iOS zoom-on-focus for form controls */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Apple-style list section headers */
