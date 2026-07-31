@@ -603,48 +603,121 @@ export default function Index() {
 
       case 'profile':
         return (
-          <div className="space-y-4 animate-fade-in">
-            <AppearanceSettings
-              appearance={appearance}
-              onUpdate={updateAppearance}
-              isPremium={isPremium}
-              onShowDonationGate={() => setShowDonationGate(true)}
-            />
-            <Button 
-              onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)} 
-              className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
-            >
-              <Settings className="h-5 w-5 mr-3" />
-              Daily Goals & Settings
-              {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
-            </Button>
-            {isPremium ? (
-              <HealthKitExport
-                foods={foods}
-                logs={logs}
-                getTodayNutrients={getTodayNutrients}
-              />
-            ) : (
+          <div className="space-y-6 animate-fade-in">
+            {/* ---------- Account ---------- */}
+            <SettingsSection title="Account" icon={User}>
+              {isPremium && (
+                <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
+                    <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
+                  </div>
+                </div>
+              )}
+              {isLoggedIn ? (
+                <Button
+                  onClick={handleSignOut}
+                  variant="outline"
+                  disabled={signingOut}
+                  className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
+                >
+                  {signingOut ? (
+                    <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                  ) : (
+                    <LogOut className="h-5 w-5 mr-3" />
+                  )}
+                  {signingOut ? 'Signing out…' : 'Sign Out'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate('/auth')}
+                  className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+                >
+                  <LogOut className="h-5 w-5 mr-3 rotate-180" />
+                  Log In
+                </Button>
+              )}
+            </SettingsSection>
+
+            {/* ---------- Goals & nutrition ---------- */}
+            <SettingsSection title="Goals & Nutrition" icon={Target}>
               <Button
-                onClick={() => setShowDonationGate(true)}
-                className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+                onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
+                className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
               >
-                <Heart className="h-5 w-5 mr-3 text-destructive" />
-                Apple Health Export
-                <Lock className="h-3.5 w-3.5 ml-auto" />
+                <Settings className="h-5 w-5 mr-3" />
+                Daily Goals & Settings
+                {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
               </Button>
-            )}
-            <BackupCard
-              exportDatabase={exportDatabase}
-              importDatabase={importDatabase}
-              foodsCount={foods.length}
-              logsCount={logs.length}
-            />
-            <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
-            <FeedbackCard isLoggedIn={isLoggedIn} />
-            <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
-            <OfflineSimulationCard />
-            <ErrorLogCard />
+              <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
+            </SettingsSection>
+
+            {/* ---------- Appearance ---------- */}
+            <SettingsSection title="Appearance" icon={Palette}>
+              <AppearanceSettings
+                appearance={appearance}
+                onUpdate={updateAppearance}
+                isPremium={isPremium}
+                onShowDonationGate={() => setShowDonationGate(true)}
+              />
+              <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
+            </SettingsSection>
+
+            {/* ---------- Data & sync ---------- */}
+            <SettingsSection title="Data & Sync" icon={Database}>
+              {isPremium ? (
+                <HealthKitExport
+                  foods={foods}
+                  logs={logs}
+                  getTodayNutrients={getTodayNutrients}
+                />
+              ) : (
+                <Button
+                  onClick={() => setShowDonationGate(true)}
+                  className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+                >
+                  <Heart className="h-5 w-5 mr-3 text-destructive" />
+                  Apple Health Export
+                  <Lock className="h-3.5 w-3.5 ml-auto" />
+                </Button>
+              )}
+              <BackupCard
+                exportDatabase={exportDatabase}
+                importDatabase={importDatabase}
+                foodsCount={foods.length}
+                logsCount={logs.length}
+              />
+            </SettingsSection>
+
+            {/* ---------- Support ---------- */}
+            <SettingsSection title="Support" icon={LifeBuoy}>
+              <FeedbackCard isLoggedIn={isLoggedIn} />
+            </SettingsSection>
+
+            {/* ---------- Advanced / diagnostics ---------- */}
+            <SettingsSection
+              title="Advanced"
+              icon={Wrench}
+              description="Diagnostics and developer tools."
+              collapsible
+              defaultOpen={false}
+            >
+              <OfflineSimulationCard />
+              <ErrorLogCard />
+              {isAdmin && (
+                <Button
+                  onClick={() => navigate('/test-checklist')}
+                  variant="outline"
+                  className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+                >
+                  <ClipboardCheck className="h-5 w-5 mr-3" />
+                  Test Checklist
+                  <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+                </Button>
+              )}
+            </SettingsSection>
+
 
             {isAdmin && (
               <Button
