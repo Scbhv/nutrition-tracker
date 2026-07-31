@@ -2,38 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+    />
 
     <!-- Security Headers -->
     <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      script-src 'self' https://cdn.gpteng.co https://cdn.tailwindcss.com 'unsafe-inline';
+      default-src 'self' capacitor: ionic: https://localhost;
+      script-src 'self' capacitor: ionic: https://localhost https://cdn.gpteng.co https://cdn.tailwindcss.com 'unsafe-inline';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com;
-      img-src 'self' data: blob: https:;
-      connect-src 'self' https://*.supabase.co https://ai.gateway.lovable.dev https://world.openfoodfacts.org wss://*.supabase.co;
+      font-src 'self' data: https://fonts.gstatic.com;
+      img-src 'self' data: blob: https: capacitor: ionic:;
+      connect-src 'self' capacitor: ionic: https://localhost https://*.supabase.co https://ai.gateway.lovable.dev https://world.openfoodfacts.org https://*.lovableproject.com https://*.lovable.app wss://*.supabase.co;
       frame-ancestors 'self' https://*.lovable.app https://*.lovableproject.com https://*.lovable.dev https://*.gptengineer.app;
       base-uri 'self';
       form-action 'self';
       object-src 'none';
     " />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <title>NutriTrack - Track Your Nutrition</title>
-    <meta name="description" content="Track your nutrition effortlessly with AI-powered food lookup" />
-    <meta name="author" content="Lovable" />
+    <meta name="description" content="Track calories, macros and 40+ micronutrients with barcode scanning, AI food lookup and offline logging." />
+    <meta name="author" content="NutriTrack" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Mobile / installable app -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#141614" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NutriTrack" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+
+    <meta property="og:title" content="NutriTrack - Track Your Nutrition" />
+    <meta property="og:description" content="Track calories, macros and 40+ micronutrients with barcode scanning, AI food lookup and offline logging." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   </head>
 
   <body>
