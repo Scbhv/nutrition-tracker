@@ -124,7 +124,7 @@ export default function AdminPanel() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-svh bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -132,7 +132,7 @@ export default function AdminPanel() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-svh bg-background flex flex-col items-center justify-center p-6 text-center">
         <Shield className="h-12 w-12 text-muted-foreground mb-4" />
         <h1 className="text-xl font-bold text-foreground mb-2">Sign In Required</h1>
         <p className="text-muted-foreground text-sm mb-4">Please sign in with your admin account to access this panel.</p>
@@ -146,7 +146,7 @@ export default function AdminPanel() {
 
   if (error === 'Forbidden') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-svh bg-background flex flex-col items-center justify-center p-6 text-center">
         <Shield className="h-12 w-12 text-muted-foreground mb-4" />
         <h1 className="text-xl font-bold text-foreground mb-2">Access Denied</h1>
         <p className="text-muted-foreground text-sm mb-4">You don't have admin privileges.</p>
@@ -159,7 +159,7 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-10 bg-background/70 backdrop-blur-2xl border-b border-border/30">
         <div className="flex items-center gap-3 px-5 py-3">
           <Button variant="ghost" size="icon" onClick={() => window.location.href = '/'} className="rounded-full h-9 w-9">

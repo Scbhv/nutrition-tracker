@@ -63,7 +63,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+    <div className="min-h-svh bg-background flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm space-y-8">
         {/* Logo/Header */}
         <div className="text-center space-y-2">

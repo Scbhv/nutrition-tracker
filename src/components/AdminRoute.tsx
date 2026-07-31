@@ -12,14 +12,14 @@ export function AdminRoute({ children }: { children: ReactNode }) {
 
   if (state === 'checking') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-svh bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
   if (state === 'denied') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-svh bg-background flex flex-col items-center justify-center p-6 text-center">
         <Shield className="h-12 w-12 text-muted-foreground mb-4" />
         <h1 className="text-xl font-bold text-foreground mb-2">Access Denied</h1>
         <p className="text-muted-foreground text-sm mb-4">This page is restricted.</p>
