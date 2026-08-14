@@ -613,19 +613,19 @@ export default function Index() {
         return (
           <div className="space-y-6 animate-fade-in">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70 pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 value={settingsQuery}
                 onChange={(e) => setSettingsQuery(e.target.value)}
                 placeholder="Search settings..."
-                className="w-full h-11 pl-9 pr-9 rounded-[14px] bg-card/80 backdrop-blur-xl border border-border/50 text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 shadow-sm transition-all"
+                className="w-full h-12 pl-10 pr-10 rounded-[16px] bg-card/70 backdrop-blur-2xl border border-border/40 text-[16px] text-foreground placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-ring/60 focus:border-ring/50 shadow-sm transition-all"
               />
               {settingsQuery && (
                 <button
                   type="button"
                   onClick={() => setSettingsQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
