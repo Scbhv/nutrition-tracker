@@ -683,12 +683,6 @@ export default function Index() {
                   <Lock className="h-3.5 w-3.5 ml-auto" />
                 </Button>
               )}
-              <BackupCard
-                exportDatabase={exportDatabase}
-                importDatabase={importDatabase}
-                foodsCount={foods.length}
-                logsCount={logs.length}
-              />
             </SettingsSection>
 
             {/* ---------- Support ---------- */}
