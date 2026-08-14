@@ -35,6 +35,7 @@ import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { SettingsSection } from '@/components/SettingsSection';
+import { SettingsGroup } from '@/components/SettingsGroup';
 import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS, Recipe } from '@/types/nutrients';
 import { buildRecipeFoodFields } from '@/lib/recipe';
