@@ -809,3 +809,17 @@ body.has-theme-pack-button .bg-primary {
   background-size: cover;
   background-blend-mode: overlay;
 }
+
+/* ============== iOS-style grouped settings ============== */
+.settings-group > * {
+  border-radius: 0 !important;
+  border-width: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.settings-group > * + * {
+  border-top: 1px solid hsl(var(--border) / 0.35) !important;
+}
+
