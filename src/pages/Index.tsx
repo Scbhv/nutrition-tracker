@@ -86,6 +86,7 @@ export default function Index() {
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showDonationGate, setShowDonationGate] = useState(false);
+  const [settingsQuery, setSettingsQuery] = useState('');
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
   const dragCounter = useRef(0);
