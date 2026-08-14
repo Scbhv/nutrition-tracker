@@ -809,3 +809,29 @@ body.has-theme-pack-button .bg-primary {
   background-size: cover;
   background-blend-mode: overlay;
 }
+
+/* ============== iOS-style grouped settings ============== */
+.settings-group > * {
+  border-radius: 0 !important;
+  border-width: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.settings-group > * + * {
+  border-top: 1px solid hsl(var(--border) / 0.35) !important;
+}
+
+/* Keep inner cards/sheets inside modals untouched */
+.settings-group [role="dialog"] > *,
+.settings-group [data-radix-popper-content-wrapper] > *,
+.settings-group .rounded-2xl,
+.settings-group .rounded-xl,
+.settings-group .rounded-lg {
+  border-radius: inherit;
+  border-width: inherit;
+  background-color: inherit;
+  box-shadow: inherit;
+  backdrop-filter: inherit;
+}
