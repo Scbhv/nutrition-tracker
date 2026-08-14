@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle, ClipboardCheck, User, Palette, Target, Database, LifeBuoy, Wrench } from 'lucide-react';
+import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle, ClipboardCheck, User, Palette, Target, Database, LifeBuoy, Wrench, Search, X } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
@@ -86,6 +86,7 @@ export default function Index() {
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showDonationGate, setShowDonationGate] = useState(false);
+  const [settingsQuery, setSettingsQuery] = useState('');
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
   const dragCounter = useRef(0);
@@ -352,6 +353,12 @@ export default function Index() {
   }
 
   const renderContent = () => {
+    const q = settingsQuery.trim().toLowerCase();
+    const settingsMatches = (...keywords: string[]) => {
+      if (!q) return true;
+      return keywords.some((k) => k.toLowerCase().includes(q));
+    };
+
     switch (activeTab) {
       case 'today':
         return (
@@ -605,123 +612,180 @@ export default function Index() {
       case 'profile':
         return (
           <div className="space-y-6 animate-fade-in">
-            {/* ---------- Account ---------- */}
-            <SettingsSection title="Account" icon={User}>
-              {isPremium && (
-                <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
-                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
-                    <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
-                  </div>
-                </div>
-              )}
-              {isLoggedIn ? (
-                <Button
-                  onClick={handleSignOut}
-                  variant="outline"
-                  disabled={signingOut}
-                  className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
-                >
-                  {signingOut ? (
-                    <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-                  ) : (
-                    <LogOut className="h-5 w-5 mr-3" />
-                  )}
-                  {signingOut ? 'Signing out…' : 'Sign Out'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => navigate('/auth')}
-                  className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-                >
-                  <LogOut className="h-5 w-5 mr-3 rotate-180" />
-                  Log In
-                </Button>
-              )}
-            </SettingsSection>
-
-            {/* ---------- Goals & nutrition ---------- */}
-            <SettingsSection title="Goals & Nutrition" icon={Target}>
-              <Button
-                onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
-                className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
-              >
-                <Settings className="h-5 w-5 mr-3" />
-                Daily Goals & Settings
-                {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
-              </Button>
-              <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
-            </SettingsSection>
-
-            {/* ---------- Appearance ---------- */}
-            <SettingsSection title="Appearance" icon={Palette}>
-              <AppearanceSettings
-                appearance={appearance}
-                onUpdate={updateAppearance}
-                isPremium={isPremium}
-                onShowDonationGate={() => setShowDonationGate(true)}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={settingsQuery}
+                onChange={(e) => setSettingsQuery(e.target.value)}
+                placeholder="Search settings..."
+                className="w-full h-12 pl-10 pr-10 rounded-[16px] bg-card/70 backdrop-blur-2xl border border-border/40 text-[16px] text-foreground placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-ring/60 focus:border-ring/50 shadow-sm transition-all"
               />
-              <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
-            </SettingsSection>
-
-            {/* ---------- Data & sync ---------- */}
-            <SettingsSection title="Data & Sync" icon={Database}>
-              {isPremium ? (
-                <HealthKitExport
-                  foods={foods}
-                  logs={logs}
-                  getTodayNutrients={getTodayNutrients}
-                />
-              ) : (
-                <Button
-                  onClick={() => setShowDonationGate(true)}
-                  className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+              {settingsQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSettingsQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                 >
-                  <Heart className="h-5 w-5 mr-3 text-destructive" />
-                  Apple Health Export
-                  <Lock className="h-3.5 w-3.5 ml-auto" />
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               )}
-            </SettingsSection>
+            </div>
 
-            {/* ---------- Support ---------- */}
-            <SettingsSection title="Support" icon={LifeBuoy}>
-              <FeedbackCard isLoggedIn={isLoggedIn} />
-            </SettingsSection>
-
-            {/* ---------- Advanced / diagnostics ---------- */}
-            <SettingsSection
-              title="Advanced"
-              icon={Wrench}
-              description="Diagnostics, backups and developer tools."
-              collapsible
-              defaultOpen={false}
-            >
-              <SettingsGroup>
-                <BackupCard
-                  exportDatabase={exportDatabase}
-                  importDatabase={importDatabase}
-                  foodsCount={foods.length}
-                  logsCount={logs.length}
-                />
-                <OfflineSimulationCard />
-                <ErrorLogCard />
-                {isAdmin && (
+            {/* ---------- Account ---------- */}
+            {settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') && (
+              <SettingsSection title="Account" icon={User}>
+                {isPremium && (
+                  <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
+                    <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
+                      <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
+                    </div>
+                  </div>
+                )}
+                {isLoggedIn ? (
                   <Button
-                    onClick={() => navigate('/test-checklist')}
+                    onClick={handleSignOut}
                     variant="outline"
-                    className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
+                    disabled={signingOut}
+                    className="w-full h-14 justify-start px-4 rounded-2xl text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 transition-transform active:scale-[0.98] disabled:opacity-60"
                   >
-                    <ClipboardCheck className="h-5 w-5 mr-3" />
-                    Test Checklist
-                    <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+                    {signingOut ? (
+                      <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                    ) : (
+                      <LogOut className="h-5 w-5 mr-3" />
+                    )}
+                    {signingOut ? 'Signing out…' : 'Sign Out'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
+                  >
+                    <LogOut className="h-5 w-5 mr-3 rotate-180" />
+                    Log In
                   </Button>
                 )}
-              </SettingsGroup>
-            </SettingsSection>
+              </SettingsSection>
+            )}
 
+            {/* ---------- Goals & nutrition ---------- */}
+            {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') && (
+              <SettingsSection title="Goals & Nutrition" icon={Target}>
+                <Button
+                  onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
+                  className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
+                >
+                  <Settings className="h-5 w-5 mr-3" />
+                  Daily Goals & Settings
+                  {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
+                </Button>
+                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
+              </SettingsSection>
+            )}
 
+            {/* ---------- Appearance ---------- */}
+            {settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') && (
+              <SettingsSection title="Appearance" icon={Palette}>
+                <AppearanceSettings
+                  appearance={appearance}
+                  onUpdate={updateAppearance}
+                  isPremium={isPremium}
+                  onShowDonationGate={() => setShowDonationGate(true)}
+                />
+                <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
+              </SettingsSection>
+            )}
+
+            {/* ---------- Data & sync ---------- */}
+            {settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') && (
+              <SettingsSection title="Data & Sync" icon={Database}>
+                {isPremium ? (
+                  <HealthKitExport
+                    foods={foods}
+                    logs={logs}
+                    getTodayNutrients={getTodayNutrients}
+                  />
+                ) : (
+                  <Button
+                    onClick={() => setShowDonationGate(true)}
+                    className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
+                  >
+                    <Heart className="h-5 w-5 mr-3 text-destructive" />
+                    Apple Health Export
+                    <Lock className="h-3.5 w-3.5 ml-auto" />
+                  </Button>
+                )}
+              </SettingsSection>
+            )}
+
+            {/* ---------- Support ---------- */}
+            {settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') && (
+              <SettingsSection title="Support" icon={LifeBuoy}>
+                <FeedbackCard isLoggedIn={isLoggedIn} />
+              </SettingsSection>
+            )}
+
+            {/* ---------- Advanced / diagnostics ---------- */}
+            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer') && (
+              <SettingsSection
+                key={q ? 'advanced-open' : 'advanced-closed'}
+                title="Advanced"
+                icon={Wrench}
+                description="Diagnostics, backups and developer tools."
+                collapsible={!q}
+                defaultOpen={!!q}
+              >
+                <SettingsGroup>
+                  {settingsMatches('advanced', 'backup', 'restore', 'export', 'import') && (
+                    <BackupCard
+                      exportDatabase={exportDatabase}
+                      importDatabase={importDatabase}
+                      foodsCount={foods.length}
+                      logsCount={logs.length}
+                    />
+                  )}
+                  {settingsMatches('advanced', 'offline', 'simulation', 'local', 'files') && (
+                    <OfflineSimulationCard />
+                  )}
+                  {settingsMatches('advanced', 'error', 'log', 'debug') && (
+                    <ErrorLogCard />
+                  )}
+                  {isAdmin && settingsMatches('advanced', 'test', 'checklist', 'system test', 'diagnostics') && (
+                    <Button
+                      onClick={() => navigate('/test-checklist')}
+                      variant="outline"
+                      className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
+                    >
+                      <ClipboardCheck className="h-5 w-5 mr-3" />
+                      Test Checklist
+                      <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+                    </Button>
+                  )}
+                </SettingsGroup>
+              </SettingsSection>
+            )}
+
+            {q && !(
+              settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') ||
+              settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') ||
+              settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') ||
+              settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') ||
+              settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') ||
+              settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer')
+            ) && (
+              <div className="text-center py-10">
+                <p className="text-[15px] text-muted-foreground">No settings match "{settingsQuery}"</p>
+                <button
+                  type="button"
+                  onClick={() => setSettingsQuery('')}
+                  className="mt-2 text-[13px] text-primary hover:underline"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
 
             {/* Footer links */}
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 pb-4">
