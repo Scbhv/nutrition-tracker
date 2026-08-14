@@ -694,23 +694,31 @@ export default function Index() {
             <SettingsSection
               title="Advanced"
               icon={Wrench}
-              description="Diagnostics and developer tools."
+              description="Diagnostics, backups and developer tools."
               collapsible
               defaultOpen={false}
             >
-              <OfflineSimulationCard />
-              <ErrorLogCard />
-              {isAdmin && (
-                <Button
-                  onClick={() => navigate('/test-checklist')}
-                  variant="outline"
-                  className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
-                >
-                  <ClipboardCheck className="h-5 w-5 mr-3" />
-                  Test Checklist
-                  <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
-                </Button>
-              )}
+              <SettingsGroup>
+                <BackupCard
+                  exportDatabase={exportDatabase}
+                  importDatabase={importDatabase}
+                  foodsCount={foods.length}
+                  logsCount={logs.length}
+                />
+                <OfflineSimulationCard />
+                <ErrorLogCard />
+                {isAdmin && (
+                  <Button
+                    onClick={() => navigate('/test-checklist')}
+                    variant="outline"
+                    className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
+                  >
+                    <ClipboardCheck className="h-5 w-5 mr-3" />
+                    Test Checklist
+                    <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
+                  </Button>
+                )}
+              </SettingsGroup>
             </SettingsSection>
 
 
