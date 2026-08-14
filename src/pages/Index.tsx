@@ -353,6 +353,12 @@ export default function Index() {
   }
 
   const renderContent = () => {
+    const q = settingsQuery.trim().toLowerCase();
+    const settingsMatches = (...keywords: string[]) => {
+      if (!q) return true;
+      return keywords.some((k) => k.toLowerCase().includes(q));
+    };
+
     switch (activeTab) {
       case 'today':
         return (
