@@ -25,7 +25,7 @@ interface NutrientLibraryCardProps {
 
 const seedLibrary = parseNutrientLibrary(JSON.stringify(seedFoodsRaw));
 
-export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardProps) {
+export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: NutrientLibraryCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState('');
@@ -35,6 +35,7 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
   );
   const seedLoaded = typeof window !== 'undefined' && localStorage.getItem(SEED_LOADED_KEY) === '1';
   const seedFoodCount = seedLibrary.success ? seedLibrary.foods.length : 0;
+  const q = highlightQuery;
 
   const existingNames = useMemo(
     () => new Set(foods.map(f => `${f.name.toLowerCase()}|${f.brand?.toLowerCase() ?? ''}`)),
