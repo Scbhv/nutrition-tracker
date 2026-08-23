@@ -16,6 +16,7 @@ interface AppearanceSettingsProps {
   onUpdate: (updates: Partial<AppearanceSettingsType>) => void;
   isPremium?: boolean;
   onShowDonationGate?: () => void;
+  highlightQuery?: string;
 }
 
 const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
