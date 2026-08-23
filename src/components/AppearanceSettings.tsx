@@ -3,6 +3,7 @@ import { Sun, Moon, Monitor, Droplets, Palette, Lock } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { DonationGateModal } from '@/components/DonationGateModal';
+import { HighlightText } from '@/components/HighlightText';
 import {
   type ThemeMode,
   type DesignStyle,
@@ -16,6 +17,7 @@ interface AppearanceSettingsProps {
   onUpdate: (updates: Partial<AppearanceSettingsType>) => void;
   isPremium?: boolean;
   onShowDonationGate?: () => void;
+  highlightQuery?: string;
 }
 
 const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
@@ -24,10 +26,11 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }, ref) {
+export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate, highlightQuery = '' }, ref) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const designLocked = !isPremium;
+  const q = highlightQuery;
 
   const showGate = () => {
     if (onShowDonationGate) onShowDonationGate();
@@ -54,7 +57,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            Theme
+            <HighlightText text="Theme" query={q} />
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
@@ -73,7 +76,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{label}</span>
+              <span className="text-xs font-medium"><HighlightText text={label} query={q} /></span>
             </button>
           ))}
         </div>
@@ -86,7 +89,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            Design Style
+            <HighlightText text="Design Style" query={q} />
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
@@ -105,7 +108,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
               } ${designLocked ? 'cursor-not-allowed' : 'hover:bg-muted'}`}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-sm font-medium">{label}</span>
+              <span className="text-sm font-medium"><HighlightText text={label} query={q} /></span>
             </button>
           ))}
         </div>
@@ -118,7 +121,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            Accent Color
+            <HighlightText text="Accent Color" query={q} />
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
@@ -139,7 +142,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
         </div>
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Custom</span>
+            <span className="text-xs text-muted-foreground"><HighlightText text="Custom" query={q} /></span>
             <span className="text-xs text-muted-foreground">{appearance.accentHue}°</span>
           </div>
           <input
@@ -165,7 +168,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            App Icon
+            <HighlightText text="App Icon" query={q} />
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>

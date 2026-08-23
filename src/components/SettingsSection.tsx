@@ -3,8 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SettingsSectionProps {
-  title: string;
-  description?: string;
+  title: ReactNode;
+  description?: ReactNode;
   icon?: React.ComponentType<{ className?: string }>;
   children: ReactNode;
   /** Render as a collapsible group (used for advanced / rarely-used settings). */

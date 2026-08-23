@@ -10,6 +10,7 @@ import { logError } from '@/lib/errorLog';
 import { useThemePack, type AppliedThemePack } from '@/hooks/useThemePack';
 import { ThemePackLibrary } from '@/components/ThemePackLibrary';
 import { cn } from '@/lib/utils';
+import { HighlightText } from '@/components/HighlightText';
 
 interface ThemePackRow {
   id: string;
@@ -51,9 +52,10 @@ const toApplied = (r: ThemePackRow): AppliedThemePack => ({
 interface Props {
   isPremium: boolean;
   onShowDonationGate: () => void;
+  highlightQuery?: string;
 }
 
-export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
+export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = '' }: Props) {
   const { toast } = useToast();
   const { active, apply, clear } = useThemePack();
   const [userId, setUserId] = useState<string | null>(null);
@@ -228,12 +230,16 @@ export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
     );
   };
 
+  const q = highlightQuery;
+
   return (
     <div className="glass-card rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Palette className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Theme Packs</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            <HighlightText text="Theme Packs" query={q} />
+          </Label>
         </div>
         {active && (
           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={clear}>Reset</Button>
@@ -251,7 +257,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
             )}
           >
             {t === 'create' && !isPremium ? <Lock className="h-3 w-3 inline mr-1" /> : null}
-            {t}
+            <HighlightText text={t} query={q} />
           </button>
         ))}
       </div>
@@ -274,7 +280,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
             onClick={onShowDonationGate}
             className="w-full p-4 rounded-xl bg-secondary text-sm text-muted-foreground flex items-center justify-center gap-2"
           >
-            <Lock className="h-4 w-4" /> Premium required to upload theme packs
+            <Lock className="h-4 w-4" /> <HighlightText text="Premium required to upload theme packs" query={q} />
           </button>
         ) : (
           <div className="space-y-3">

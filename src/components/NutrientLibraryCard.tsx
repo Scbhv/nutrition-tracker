@@ -14,16 +14,18 @@ import {
   SEED_LOADED_KEY,
   type NutrientLibrary,
 } from '@/lib/nutrientLibrary';
+import { HighlightText } from '@/components/HighlightText';
 
 interface NutrientLibraryCardProps {
   foods: FoodItem[];
   /** Merge new foods into the user's database, skipping duplicates by id/barcode. */
   mergeFoods: (foods: FoodItem[]) => void;
+  highlightQuery?: string;
 }
 
 const seedLibrary = parseNutrientLibrary(JSON.stringify(seedFoodsRaw));
 
-export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardProps) {
+export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: NutrientLibraryCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState('');
@@ -33,6 +35,7 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
   );
   const seedLoaded = typeof window !== 'undefined' && localStorage.getItem(SEED_LOADED_KEY) === '1';
   const seedFoodCount = seedLibrary.success ? seedLibrary.foods.length : 0;
+  const q = highlightQuery;
 
   const existingNames = useMemo(
     () => new Set(foods.map(f => `${f.name.toLowerCase()}|${f.brand?.toLowerCase() ?? ''}`)),
@@ -115,7 +118,9 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
           <BookOpen className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[15px] text-foreground tracking-tight">Nutrient Library</h3>
+          <h3 className="font-semibold text-[15px] text-foreground tracking-tight">
+            <HighlightText text="Nutrient Library" query={q} />
+          </h3>
           <p className="text-[12px] text-muted-foreground/80 truncate">
             {foods.length} foods in your database
           </p>
@@ -126,7 +131,9 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Starter catalog</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Starter catalog" query={q} />
+          </span>
           {seedLoaded && (
             <span className="inline-flex items-center gap-1 text-[10px] text-primary ml-auto">
               <Check className="h-3 w-3" /> loaded
@@ -134,12 +141,14 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
           )}
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          {seedFoodCount} common everyday foods (fruits, grains, proteins, dairy) with macros per 100 g.
-          Safe to load multiple times — duplicates are skipped.
+          <HighlightText
+            text={`${seedFoodCount} common everyday foods (fruits, grains, proteins, dairy) with macros per 100 g. Safe to load multiple times — duplicates are skipped.`}
+            query={q}
+          />
         </p>
         <Button onClick={handleLoadSeed} variant="outline" className="w-full h-10 gap-2 rounded-2xl">
           <Plus className="h-4 w-4" />
-          {seedLoaded ? 'Re-load starter catalog' : 'Load starter catalog'}
+          <HighlightText text={seedLoaded ? 'Re-load starter catalog' : 'Load starter catalog'} query={q} />
         </Button>
       </div>
 
@@ -147,18 +156,22 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Foods JSON file</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Foods JSON file" query={q} />
+          </span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Export just your foods as a portable <code className="text-foreground/80">.json</code> library, or
-          import one from disk. (For full backups including logs &amp; settings, use Backup &amp; Restore.)
+          <HighlightText
+            text="Export just your foods as a portable .json library, or import one from disk. (For full backups including logs & settings, use Backup & Restore.)"
+            query={q}
+          />
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Button onClick={handleExport} variant="outline" className="h-10 gap-2 rounded-2xl">
-            <Download className="h-4 w-4" /> Export
+            <Download className="h-4 w-4" /> <HighlightText text="Export" query={q} />
           </Button>
           <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="h-10 gap-2 rounded-2xl">
-            <Upload className="h-4 w-4" /> Import
+            <Upload className="h-4 w-4" /> <HighlightText text="Import" query={q} />
           </Button>
         </div>
         <input
@@ -174,10 +187,15 @@ export function NutrientLibraryCard({ foods, mergeFoods }: NutrientLibraryCardPr
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Load from URL</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Load from URL" query={q} />
+          </span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Paste the URL of a community-shared nutrient library (.json). You'll see a preview before merging.
+          <HighlightText
+            text="Paste the URL of a community-shared nutrient library (.json). You'll see a preview before merging."
+            query={q}
+          />
         </p>
         <div className="flex gap-2">
           <Input

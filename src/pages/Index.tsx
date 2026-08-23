@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle, ClipboardCheck, User, Palette, Target, Database, LifeBuoy, Wrench, Search, X } from 'lucide-react';
+import { HighlightText } from '@/components/HighlightText';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
@@ -634,13 +635,17 @@ export default function Index() {
 
             {/* ---------- Account ---------- */}
             {settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') && (
-              <SettingsSection title="Account" icon={User}>
+              <SettingsSection title={<HighlightText text="Account" query={q} />} icon={User}>
                 {isPremium && (
                   <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
                     <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                     <div className="flex-1">
-                      <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
-                      <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
+                      <p className="text-[14px] font-semibold text-foreground tracking-tight">
+                        <HighlightText text="Premium Active" query={q} />
+                      </p>
+                      <p className="text-[12px] text-muted-foreground/70">
+                        <HighlightText text="All features unlocked" query={q} />
+                      </p>
                     </div>
                   </div>
                 )}
@@ -656,7 +661,7 @@ export default function Index() {
                     ) : (
                       <LogOut className="h-5 w-5 mr-3" />
                     )}
-                    {signingOut ? 'Signing out…' : 'Sign Out'}
+                    {signingOut ? 'Signing out…' : <HighlightText text="Sign Out" query={q} />}
                   </Button>
                 ) : (
                   <Button
@@ -664,7 +669,7 @@ export default function Index() {
                     className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
                   >
                     <LogOut className="h-5 w-5 mr-3 rotate-180" />
-                    Log In
+                    <HighlightText text="Log In" query={q} />
                   </Button>
                 )}
               </SettingsSection>
@@ -672,29 +677,30 @@ export default function Index() {
 
             {/* ---------- Goals & nutrition ---------- */}
             {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') && (
-              <SettingsSection title="Goals & Nutrition" icon={Target}>
+              <SettingsSection title={<HighlightText text="Goals & Nutrition" query={q} />} icon={Target}>
                 <Button
                   onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
                   className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
                 >
                   <Settings className="h-5 w-5 mr-3" />
-                  Daily Goals & Settings
+                  <HighlightText text="Daily Goals & Settings" query={q} />
                   {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
-                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
+                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
               </SettingsSection>
             )}
 
             {/* ---------- Appearance ---------- */}
             {settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') && (
-              <SettingsSection title="Appearance" icon={Palette}>
+              <SettingsSection title={<HighlightText text="Appearance" query={q} />} icon={Palette}>
                 <AppearanceSettings
                   appearance={appearance}
                   onUpdate={updateAppearance}
                   isPremium={isPremium}
                   onShowDonationGate={() => setShowDonationGate(true)}
+                  highlightQuery={q}
                 />
-                <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
+                <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} highlightQuery={q} />
               </SettingsSection>
             )}
 
