@@ -156,18 +156,22 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Foods JSON file</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Foods JSON file" query={q} />
+          </span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Export just your foods as a portable <code className="text-foreground/80">.json</code> library, or
-          import one from disk. (For full backups including logs &amp; settings, use Backup &amp; Restore.)
+          <HighlightText
+            text="Export just your foods as a portable .json library, or import one from disk. (For full backups including logs & settings, use Backup & Restore.)"
+            query={q}
+          />
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Button onClick={handleExport} variant="outline" className="h-10 gap-2 rounded-2xl">
-            <Download className="h-4 w-4" /> Export
+            <Download className="h-4 w-4" /> <HighlightText text="Export" query={q} />
           </Button>
           <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="h-10 gap-2 rounded-2xl">
-            <Upload className="h-4 w-4" /> Import
+            <Upload className="h-4 w-4" /> <HighlightText text="Import" query={q} />
           </Button>
         </div>
         <input
