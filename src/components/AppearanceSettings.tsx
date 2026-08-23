@@ -76,7 +76,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{label}</span>
+              <span className="text-xs font-medium"><HighlightText text={label} query={q} /></span>
             </button>
           ))}
         </div>
