@@ -692,14 +692,15 @@ export default function Index() {
 
             {/* ---------- Appearance ---------- */}
             {settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') && (
-              <SettingsSection title="Appearance" icon={Palette}>
+              <SettingsSection title={<HighlightText text="Appearance" query={q} />} icon={Palette}>
                 <AppearanceSettings
                   appearance={appearance}
                   onUpdate={updateAppearance}
                   isPremium={isPremium}
                   onShowDonationGate={() => setShowDonationGate(true)}
+                  highlightQuery={q}
                 />
-                <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} />
+                <ThemePackCard isPremium={isPremium} onShowDonationGate={() => setShowDonationGate(true)} highlightQuery={q} />
               </SettingsSection>
             )}
 
