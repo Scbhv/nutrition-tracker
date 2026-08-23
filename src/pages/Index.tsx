@@ -677,16 +677,16 @@ export default function Index() {
 
             {/* ---------- Goals & nutrition ---------- */}
             {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') && (
-              <SettingsSection title="Goals & Nutrition" icon={Target}>
+              <SettingsSection title={<HighlightText text="Goals & Nutrition" query={q} />} icon={Target}>
                 <Button
                   onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
                   className={`w-full ios-button-secondary h-14 justify-start px-4 transition-transform active:scale-[0.98] ${!isPremium ? 'opacity-50' : ''}`}
                 >
                   <Settings className="h-5 w-5 mr-3" />
-                  Daily Goals & Settings
+                  <HighlightText text="Daily Goals & Settings" query={q} />
                   {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
-                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} />
+                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
               </SettingsSection>
             )}
 
