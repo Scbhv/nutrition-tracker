@@ -108,7 +108,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
               } ${designLocked ? 'cursor-not-allowed' : 'hover:bg-muted'}`}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-sm font-medium">{label}</span>
+              <span className="text-sm font-medium"><HighlightText text={label} query={q} /></span>
             </button>
           ))}
         </div>
