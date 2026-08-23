@@ -257,7 +257,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = 
             )}
           >
             {t === 'create' && !isPremium ? <Lock className="h-3 w-3 inline mr-1" /> : null}
-            {t}
+            <HighlightText text={t} query={q} />
           </button>
         ))}
       </div>
