@@ -168,7 +168,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
       >
         <div className="flex items-center justify-between">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            App Icon
+            <HighlightText text="App Icon" query={q} />
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
