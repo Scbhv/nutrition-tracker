@@ -10,6 +10,7 @@ import { logError } from '@/lib/errorLog';
 import { useThemePack, type AppliedThemePack } from '@/hooks/useThemePack';
 import { ThemePackLibrary } from '@/components/ThemePackLibrary';
 import { cn } from '@/lib/utils';
+import { HighlightText } from '@/components/HighlightText';
 
 interface ThemePackRow {
   id: string;
