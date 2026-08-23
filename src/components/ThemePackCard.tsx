@@ -51,9 +51,10 @@ const toApplied = (r: ThemePackRow): AppliedThemePack => ({
 interface Props {
   isPremium: boolean;
   onShowDonationGate: () => void;
+  highlightQuery?: string;
 }
 
-export function ThemePackCard({ isPremium, onShowDonationGate }: Props) {
+export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = '' }: Props) {
   const { toast } = useToast();
   const { active, apply, clear } = useThemePack();
   const [userId, setUserId] = useState<string | null>(null);
