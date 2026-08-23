@@ -131,7 +131,9 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Starter catalog</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Starter catalog" query={q} />
+          </span>
           {seedLoaded && (
             <span className="inline-flex items-center gap-1 text-[10px] text-primary ml-auto">
               <Check className="h-3 w-3" /> loaded
@@ -139,12 +141,14 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
           )}
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          {seedFoodCount} common everyday foods (fruits, grains, proteins, dairy) with macros per 100 g.
-          Safe to load multiple times — duplicates are skipped.
+          <HighlightText
+            text={`${seedFoodCount} common everyday foods (fruits, grains, proteins, dairy) with macros per 100 g. Safe to load multiple times — duplicates are skipped.`}
+            query={q}
+          />
         </p>
         <Button onClick={handleLoadSeed} variant="outline" className="w-full h-10 gap-2 rounded-2xl">
           <Plus className="h-4 w-4" />
-          {seedLoaded ? 'Re-load starter catalog' : 'Load starter catalog'}
+          <HighlightText text={seedLoaded ? 'Re-load starter catalog' : 'Load starter catalog'} query={q} />
         </Button>
       </div>
 
