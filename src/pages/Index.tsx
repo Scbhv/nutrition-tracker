@@ -635,13 +635,17 @@ export default function Index() {
 
             {/* ---------- Account ---------- */}
             {settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') && (
-              <SettingsSection title="Account" icon={User}>
+              <SettingsSection title={<HighlightText text="Account" query={q} />} icon={User}>
                 {isPremium && (
                   <div className="bg-card/60 backdrop-blur-2xl rounded-[20px] p-4 flex items-center gap-3 border border-border/30 shadow-sm">
                     <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                     <div className="flex-1">
-                      <p className="text-[14px] font-semibold text-foreground tracking-tight">Premium Active</p>
-                      <p className="text-[12px] text-muted-foreground/70">All features unlocked</p>
+                      <p className="text-[14px] font-semibold text-foreground tracking-tight">
+                        <HighlightText text="Premium Active" query={q} />
+                      </p>
+                      <p className="text-[12px] text-muted-foreground/70">
+                        <HighlightText text="All features unlocked" query={q} />
+                      </p>
                     </div>
                   </div>
                 )}
@@ -657,7 +661,7 @@ export default function Index() {
                     ) : (
                       <LogOut className="h-5 w-5 mr-3" />
                     )}
-                    {signingOut ? 'Signing out…' : 'Sign Out'}
+                    {signingOut ? 'Signing out…' : <HighlightText text="Sign Out" query={q} />}
                   </Button>
                 ) : (
                   <Button
@@ -665,7 +669,7 @@ export default function Index() {
                     className="w-full h-14 justify-start px-4 rounded-2xl transition-transform active:scale-[0.98]"
                   >
                     <LogOut className="h-5 w-5 mr-3 rotate-180" />
-                    Log In
+                    <HighlightText text="Log In" query={q} />
                   </Button>
                 )}
               </SettingsSection>
