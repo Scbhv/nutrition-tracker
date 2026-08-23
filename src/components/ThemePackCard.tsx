@@ -230,12 +230,16 @@ export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = 
     );
   };
 
+  const q = highlightQuery;
+
   return (
     <div className="glass-card rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Palette className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Theme Packs</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+            <HighlightText text="Theme Packs" query={q} />
+          </Label>
         </div>
         {active && (
           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={clear}>Reset</Button>
