@@ -14,11 +14,13 @@ import {
   SEED_LOADED_KEY,
   type NutrientLibrary,
 } from '@/lib/nutrientLibrary';
+import { HighlightText } from '@/components/HighlightText';
 
 interface NutrientLibraryCardProps {
   foods: FoodItem[];
   /** Merge new foods into the user's database, skipping duplicates by id/barcode. */
   mergeFoods: (foods: FoodItem[]) => void;
+  highlightQuery?: string;
 }
 
 const seedLibrary = parseNutrientLibrary(JSON.stringify(seedFoodsRaw));
