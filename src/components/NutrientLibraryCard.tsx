@@ -187,10 +187,15 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
       <div className="rounded-2xl bg-muted/30 border border-border/30 p-3 space-y-2">
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-primary" />
-          <span className="text-[13px] font-medium text-foreground">Load from URL</span>
+          <span className="text-[13px] font-medium text-foreground">
+            <HighlightText text="Load from URL" query={q} />
+          </span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Paste the URL of a community-shared nutrient library (.json). You'll see a preview before merging.
+          <HighlightText
+            text="Paste the URL of a community-shared nutrient library (.json). You'll see a preview before merging."
+            query={q}
+          />
         </p>
         <div className="flex gap-2">
           <Input
