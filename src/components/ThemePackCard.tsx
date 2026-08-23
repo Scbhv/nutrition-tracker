@@ -280,7 +280,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = 
             onClick={onShowDonationGate}
             className="w-full p-4 rounded-xl bg-secondary text-sm text-muted-foreground flex items-center justify-center gap-2"
           >
-            <Lock className="h-4 w-4" /> Premium required to upload theme packs
+            <Lock className="h-4 w-4" /> <HighlightText text="Premium required to upload theme packs" query={q} />
           </button>
         ) : (
           <div className="space-y-3">
