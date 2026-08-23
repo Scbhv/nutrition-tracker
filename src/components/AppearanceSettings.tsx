@@ -26,10 +26,11 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
   { mode: 'auto', icon: Monitor, label: 'Auto' },
 ];
 
-export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate }, ref) {
+export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsProps>(function AppearanceSettings({ appearance, onUpdate, isPremium = false, onShowDonationGate, highlightQuery = '' }, ref) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const designLocked = !isPremium;
+  const q = highlightQuery;
 
   const showGate = () => {
     if (onShowDonationGate) onShowDonationGate();
