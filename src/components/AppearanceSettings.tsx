@@ -142,7 +142,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
         </div>
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Custom</span>
+            <span className="text-xs text-muted-foreground"><HighlightText text="Custom" query={q} /></span>
             <span className="text-xs text-muted-foreground">{appearance.accentHue}°</span>
           </div>
           <input
