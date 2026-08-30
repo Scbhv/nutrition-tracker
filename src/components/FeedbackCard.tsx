@@ -11,6 +11,7 @@ type FeedbackType = 'bug' | 'feature' | 'other';
 
 interface FeedbackCardProps {
   isLoggedIn: boolean;
+  highlightQuery?: string;
 }
 
 const TYPE_OPTIONS: { value: FeedbackType; label: string; icon: typeof Bug }[] = [
