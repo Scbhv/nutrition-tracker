@@ -729,8 +729,8 @@ export default function Index() {
 
             {/* ---------- Support ---------- */}
             {settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') && (
-              <SettingsSection title="Support" icon={LifeBuoy}>
-                <FeedbackCard isLoggedIn={isLoggedIn} />
+              <SettingsSection title={<HighlightText text="Support" query={q} />} icon={LifeBuoy}>
+                <FeedbackCard isLoggedIn={isLoggedIn} highlightQuery={q} />
               </SettingsSection>
             )}
 
