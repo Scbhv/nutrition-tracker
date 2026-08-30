@@ -236,7 +236,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients, highlightQuery
         className="w-full ios-button-secondary h-14 justify-start px-4"
       >
         <Heart className="h-5 w-5 mr-3 text-destructive" />
-        Apple Health Export
+        <HighlightText text="Apple Health Export" query={q} />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
