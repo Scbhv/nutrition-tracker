@@ -153,7 +153,7 @@ export function FeedbackCard({ isLoggedIn, highlightQuery = '' }: FeedbackCardPr
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {label}
+                <HighlightText text={label} query={q} />
               </button>
             ))}
           </div>
