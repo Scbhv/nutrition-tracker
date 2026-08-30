@@ -54,6 +54,7 @@ interface HealthKitExportProps {
   foods: FoodItem[];
   logs: DailyLog[];
   getTodayNutrients: () => NutrientData;
+  highlightQuery?: string;
 }
 
 function getNutrientsForDate(date: string, logs: DailyLog[], foods: FoodItem[]): NutrientData {
