@@ -738,9 +738,9 @@ export default function Index() {
             {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer') && (
               <SettingsSection
                 key={q ? 'advanced-open' : 'advanced-closed'}
-                title="Advanced"
+                title={<HighlightText text="Advanced" query={q} />}
                 icon={Wrench}
-                description="Diagnostics, backups and developer tools."
+                description={<HighlightText text="Diagnostics, backups and developer tools." query={q} />}
                 collapsible={!q}
                 defaultOpen={!!q}
               >
@@ -751,13 +751,14 @@ export default function Index() {
                       importDatabase={importDatabase}
                       foodsCount={foods.length}
                       logsCount={logs.length}
+                      highlightQuery={q}
                     />
                   )}
                   {settingsMatches('advanced', 'offline', 'simulation', 'local', 'files') && (
-                    <OfflineSimulationCard />
+                    <OfflineSimulationCard highlightQuery={q} />
                   )}
                   {settingsMatches('advanced', 'error', 'log', 'debug') && (
-                    <ErrorLogCard />
+                    <ErrorLogCard highlightQuery={q} />
                   )}
                   {isAdmin && settingsMatches('advanced', 'test', 'checklist', 'system test', 'diagnostics') && (
                     <Button
@@ -766,7 +767,7 @@ export default function Index() {
                       className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
                     >
                       <ClipboardCheck className="h-5 w-5 mr-3" />
-                      Test Checklist
+                      <HighlightText text="Test Checklist" query={q} />
                       <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
                     </Button>
                   )}
