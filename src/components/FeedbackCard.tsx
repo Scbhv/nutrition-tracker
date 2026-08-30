@@ -23,13 +23,14 @@ const TYPE_OPTIONS: { value: FeedbackType; label: string; icon: typeof Bug }[] =
 const MAX_MESSAGE = 2000;
 const MAX_IMAGE_MB = 5;
 
-export function FeedbackCard({ isLoggedIn }: FeedbackCardProps) {
+export function FeedbackCard({ isLoggedIn, highlightQuery = '' }: FeedbackCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [type, setType] = useState<FeedbackType>('feature');
   const [message, setMessage] = useState('');
   const [replyEmail, setReplyEmail] = useState('');
+  const q = highlightQuery;
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [justSent, setJustSent] = useState(false);
