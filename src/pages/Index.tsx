@@ -706,12 +706,13 @@ export default function Index() {
 
             {/* ---------- Data & sync ---------- */}
             {settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') && (
-              <SettingsSection title="Data & Sync" icon={Database}>
+              <SettingsSection title={<HighlightText text="Data & Sync" query={q} />} icon={Database}>
                 {isPremium ? (
                   <HealthKitExport
                     foods={foods}
                     logs={logs}
                     getTodayNutrients={getTodayNutrients}
+                    highlightQuery={q}
                   />
                 ) : (
                   <Button
@@ -719,7 +720,7 @@ export default function Index() {
                     className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
                   >
                     <Heart className="h-5 w-5 mr-3 text-destructive" />
-                    Apple Health Export
+                    <HighlightText text="Apple Health Export" query={q} />
                     <Lock className="h-3.5 w-3.5 ml-auto" />
                   </Button>
                 )}
@@ -728,8 +729,8 @@ export default function Index() {
 
             {/* ---------- Support ---------- */}
             {settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') && (
-              <SettingsSection title="Support" icon={LifeBuoy}>
-                <FeedbackCard isLoggedIn={isLoggedIn} />
+              <SettingsSection title={<HighlightText text="Support" query={q} />} icon={LifeBuoy}>
+                <FeedbackCard isLoggedIn={isLoggedIn} highlightQuery={q} />
               </SettingsSection>
             )}
 
@@ -737,9 +738,9 @@ export default function Index() {
             {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer') && (
               <SettingsSection
                 key={q ? 'advanced-open' : 'advanced-closed'}
-                title="Advanced"
+                title={<HighlightText text="Advanced" query={q} />}
                 icon={Wrench}
-                description="Diagnostics, backups and developer tools."
+                description={<HighlightText text="Diagnostics, backups and developer tools." query={q} />}
                 collapsible={!q}
                 defaultOpen={!!q}
               >
@@ -750,13 +751,14 @@ export default function Index() {
                       importDatabase={importDatabase}
                       foodsCount={foods.length}
                       logsCount={logs.length}
+                      highlightQuery={q}
                     />
                   )}
                   {settingsMatches('advanced', 'offline', 'simulation', 'local', 'files') && (
-                    <OfflineSimulationCard />
+                    <OfflineSimulationCard highlightQuery={q} />
                   )}
                   {settingsMatches('advanced', 'error', 'log', 'debug') && (
-                    <ErrorLogCard />
+                    <ErrorLogCard highlightQuery={q} />
                   )}
                   {isAdmin && settingsMatches('advanced', 'test', 'checklist', 'system test', 'diagnostics') && (
                     <Button
@@ -765,7 +767,7 @@ export default function Index() {
                       className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
                     >
                       <ClipboardCheck className="h-5 w-5 mr-3" />
-                      Test Checklist
+                      <HighlightText text="Test Checklist" query={q} />
                       <span className="ml-auto text-xs text-muted-foreground">Admin only</span>
                     </Button>
                   )}

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { NutrientData, FoodItem, DailyLog } from '@/types/nutrients';
 import { cn } from '@/lib/utils';
 import { logError } from '@/lib/errorLog';
+import { HighlightText } from '@/components/HighlightText';
 
 const AUTO_SYNC_KEY = 'nutritrack-health-autosync';
 
@@ -54,6 +55,7 @@ interface HealthKitExportProps {
   foods: FoodItem[];
   logs: DailyLog[];
   getTodayNutrients: () => NutrientData;
+  highlightQuery?: string;
 }
 
 function getNutrientsForDate(date: string, logs: DailyLog[], foods: FoodItem[]): NutrientData {
@@ -115,7 +117,7 @@ function buildHealthKitPayload(
   };
 }
 
-export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExportProps) {
+export function HealthKitExport({ foods, logs, getTodayNutrients, highlightQuery = '' }: HealthKitExportProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [exportDate, setExportDate] = useState(new Date().toISOString().split('T')[0]);
@@ -124,6 +126,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
   const [autoSync, setAutoSync] = useState<boolean>(
     () => localStorage.getItem(AUTO_SYNC_KEY) === 'true'
   );
+  const q = highlightQuery;
 
   // All nutrients enabled by default
   const [enabledNutrients, setEnabledNutrients] = useState<Record<string, boolean>>(() => {
@@ -233,7 +236,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
         className="w-full ios-button-secondary h-14 justify-start px-4"
       >
         <Heart className="h-5 w-5 mr-3 text-destructive" />
-        Apple Health Export
+        <HighlightText text="Apple Health Export" query={q} />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

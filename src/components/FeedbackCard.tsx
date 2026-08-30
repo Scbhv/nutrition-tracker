@@ -5,11 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { HighlightText } from '@/components/HighlightText';
 
 type FeedbackType = 'bug' | 'feature' | 'other';
 
 interface FeedbackCardProps {
   isLoggedIn: boolean;
+  highlightQuery?: string;
 }
 
 const TYPE_OPTIONS: { value: FeedbackType; label: string; icon: typeof Bug }[] = [
@@ -21,13 +23,14 @@ const TYPE_OPTIONS: { value: FeedbackType; label: string; icon: typeof Bug }[] =
 const MAX_MESSAGE = 2000;
 const MAX_IMAGE_MB = 5;
 
-export function FeedbackCard({ isLoggedIn }: FeedbackCardProps) {
+export function FeedbackCard({ isLoggedIn, highlightQuery = '' }: FeedbackCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [type, setType] = useState<FeedbackType>('feature');
   const [message, setMessage] = useState('');
   const [replyEmail, setReplyEmail] = useState('');
+  const q = highlightQuery;
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [justSent, setJustSent] = useState(false);
@@ -121,9 +124,9 @@ export function FeedbackCard({ isLoggedIn }: FeedbackCardProps) {
           <MessageSquarePlus className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[15px] text-foreground tracking-tight">Send Feedback</h3>
+          <h3 className="font-semibold text-[15px] text-foreground tracking-tight"><HighlightText text="Send Feedback" query={q} /></h3>
           <p className="text-[12px] text-muted-foreground/80 truncate">
-            {justSent ? 'Sent — thank you!' : 'Report a bug or suggest a feature'}
+            {justSent ? 'Sent — thank you!' : <HighlightText text="Report a bug or suggest a feature" query={q} />}
           </p>
         </div>
         {justSent && <Check className="h-5 w-5 text-primary shrink-0" />}
@@ -150,7 +153,7 @@ export function FeedbackCard({ isLoggedIn }: FeedbackCardProps) {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {label}
+                <HighlightText text={label} query={q} />
               </button>
             ))}
           </div>
