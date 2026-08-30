@@ -706,12 +706,13 @@ export default function Index() {
 
             {/* ---------- Data & sync ---------- */}
             {settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') && (
-              <SettingsSection title="Data & Sync" icon={Database}>
+              <SettingsSection title={<HighlightText text="Data & Sync" query={q} />} icon={Database}>
                 {isPremium ? (
                   <HealthKitExport
                     foods={foods}
                     logs={logs}
                     getTodayNutrients={getTodayNutrients}
+                    highlightQuery={q}
                   />
                 ) : (
                   <Button
@@ -719,7 +720,7 @@ export default function Index() {
                     className="w-full ios-button-secondary h-14 justify-start px-4 opacity-50"
                   >
                     <Heart className="h-5 w-5 mr-3 text-destructive" />
-                    Apple Health Export
+                    <HighlightText text="Apple Health Export" query={q} />
                     <Lock className="h-3.5 w-3.5 ml-auto" />
                   </Button>
                 )}
