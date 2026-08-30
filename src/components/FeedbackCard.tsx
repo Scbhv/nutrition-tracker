@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { HighlightText } from '@/components/HighlightText';
 
 type FeedbackType = 'bug' | 'feature' | 'other';
 
