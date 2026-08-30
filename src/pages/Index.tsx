@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Sparkles, Apple, Settings, Flame, Trash2, Clock, Dumbbell, Upload, Heart, ExternalLink, Lock, RotateCcw, Shield, Loader2, CheckCircle, LogOut, AlertTriangle, ClipboardCheck, User, Palette, Target, Database, LifeBuoy, Wrench, Search, X } from 'lucide-react';
+import { SettingsSearchBar } from '@/components/SettingsSearchBar';
+import { loadSettingsQuery, saveSettingsQuery, matchesKeywords, SETTINGS_INDEX } from '@/lib/settingsSearch';
 import { HighlightText } from '@/components/HighlightText';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,7 +89,8 @@ export default function Index() {
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showDonationGate, setShowDonationGate] = useState(false);
-  const [settingsQuery, setSettingsQuery] = useState('');
+  const [settingsQuery, setSettingsQueryState] = useState(() => loadSettingsQuery());
+  const setSettingsQuery = (v: string) => { setSettingsQueryState(v); saveSettingsQuery(v); };
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
   const dragCounter = useRef(0);
@@ -355,10 +358,10 @@ export default function Index() {
 
   const renderContent = () => {
     const q = settingsQuery.trim().toLowerCase();
-    const settingsMatches = (...keywords: string[]) => {
-      if (!q) return true;
-      return keywords.some((k) => k.toLowerCase().includes(q));
-    };
+    const settingsMatches = (...keywords: string[]) => matchesKeywords(q, keywords);
+    const settingsResultCount = q
+      ? SETTINGS_INDEX.filter((item) => matchesKeywords(q, [item.label, item.section, ...item.keywords])).length
+      : SETTINGS_INDEX.length;
 
     switch (activeTab) {
       case 'today':
