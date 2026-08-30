@@ -117,7 +117,7 @@ function buildHealthKitPayload(
   };
 }
 
-export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExportProps) {
+export function HealthKitExport({ foods, logs, getTodayNutrients, highlightQuery = '' }: HealthKitExportProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [exportDate, setExportDate] = useState(new Date().toISOString().split('T')[0]);
@@ -126,6 +126,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients }: HealthKitExp
   const [autoSync, setAutoSync] = useState<boolean>(
     () => localStorage.getItem(AUTO_SYNC_KEY) === 'true'
   );
+  const q = highlightQuery;
 
   // All nutrients enabled by default
   const [enabledNutrients, setEnabledNutrients] = useState<Record<string, boolean>>(() => {
