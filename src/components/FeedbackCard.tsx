@@ -124,9 +124,9 @@ export function FeedbackCard({ isLoggedIn, highlightQuery = '' }: FeedbackCardPr
           <MessageSquarePlus className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[15px] text-foreground tracking-tight">Send Feedback</h3>
+          <h3 className="font-semibold text-[15px] text-foreground tracking-tight"><HighlightText text="Send Feedback" query={q} /></h3>
           <p className="text-[12px] text-muted-foreground/80 truncate">
-            {justSent ? 'Sent — thank you!' : 'Report a bug or suggest a feature'}
+            {justSent ? 'Sent — thank you!' : <HighlightText text="Report a bug or suggest a feature" query={q} />}
           </p>
         </div>
         {justSent && <Check className="h-5 w-5 text-primary shrink-0" />}
