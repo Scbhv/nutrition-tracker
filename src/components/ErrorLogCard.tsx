@@ -37,7 +37,7 @@ async function copy(text: string, label: string) {
   }
 }
 
-export function ErrorLogCard() {
+export function ErrorLogCard({ highlightQuery: _highlightQuery }: { highlightQuery?: string } = {}) {
   const [entries, setEntries] = useState<ErrorEntry[]>(() => getErrorLog());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
