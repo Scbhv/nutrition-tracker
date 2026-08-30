@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { NutrientData, FoodItem, DailyLog } from '@/types/nutrients';
 import { cn } from '@/lib/utils';
 import { logError } from '@/lib/errorLog';
+import { HighlightText } from '@/components/HighlightText';
 
 const AUTO_SYNC_KEY = 'nutritrack-health-autosync';
 
