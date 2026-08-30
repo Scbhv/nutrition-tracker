@@ -37,7 +37,7 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
-export function OfflineSimulationCard() {
+export function OfflineSimulationCard({ highlightQuery: _highlightQuery }: { highlightQuery?: string } = {}) {
   const [offline, setOffline] = useState<boolean>(() => isOfflineMode());
   const [log, setLog] = useState<SourceEvent[]>(() => getSourceLog());
 

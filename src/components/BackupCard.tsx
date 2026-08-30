@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 interface BackupCardProps {
+  highlightQuery?: string;
   /** Returns a JSON string bundling foods/logs/settings. */
   exportDatabase: () => string;
   /** Imports a JSON string. Returns success + optional error message. */
@@ -13,7 +14,7 @@ interface BackupCardProps {
   logsCount: number;
 }
 
-export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCount }: BackupCardProps) {
+export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCount, highlightQuery: _highlightQuery }: BackupCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [lastExport, setLastExport] = useState<string | null>(
