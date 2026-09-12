@@ -305,7 +305,7 @@ export function HealthKitExport({ foods, logs, getTodayNutrients, highlightQuery
                     No nutrition data for this date
                   </p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                     {payload.samples.slice(0, 6).map(sample => {
                       const entry = Object.entries(HEALTHKIT_MAP).find(
                         ([, m]) => `HKQuantityTypeIdentifier${m.identifier.charAt(0).toUpperCase()}${m.identifier.slice(1)}` === sample.sampleType
