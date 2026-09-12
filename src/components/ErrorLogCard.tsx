@@ -15,6 +15,17 @@ import {
   formatErrorReport,
   type ErrorEntry,
 } from '@/lib/errorLog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 function timeAgo(iso: string): string {
@@ -143,21 +154,45 @@ export function ErrorLogCard({ highlightQuery: _highlightQuery }: { highlightQue
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 active:scale-[0.98] transition-transform"
+              className="flex-1 h-11 active:scale-[0.98] transition-transform"
               onClick={handleCopyAll}
             >
               <Copy className="h-3.5 w-3.5 mr-1.5" />
               Copy all
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="active:scale-[0.98] transition-transform text-destructive hover:text-destructive"
-              onClick={handleClear}
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-              Clear
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-11 active:scale-[0.98] transition-transform text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                  Clear
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-sm rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    Delete all error reports?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This permanently removes every recorded error from this device. Copy them first if you
+                    still want to send them as a bug report — this can't be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-2">
+                  <AlertDialogCancel className="h-12 rounded-xl">Keep them</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleClear}
+                    className="h-12 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete all
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </>
       )}

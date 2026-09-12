@@ -166,7 +166,7 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
             query={q}
           />
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
           <Button onClick={handleExport} variant="outline" className="h-10 gap-2 rounded-2xl">
             <Download className="h-4 w-4" /> <HighlightText text="Export" query={q} />
           </Button>
@@ -262,7 +262,7 @@ export function NutrientLibraryCard({ foods, mergeFoods, highlightQuery = '' }: 
               )}
             </ul>
           </ScrollArea>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
             <Button onClick={() => setPreview(null)} variant="outline" className="h-10 rounded-2xl">
               Cancel
             </Button>

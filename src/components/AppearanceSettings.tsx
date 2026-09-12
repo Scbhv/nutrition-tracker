@@ -93,7 +93,7 @@ export const AppearanceSettings = forwardRef<HTMLDivElement, AppearanceSettingsP
           </Label>
           {designLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
           {([
             { style: 'default' as DesignStyle, icon: Palette, label: 'Default' },
             { style: 'liquid-glass' as DesignStyle, icon: Droplets, label: 'Liquid Glass' },

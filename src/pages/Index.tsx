@@ -914,8 +914,8 @@ export default function Index() {
       )}
       <Header title={getTitle()} />
 
-      <ScrollArea className="h-[calc(100vh-140px)]">
-        <main className="max-w-lg mx-auto px-5 pb-6 safe-bottom">
+      <ScrollArea className="h-[calc(100vh-140px)] w-full [&>div]:!block">
+        <main className="w-full max-w-lg mx-auto px-4 xs:px-5 pb-6 safe-bottom">
           {renderContent()}
         </main>
       </ScrollArea>

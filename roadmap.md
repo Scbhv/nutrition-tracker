@@ -1,14 +1,8 @@
 # Roadmap
 
 ## Done
-- Settings search: highlight matches in results
-- Settings search: remember last query across visits
-- Settings search: synonyms + fuzzy matching (e.g. "restore" finds Backup)
-- Settings search: typeahead suggestions with keyboard navigation
-- Settings search: accessibility (label, clear button, live announcements, Escape/arrow keys)
+- Settings search: highlight matches, remembered query, synonyms + fuzzy matching, typeahead, accessibility
 - Local data persistence (files on device, survives reboot)
-
-## Open
-- Confirmation dialogs + safety copy for restore/delete actions
-- Write a Swift rebuild guide describing how the app works
-- Resize/verify layout fits an iPhone screen
+- Confirmation dialogs + safety copy for restore / delete actions
+- Swift rebuild guide (docs/SWIFT_REBUILD.md)
+- Settings layout tuned for iPhone widths (single-column buttons under 390px, taller tap targets)

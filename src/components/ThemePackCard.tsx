@@ -305,7 +305,7 @@ export function ThemePackCard({ isPremium, onShowDonationGate, highlightQuery = 
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
               {SLOTS.map(({ key, label }) => {
                 const f = files[key];
                 const preview = f ? URL.createObjectURL(f) : null;
