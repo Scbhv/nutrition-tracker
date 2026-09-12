@@ -2,6 +2,16 @@ import { useRef, useState } from 'react';
 import { Download, Upload, Database, Check, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface BackupCardProps {
@@ -17,6 +27,7 @@ interface BackupCardProps {
 export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCount, highlightQuery: _highlightQuery }: BackupCardProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pending, setPending] = useState<{ name: string; text: string } | null>(null);
   const [lastExport, setLastExport] = useState<string | null>(
     () => localStorage.getItem('nutritrack-last-backup')
   );
@@ -60,11 +71,26 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
 
     try {
       const text = await file.text();
+      setPending({ name: file.name, text });
+    } catch (err) {
+      toast({
+        title: 'Could not read file',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const confirmRestore = () => {
+    if (!pending) return;
+    const { name, text } = pending;
+    setPending(null);
+    try {
       const result = importDatabase(text);
       if (result.success) {
         toast({
           title: 'Backup restored',
-          description: `Imported ${file.name}`,
+          description: `Imported ${name}`,
         });
       } else {
         toast({
@@ -75,7 +101,7 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
       }
     } catch (err) {
       toast({
-        title: 'Could not read file',
+        title: 'Import failed',
         description: err instanceof Error ? err.message : 'Unknown error',
         variant: 'destructive',
       });
@@ -103,10 +129,10 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
         anywhere — and re-import on any device.
       </p>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         <Button
           onClick={handleExport}
-          className="ios-button-primary h-12 gap-2"
+          className="ios-button-primary h-14 text-[15px] gap-2"
         >
           <Download className="h-4 w-4" />
           Export
@@ -114,7 +140,7 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
         <Button
           onClick={handleImportClick}
           variant="outline"
-          className="h-12 gap-2 rounded-2xl"
+          className="h-14 text-[15px] gap-2 rounded-2xl"
         >
           <Upload className="h-4 w-4" />
           Import
@@ -142,6 +168,32 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
         onChange={handleFileChange}
         className="hidden"
       />
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
+        <AlertDialogContent className="max-w-sm rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Replace your data with this backup?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Restoring <span className="font-medium text-foreground/80">{pending?.name}</span> overwrites the
+              foods, daily logs and settings currently on this device
+              ({foodsCount} foods · {logsCount} days logged). This can't be undone — export a fresh backup
+              first if you're unsure.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="h-12 rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRestore}
+              className="h-12 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Restore & overwrite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
