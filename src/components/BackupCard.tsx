@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { recordHistory } from '@/lib/settingsHistory';
 
 interface BackupCardProps {
   highlightQuery?: string;
@@ -85,9 +86,22 @@ export function BackupCard({ exportDatabase, importDatabase, foodsCount, logsCou
     if (!pending) return;
     const { name, text } = pending;
     setPending(null);
+    let snapshot: string | null = null;
+    try {
+      snapshot = exportDatabase();
+    } catch {
+      snapshot = null;
+    }
     try {
       const result = importDatabase(text);
       if (result.success) {
+        recordHistory({
+          kind: 'restore',
+          title: `Restored backup ${name}`,
+          detail: `Replaced ${foodsCount} foods · ${logsCount} days logged`,
+          undoHandler: snapshot ? 'database' : undefined,
+          undoPayload: snapshot ? { json: snapshot } : undefined,
+        });
         toast({
           title: 'Backup restored',
           description: `Imported ${name}`,
