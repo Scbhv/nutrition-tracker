@@ -44,13 +44,13 @@ export function WeekView({ onDayClick }: WeekViewProps) {
             key={dayData.day}
             onClick={() => onDayClick?.(dayData.date)}
             className={cn(
-              "flex flex-col items-center gap-1.5 py-2 px-2 rounded-2xl transition-all",
+              "flex flex-1 min-w-0 flex-col items-center gap-1.5 py-2 px-0.5 xs:px-2 rounded-2xl transition-all",
               dayData.isToday && "bg-primary/15",
               !dayData.isPast && !dayData.isToday && "opacity-40"
             )}
           >
             <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors",
+              "w-9 h-9 xs:w-10 xs:h-10 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors",
               dayData.hasData && "bg-primary text-primary-foreground",
               dayData.isToday && !dayData.hasData && "bg-secondary text-foreground",
               !dayData.hasData && !dayData.isToday && "bg-muted/50 text-muted-foreground"
