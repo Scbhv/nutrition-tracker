@@ -69,6 +69,16 @@ export function clearErrorLog(): void {
   emit();
 }
 
+/** Put back a previously cleared log (used by settings history undo). */
+export function restoreErrorLog(entries: ErrorEntry[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, LIMIT)));
+  } catch {
+    // ignore
+  }
+  emit();
+}
+
 export function subscribeErrorLog(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);

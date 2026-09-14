@@ -15,6 +15,7 @@ import {
   formatErrorReport,
   type ErrorEntry,
 } from '@/lib/errorLog';
+import { recordHistory } from '@/lib/settingsHistory';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,7 +64,15 @@ export function ErrorLogCard({ highlightQuery: _highlightQuery }: { highlightQue
   const handleCopyAll = () => copy(formatErrorReport(entries), 'Full report');
 
   const handleClear = () => {
+    const snapshot = getErrorLog();
     clearErrorLog();
+    recordHistory({
+      kind: 'delete',
+      title: 'Cleared error log',
+      detail: `${snapshot.length} error report${snapshot.length === 1 ? '' : 's'} deleted`,
+      undoHandler: 'errorLog',
+      undoPayload: snapshot,
+    });
     toast.success('Error log cleared');
   };
 
