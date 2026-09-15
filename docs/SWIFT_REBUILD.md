@@ -190,3 +190,98 @@ should write directly with HealthKit instead:
 - `HealthKitService`, `BarcodeScannerService` (AVFoundation + Vision), `AIService`.
 - Design tokens in a single `Theme` file (colors, radii 20pt, blur materials, SF Pro tracking).
 - Haptics via `UIImpactFeedbackGenerator` on log, delete, toggle and success events.
+
+---
+
+## 9. The database layer in detail
+
+Three JSON documents in `Documents/NutriTrack/`, each written atomically (write to `*.tmp`, then `FileManager.replaceItemAt`) and debounced ~400 ms after a change.
+
+| File | Contents |
+| --- | --- |
+| `foods.json` | `[FoodItem]` — the library, including recipes (a recipe is a FoodItem with `recipe` metadata: ingredients, servings, instructions, prepTime, tags) |
+| `logs.json` | `[DailyLog]` — one per date, with **denormalized** nutrient values per entry so deleting a food never rewrites history |
+| `settings.json` | `UserSettings` — daily goals, weekday overrides, custom nutrients, default serving size, appearance |
+
+Swift shape:
+
+```swift
+protocol Store: Actor {
+    associatedtype Model: Codable
+    func load() async throws -> Model
+    func save(_ model: Model) async
+}
+
+actor JSONStore<Model: Codable>: Store {
+    private let url: URL           // Documents/NutriTrack/<name>.json
+    private var flushTask: Task<Void, Never>?
+    // debounce + atomic replace; on decode failure keep a .corrupt backup and start empty
+}
+```
+
+Rules to preserve:
+- Every write survives app termination and device reboot — never keep the only copy in memory or `UserDefaults`.
+- Decoding is tolerant: unknown keys ignored, missing nutrients default to `nil`, never `0`.
+- Import validation is schema-first (Zod in the web app → `Decodable` + explicit range checks in Swift). Reject the whole file if invalid; never partially apply.
+- IDs are UUID strings; `mergeFoods` dedupes by `id` first, then by `barcode`.
+- Backup export bundles all three documents into one JSON file; import replaces all three together.
+
+## 10. Settings search
+
+A single search field above the settings list filters sections and highlights matched substrings.
+
+Pipeline (port `settingsSearch.ts`):
+1. **Normalize** — trim + lowercase.
+2. **Synonym expansion** — fixed groups; a query matching any word in a group also matches all the others. Groups include `backup/restore/save/archive/snapshot`, `export/download/share`, `import/upload/load/merge`, `appearance/theme/look/style`, `delete/remove/erase/wipe`, `premium/pro/unlock/donation`, `apple health/healthkit/shortcuts`.
+3. **Fuzzy match** — substring first; otherwise an in-order subsequence test (`"bckp"` matches `"backup"`), only for queries of 3+ characters.
+4. **Ranking for typeahead** — label prefix 100, label contains 80, keyword contains 60, synonym/fuzzy 30; top 5 shown.
+
+```swift
+func fuzzyMatch(_ needle: String, _ haystack: String) -> Bool {
+    if haystack.contains(needle) { return true }
+    guard needle.count >= 3 else { return false }
+    var i = needle.startIndex
+    for ch in haystack where ch == needle[i] {
+        i = needle.index(after: i)
+        if i == needle.endIndex { return true }
+    }
+    return false
+}
+```
+
+UI requirements:
+- Last query persists (`UserDefaults`) and is restored when returning to the screen.
+- Typeahead list: arrow keys / VoiceOver rotor navigable, Return applies, Escape dismisses then clears.
+- Matched text is highlighted inside each row (`AttributedString` range highlighting).
+- Matching sections auto-expand; a "No settings match …" state offers a Clear action.
+- Announce the result count with `AccessibilityNotification.Announcement` (the web app uses an `aria-live` region).
+- Results feed a live **settings editor**: matched numeric goals (calories, protein, carbs, fat, fiber, water, default serving size) and the per-weekday goals toggle render as editable fields with inline validation (number, ≥ 0, ≤ 100000), a Save button disabled until dirty and valid, and a Discard button.
+
+## 11. Restore / delete safety and history
+
+Every destructive action follows the same three steps:
+
+1. **Confirm** in a sheet that names the object and the exact loss ("Restoring `backup-2026-03-04.json` overwrites the foods, daily logs and settings on this device (214 foods · 96 days logged)"). Destructive button is not the default; the cancel option is phrased positively ("Keep them").
+2. **Snapshot** the prior state before mutating.
+3. **Record** a history entry.
+
+```swift
+enum HistoryKind: String, Codable { case search, restore, delete, edit }
+
+struct HistoryEntry: Codable, Identifiable {
+    let id: UUID
+    let at: Date
+    let kind: HistoryKind
+    let title: String
+    var detail: String?
+    var undoHandler: String?     // key into the registry
+    var undoPayload: Data?       // encoded snapshot
+    var undone: Bool = false
+}
+```
+
+- Store the newest 60 entries; when storage is tight, drop payload-carrying entries first, keep 20 headlines.
+- An `UndoRegistry` maps handler names to closures registered by the live screens: `search` (restore the previous query), `database` (re-import the pre-restore snapshot), `settings` (re-apply the previous `UserSettings` fields), `food` (merge the deleted `FoodItem` back), `errorLog` (restore deleted error reports).
+- A History screen lists all entries newest-first with filters (All / Searches / Restores / Deletes / Edits), relative timestamps, and an Undo button that is disabled when the entry is already undone or its handler isn't registered on this screen.
+- Undo failures surface as a toast with the reason; they never silently no-op.
+- Searches are coalesced: repeating the same query only refreshes the timestamp, and recording is debounced ~900 ms after typing stops.

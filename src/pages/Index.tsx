@@ -38,6 +38,9 @@ import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { SettingsSection } from '@/components/SettingsSection';
+import { SettingsEditorCard } from '@/components/SettingsEditorCard';
+import { recordSearch, recordHistory, registerUndoHandler } from '@/lib/settingsHistory';
+import { History } from 'lucide-react';
 import { SettingsGroup } from '@/components/SettingsGroup';
 import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS, Recipe } from '@/types/nutrients';
@@ -90,6 +93,7 @@ export default function Index() {
   const [isDragging, setIsDragging] = useState(false);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const [settingsQuery, setSettingsQueryState] = useState(() => loadSettingsQuery());
+  const prevQueryRef = useRef(settingsQuery);
   const setSettingsQuery = (v: string) => { setSettingsQueryState(v); saveSettingsQuery(v); };
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
@@ -113,6 +117,48 @@ export default function Index() {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Register the undo actions used by the settings history page.
+  useEffect(() => {
+    const offs = [
+      registerUndoHandler('search', (p) => {
+        const q = (p as { query?: string })?.query ?? '';
+        setSettingsQueryState(q);
+        saveSettingsQuery(q);
+      }),
+      registerUndoHandler('database', (p) => {
+        const json = (p as { json?: string })?.json;
+        if (!json) throw new Error('No snapshot stored for this restore.');
+        const res = importDatabase(json);
+        if (!res.success) throw new Error(res.errorMessage || 'Could not restore the snapshot.');
+      }),
+      registerUndoHandler('settings', (p) => {
+        updateSettings(p as Partial<typeof settings>);
+      }),
+      registerUndoHandler('food', (p) => {
+        const food = (p as { food?: FoodItem })?.food;
+        if (!food) throw new Error('No food stored for this deletion.');
+        mergeFoods([food]);
+      }),
+      registerUndoHandler('errorLog', async (p) => {
+        const { restoreErrorLog } = await import('@/lib/errorLog');
+        restoreErrorLog((p as never) ?? []);
+      }),
+    ];
+    return () => offs.forEach((off) => off());
+  }, [importDatabase, updateSettings, mergeFoods, settings]);
+
+  // Record settings searches (debounced so typing doesn't flood the history).
+  useEffect(() => {
+    const previous = prevQueryRef.current;
+    if (settingsQuery === previous) return;
+    const t = window.setTimeout(() => {
+      recordSearch(settingsQuery, previous);
+      prevQueryRef.current = settingsQuery;
+    }, 900);
+    return () => window.clearTimeout(t);
+  }, [settingsQuery]);
+
 
   // Auto-seed the starter food catalog on first launch (only when DB is empty).
   useEffect(() => {
@@ -583,8 +629,18 @@ export default function Index() {
               setShowAddFood(true);
             }}
             onDeleteFood={(id) => {
+              const removed = foods.find((f) => f.id === id);
               deleteFood(id);
-              toast({ title: 'Deleted' });
+              if (removed) {
+                recordHistory({
+                  kind: 'delete',
+                  title: `Deleted ${removed.name}`,
+                  detail: removed.brand ? `${removed.brand} · food library` : 'Food library',
+                  undoHandler: 'food',
+                  undoPayload: { food: removed },
+                });
+              }
+              toast({ title: 'Deleted', description: removed ? `${removed.name} — undo it in Settings history` : undefined });
             }}
             onLogFood={(foodId, portionGrams) => {
               const food = foods.find(f => f.id === foodId);
@@ -666,7 +722,7 @@ export default function Index() {
             )}
 
             {/* ---------- Goals & nutrition ---------- */}
-            {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') && (
+            {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'water', 'serving', 'weekday', 'edit settings') && (
               <SettingsSection title={<HighlightText text="Goals & Nutrition" query={q} />} icon={Target}>
                 <Button
                   onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
@@ -676,6 +732,13 @@ export default function Index() {
                   <HighlightText text="Daily Goals & Settings" query={q} />
                   {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
+                <SettingsEditorCard
+                  settings={settings}
+                  onUpdate={updateSettings}
+                  isPremium={isPremium}
+                  onShowDonationGate={() => setShowDonationGate(true)}
+                  query={q}
+                />
                 <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
               </SettingsSection>
             )}
@@ -725,7 +788,7 @@ export default function Index() {
             )}
 
             {/* ---------- Advanced / diagnostics ---------- */}
-            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer') && (
+            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity') && (
               <SettingsSection
                 key={q ? 'advanced-open' : 'advanced-closed'}
                 title={<HighlightText text="Advanced" query={q} />}
@@ -743,6 +806,16 @@ export default function Index() {
                       logsCount={logs.length}
                       highlightQuery={q}
                     />
+                  )}
+                  {settingsMatches('advanced', 'history', 'undo', 'activity', 'recent', 'log') && (
+                    <Button
+                      onClick={() => navigate('/settings-history')}
+                      variant="outline"
+                      className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
+                    >
+                      <History className="h-5 w-5 mr-3" />
+                      <HighlightText text="Settings history & undo" query={q} />
+                    </Button>
                   )}
                   {settingsMatches('advanced', 'offline', 'simulation', 'local', 'files') && (
                     <OfflineSimulationCard highlightQuery={q} />
@@ -767,11 +840,11 @@ export default function Index() {
 
             {q && !(
               settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') ||
-              settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') ||
+              settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'water', 'serving', 'weekday', 'edit settings') ||
               settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') ||
               settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') ||
               settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') ||
-              settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer')
+              settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity')
             ) && (
               <div className="text-center py-10">
                 <p className="text-[15px] text-muted-foreground">No settings match "{settingsQuery}"</p>
