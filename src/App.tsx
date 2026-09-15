@@ -13,6 +13,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const TestChecklist = lazy(() => import("./pages/TestChecklist"));
 const SystemTest = lazy(() => import("./pages/SystemTest"));
 const NutrientEditor = lazy(() => import("./pages/NutrientEditor"));
+const SettingsHistory = lazy(() => import("./pages/SettingsHistory"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/test-checklist" element={<AdminRoute><TestChecklist /></AdminRoute>} />
             <Route path="/system-test" element={<AdminRoute><SystemTest /></AdminRoute>} />
             <Route path="/nutrient-editor" element={<NutrientEditor />} />
+            <Route path="/settings-history" element={<SettingsHistory />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
