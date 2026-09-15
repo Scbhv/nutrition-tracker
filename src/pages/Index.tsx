@@ -38,6 +38,9 @@ import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
 import { SettingsSection } from '@/components/SettingsSection';
+import { SettingsEditorCard } from '@/components/SettingsEditorCard';
+import { recordSearch, recordHistory, registerUndoHandler } from '@/lib/settingsHistory';
+import { History } from 'lucide-react';
 import { SettingsGroup } from '@/components/SettingsGroup';
 import { useThemePack } from '@/hooks/useThemePack';
 import { FoodItem, NutrientData, NUTRIENT_UNITS, Recipe } from '@/types/nutrients';
@@ -90,6 +93,7 @@ export default function Index() {
   const [isDragging, setIsDragging] = useState(false);
   const [showDonationGate, setShowDonationGate] = useState(false);
   const [settingsQuery, setSettingsQueryState] = useState(() => loadSettingsQuery());
+  const prevQueryRef = useRef(settingsQuery);
   const setSettingsQuery = (v: string) => { setSettingsQueryState(v); saveSettingsQuery(v); };
   const { isPremium, recheck: recheckPremium } = usePremium();
   const aiLocked = !isPremium;
