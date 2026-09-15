@@ -629,8 +629,18 @@ export default function Index() {
               setShowAddFood(true);
             }}
             onDeleteFood={(id) => {
+              const removed = foods.find((f) => f.id === id);
               deleteFood(id);
-              toast({ title: 'Deleted' });
+              if (removed) {
+                recordHistory({
+                  kind: 'delete',
+                  title: `Deleted ${removed.name}`,
+                  detail: removed.brand ? `${removed.brand} · food library` : 'Food library',
+                  undoHandler: 'food',
+                  undoPayload: { food: removed },
+                });
+              }
+              toast({ title: 'Deleted', description: removed ? `${removed.name} — undo it in Settings history` : undefined });
             }}
             onLogFood={(foodId, portionGrams) => {
               const food = foods.find(f => f.id === foodId);
@@ -722,6 +732,13 @@ export default function Index() {
                   <HighlightText text="Daily Goals & Settings" query={q} />
                   {!isPremium && <Lock className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
+                <SettingsEditorCard
+                  settings={settings}
+                  onUpdate={updateSettings}
+                  isPremium={isPremium}
+                  onShowDonationGate={() => setShowDonationGate(true)}
+                  query={q}
+                />
                 <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
               </SettingsSection>
             )}
