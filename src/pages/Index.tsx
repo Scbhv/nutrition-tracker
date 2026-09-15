@@ -807,6 +807,16 @@ export default function Index() {
                       highlightQuery={q}
                     />
                   )}
+                  {settingsMatches('advanced', 'history', 'undo', 'activity', 'recent', 'log') && (
+                    <Button
+                      onClick={() => navigate('/settings-history')}
+                      variant="outline"
+                      className="w-full h-14 justify-start px-4 transition-transform active:scale-[0.98]"
+                    >
+                      <History className="h-5 w-5 mr-3" />
+                      <HighlightText text="Settings history & undo" query={q} />
+                    </Button>
+                  )}
                   {settingsMatches('advanced', 'offline', 'simulation', 'local', 'files') && (
                     <OfflineSimulationCard highlightQuery={q} />
                   )}
