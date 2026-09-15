@@ -118,6 +118,48 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Register the undo actions used by the settings history page.
+  useEffect(() => {
+    const offs = [
+      registerUndoHandler('search', (p) => {
+        const q = (p as { query?: string })?.query ?? '';
+        setSettingsQueryState(q);
+        saveSettingsQuery(q);
+      }),
+      registerUndoHandler('database', (p) => {
+        const json = (p as { json?: string })?.json;
+        if (!json) throw new Error('No snapshot stored for this restore.');
+        const res = importDatabase(json);
+        if (!res.success) throw new Error(res.errorMessage || 'Could not restore the snapshot.');
+      }),
+      registerUndoHandler('settings', (p) => {
+        updateSettings(p as Partial<typeof settings>);
+      }),
+      registerUndoHandler('food', (p) => {
+        const food = (p as { food?: FoodItem })?.food;
+        if (!food) throw new Error('No food stored for this deletion.');
+        mergeFoods([food]);
+      }),
+      registerUndoHandler('errorLog', async (p) => {
+        const { restoreErrorLog } = await import('@/lib/errorLog');
+        restoreErrorLog((p as never) ?? []);
+      }),
+    ];
+    return () => offs.forEach((off) => off());
+  }, [importDatabase, updateSettings, mergeFoods, settings]);
+
+  // Record settings searches (debounced so typing doesn't flood the history).
+  useEffect(() => {
+    const previous = prevQueryRef.current;
+    if (settingsQuery === previous) return;
+    const t = window.setTimeout(() => {
+      recordSearch(settingsQuery, previous);
+      prevQueryRef.current = settingsQuery;
+    }, 900);
+    return () => window.clearTimeout(t);
+  }, [settingsQuery]);
+
+
   // Auto-seed the starter food catalog on first launch (only when DB is empty).
   useEffect(() => {
     if (isLoading) return;
