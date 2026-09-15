@@ -722,7 +722,7 @@ export default function Index() {
             )}
 
             {/* ---------- Goals & nutrition ---------- */}
-            {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') && (
+            {settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'water', 'serving', 'weekday', 'edit settings') && (
               <SettingsSection title={<HighlightText text="Goals & Nutrition" query={q} />} icon={Target}>
                 <Button
                   onClick={() => isPremium ? setShowSettings(true) : setShowDonationGate(true)}
@@ -788,7 +788,7 @@ export default function Index() {
             )}
 
             {/* ---------- Advanced / diagnostics ---------- */}
-            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer') && (
+            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity') && (
               <SettingsSection
                 key={q ? 'advanced-open' : 'advanced-closed'}
                 title={<HighlightText text="Advanced" query={q} />}
@@ -840,11 +840,11 @@ export default function Index() {
 
             {q && !(
               settingsMatches('account', 'premium', 'sign out', 'log out', 'login', 'user') ||
-              settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json') ||
+              settingsMatches('goals', 'nutrition', 'daily goals', 'settings', 'nutrient library', 'import', 'export', 'json', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'water', 'serving', 'weekday', 'edit settings') ||
               settingsMatches('appearance', 'theme', 'color', 'font', 'texture', 'pack', 'dark mode', 'mode') ||
               settingsMatches('data', 'sync', 'apple health', 'healthkit', 'export') ||
               settingsMatches('support', 'feedback', 'help', 'contact', 'bug', 'feature') ||
-              settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer')
+              settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity')
             ) && (
               <div className="text-center py-10">
                 <p className="text-[15px] text-muted-foreground">No settings match "{settingsQuery}"</p>
