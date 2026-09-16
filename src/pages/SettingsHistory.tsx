@@ -19,6 +19,7 @@ import {
   canUndo,
   clearHistory,
   formatHistoryTime,
+  registerUndoHandler,
   subscribeHistory,
   undoHistory,
 } from '@/lib/settingsHistory';
@@ -47,6 +48,21 @@ export default function SettingsHistory() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => subscribeHistory(setEntries), []);
+
+  // Storage-backed undos that work even though the settings screen isn't mounted.
+  useEffect(() => {
+    const offs = [
+      registerUndoHandler('search', async (p) => {
+        const { saveSettingsQuery } = await import('@/lib/settingsSearch');
+        saveSettingsQuery((p as { query?: string })?.query ?? '');
+      }),
+      registerUndoHandler('errorLog', async (p) => {
+        const { restoreErrorLog } = await import('@/lib/errorLog');
+        restoreErrorLog((p as never) ?? []);
+      }),
+    ];
+    return () => offs.forEach((off) => off());
+  }, []);
 
   const visible = useMemo(
     () => (filter === 'all' ? entries : entries.filter((e) => e.kind === filter)),
