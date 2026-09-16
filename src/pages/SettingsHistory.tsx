@@ -19,6 +19,7 @@ import {
   canUndo,
   clearHistory,
   formatHistoryTime,
+  registerUndoHandler,
   subscribeHistory,
   undoHistory,
 } from '@/lib/settingsHistory';
