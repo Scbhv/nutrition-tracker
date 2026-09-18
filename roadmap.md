@@ -8,6 +8,11 @@
 - Settings layout tuned for iPhone widths (single-column buttons under 390px, taller tap targets)
 - Settings history page (/settings-history) with filters and per-entry undo
 - Search results wired into an editable settings panel (goals, serving size, weekday goals)
+- SwiftUI source scaffold in ios-native/ (JSON database, today/foods/settings, search, history + undo) — not compiled here
+
+## Swift app next steps (needs Xcode on a Mac)
+- Barcode scanning, AI food lookup, Apple Health writes
+- Community library, theme packs, premium/donation gate
 
 ## Open (waiting on a decision)
 - "Buy me a coffee": link change vs. new button vs. restyle
