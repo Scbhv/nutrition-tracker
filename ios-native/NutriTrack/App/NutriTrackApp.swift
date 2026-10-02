@@ -11,6 +11,10 @@ struct NutriTrackApp: App {
                 .environmentObject(db)
                 .environmentObject(HistoryStore.shared)
                 .environmentObject(UndoRegistry.shared)
+                .environmentObject(Cloud.shared)
+                .environmentObject(PremiumStore.shared)
+                .environmentObject(ThemeStore.shared)
+                .environmentObject(HealthKitService.shared)
                 .task { await db.load() }
         }
         .onChange(of: scenePhase) { _, phase in

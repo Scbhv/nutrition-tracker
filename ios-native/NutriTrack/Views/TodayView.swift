@@ -8,6 +8,8 @@ struct TodayView: View {
     @State private var date = Date()
     @State private var showPicker = false
     @State private var toast: String?
+    @State private var showScanner = false
+    @State private var showAI = false
 
     private var log: DailyLog { db.log(for: date) }
     private var goals: DailyGoals { db.goals(for: date) }
@@ -16,6 +18,10 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    WeekStrip(date: $date)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                }
                 Section {
                     HStack {
                         Spacer()
@@ -38,12 +44,16 @@ struct TodayView: View {
                     }
                 }
 
-                Section("Macros") {
-                    MacroBar(name: "Protein", value: totals.proteins ?? 0, goal: goals.proteins)
-                    MacroBar(name: "Carbs", value: totals.carbohydrates ?? 0, goal: goals.carbohydrates)
-                    MacroBar(name: "Fat", value: totals.fat ?? 0, goal: goals.fat)
-                    MacroBar(name: "Fiber", value: totals.fiber ?? 0, goal: goals.fiber)
-                }
+                Section {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
+                        MacroCard(name: "Protein", value: totals.proteins ?? 0, goal: goals.proteins, tint: .blue)
+                        MacroCard(name: "Carbs", value: totals.carbohydrates ?? 0, goal: goals.carbohydrates, tint: .orange)
+                        MacroCard(name: "Fat", value: totals.fat ?? 0, goal: goals.fat, tint: .pink)
+                        MacroCard(name: "Fiber", value: totals.fiber ?? 0, goal: goals.fiber, tint: .green)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                } header: { Text("Macros") }
 
                 Section("Logged food") {
                     if log.foods.isEmpty {
@@ -76,13 +86,23 @@ struct TodayView: View {
                     .accessibilityLabel("Pick a day")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        FoodLibraryView(logTo: date)
+                    Menu {
+                        NavigationLink { FoodLibraryView(logTo: date) } label: {
+                            Label("From my foods", systemImage: "list.bullet")
+                        }
+                        Button { showScanner = true } label: {
+                            Label("Scan barcode", systemImage: "barcode.viewfinder")
+                        }
+                        Button { showAI = true } label: {
+                            Label("AI lookup", systemImage: "sparkles")
+                        }
                     } label: {
-                        Label("Add food", systemImage: "plus")
+                        Label("Add food", systemImage: "plus.circle.fill")
                     }
                 }
             }
+            .fullScreenCover(isPresented: $showScanner) { BarcodeScanFlow(logTo: date) }
+            .sheet(isPresented: $showAI) { AILookupView(logTo: date) }
             .sheet(isPresented: $showPicker) {
                 DatePicker("Day", selection: $date, displayedComponents: .date)
                     .datePickerStyle(.graphical)
