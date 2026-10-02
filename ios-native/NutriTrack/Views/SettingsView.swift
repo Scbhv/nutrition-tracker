@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var db: Database
     @EnvironmentObject private var history: HistoryStore
     @EnvironmentObject private var undo: UndoRegistry
+    @EnvironmentObject private var themes: ThemeStore
 
     @State private var query = SettingsSearch.lastQuery
     @State private var previousQuery = SettingsSearch.lastQuery
@@ -32,37 +33,53 @@ struct SettingsView: View {
                         .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                 }
 
+                if visible(["account", "sign in", "apple id", "premium", "unlock", "plan"]) {
+                    AccountSection()
+                }
+
                 if visible(["goals", "calories", "protein", "carbs", "fat", "fiber",
                             "water", "serving", "weekday", "edit settings", "targets"]) {
                     SettingsEditorSection(query: query)
                 }
 
-                if visible(["backup", "restore", "export", "import", "archive", "save"]) {
-                    Section("Backup & Restore") {
-                        LabeledContent("Library",
-                                       value: "\(db.foods.count) foods · \(db.logs.count) days")
-                        Button {
-                            exportBackup()
-                        } label: {
-                            Label("Export backup", systemImage: "square.and.arrow.up")
+                if visible(["health", "apple health", "healthkit", "sync", "appearance",
+                            "theme", "look", "style", "color", "community", "library"]) {
+                    Section {
+                        NavigationLink { HealthSettingsView() } label: {
+                            SettingsRow("Apple Health", "heart.fill", .pink)
                         }
-                        Button {
-                            showImporter = true
-                        } label: {
-                            Label("Restore from backup", systemImage: "square.and.arrow.down")
+                        NavigationLink { ThemePickerView() } label: {
+                            SettingsRow("Theme", "paintpalette.fill", .indigo, value: themes.current.name)
                         }
-                        Text("A backup bundles your foods, daily logs and settings into one file.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        NavigationLink { CommunityView() } label: {
+                            SettingsRow("Community Foods", "person.3.fill", .green)
+                        }
                     }
                 }
 
-                if visible(["history", "undo", "activity", "recent"]) {
+                if visible(["backup", "restore", "export", "import", "archive", "save"]) {
+                    Section {
+                        LabeledContent("Library",
+                                       value: "\(db.foods.count) foods · \(db.logs.count) days")
+                        Button { exportBackup() } label: {
+                            Label("Export Backup", systemImage: "square.and.arrow.up")
+                        }
+                        Button { showImporter = true } label: {
+                            Label("Restore from Backup", systemImage: "square.and.arrow.down")
+                        }
+                    } header: { Text("Backup") } footer: {
+                        Text("A backup bundles your foods, daily logs and settings into one file. Settings save automatically on this iPhone.")
+                    }
+                }
+
+                if visible(["advanced", "nutrient", "library", "vitamins", "minerals", "custom",
+                            "json", "history", "undo", "activity", "recent"]) {
                     Section("Advanced") {
-                        NavigationLink {
-                            SettingsHistoryView()
-                        } label: {
-                            Label("Settings history & undo", systemImage: "clock.arrow.circlepath")
+                        NavigationLink { NutrientLibraryView() } label: {
+                            SettingsRow("Nutrient Library", "leaf.fill", .teal)
+                        }
+                        NavigationLink { SettingsHistoryView() } label: {
+                            SettingsRow("History & Undo", "clock.arrow.circlepath", .gray)
                         }
                     }
                 }
@@ -179,5 +196,26 @@ struct BackupDocument: FileDocument {
     }
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: data)
+    }
+}
+
+/// Apple-style settings row: coloured rounded icon + title + optional value.
+struct SettingsRow: View {
+    let title: String, icon: String, color: Color
+    var value: String?
+    init(_ title: String, _ icon: String, _ color: Color, value: String? = nil) {
+        self.title = title; self.icon = icon; self.color = color; self.value = value
+    }
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 29, height: 29)
+                .background(color, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+            Text(title)
+            Spacer()
+            if let value { Text(value).foregroundStyle(.secondary) }
+        }
     }
 }

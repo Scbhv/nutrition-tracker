@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject private var themes: ThemeStore
+    @EnvironmentObject private var premium: PremiumStore
+
     var body: some View {
         TabView {
             TodayView()
@@ -9,6 +12,11 @@ struct RootView: View {
                 .tabItem { Label("Foods", systemImage: "carrot.fill") }
             SettingsView()
                 .tabItem { Label("You", systemImage: "person.fill") }
+        }
+        .tint(themes.current.accent)
+        .task {
+            await premium.refresh()
+            themes.enforce(isPremium: premium.isPremium)
         }
     }
 }
@@ -41,7 +49,8 @@ struct GoalRing: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 160, height: 160)
+            .frame(width: 150, height: 150)
+            .frame(maxWidth: .infinity)
             Text(label).font(.subheadline.weight(.medium))
         }
     }

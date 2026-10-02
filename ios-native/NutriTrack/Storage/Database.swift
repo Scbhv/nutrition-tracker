@@ -8,7 +8,8 @@ final class Database: ObservableObject {
     @Published private(set) var foods: [FoodItem] = []
     @Published private(set) var logs: [String: DailyLog] = [:]
     @Published var settings = UserSettings() {
-        didSet { Task { await settingsStore.save(settings) } }
+        // Saved and flushed to disk on every change so nothing is lost on reboot.
+        didSet { Task { await settingsStore.save(settings); await settingsStore.flush() } }
     }
 
     private let foodStore = JSONStore<[FoodItem]>(name: "foods", fallback: [])
@@ -39,6 +40,17 @@ final class Database: ObservableObject {
     func addFood(_ food: FoodItem) {
         foods.append(food)
         persistFoods()
+    }
+
+    func updateFood(_ food: FoodItem) {
+        guard let idx = foods.firstIndex(where: { $0.id == food.id }) else { return addFood(food) }
+        foods[idx] = food
+        persistFoods()
+    }
+
+    private func syncHealth(_ date: Date) {
+        let day = log(for: date), goals = goals(for: date)
+        Task { await HealthKitService.shared.sync(day: day, goals: goals) }
     }
 
     @discardableResult
@@ -82,6 +94,7 @@ final class Database: ObservableObject {
         )
         logs[day.id] = day
         persistLogs()
+        syncHealth(date)
     }
 
     @discardableResult
@@ -91,6 +104,7 @@ final class Database: ObservableObject {
         let removed = day.foods.remove(at: idx)
         logs[day.id] = day
         persistLogs()
+        Task { await HealthKitService.shared.remove(entryId: removed.id) }
         return removed
     }
 
@@ -99,6 +113,7 @@ final class Database: ObservableObject {
         day.foods.append(entry)
         logs[day.id] = day
         persistLogs()
+        syncHealth(date)
     }
 
     func logExercise(_ exercise: ExerciseEntry, on date: Date = Date()) {
