@@ -31,8 +31,28 @@ NutriTrack/
                   SettingsEditor, SettingsHistoryView
 ```
 
-## What is intentionally not here yet
+## Required capabilities (Signing & Capabilities tab)
 
-Barcode scanning, the AI food lookup, Apple Health writes, community library,
-theme packs and the donation/premium gate. They are specified in the guide and
-plug into `Database` the same way the included features do.
+- **HealthKit** (writes your food intake to Apple Health)
+- **Sign in with Apple** (account, premium, community, AI lookup)
+
+Info.plist keys:
+
+- `NSCameraUsageDescription` — "Scan barcodes on food packages."
+- `NSHealthShareUsageDescription` — "Read nutrition you logged to avoid duplicates."
+- `NSHealthUpdateUsageDescription` — "Save the food you log to Apple Health."
+
+Barcode scanning uses VisionKit and needs a real iPhone (not the simulator).
+For Sign in with Apple, your app's bundle ID must be added to the Apple
+sign-in client IDs in the backend auth settings.
+
+## Check settings survive a restart
+
+1. Run on your iPhone, open You › Daily goals, change calories, Save.
+2. Swipe the app away, reopen (or reboot) — the value is still there.
+Settings are written to `Documents/NutriTrack/settings.json` immediately on every change.
+
+## Not yet in the Swift version
+
+Photo upload for community foods, theme pack image textures (gallery themes
+apply their accent colour only), recipes builder.

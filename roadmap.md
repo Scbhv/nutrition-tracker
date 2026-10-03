@@ -10,9 +10,11 @@
 - Search results wired into an editable settings panel (goals, serving size, weekday goals)
 - SwiftUI source scaffold in ios-native/ (JSON database, today/foods/settings, search, history + undo) — not compiled here
 
-## Swift app next steps (needs Xcode on a Mac)
-- Barcode scanning, AI food lookup, Apple Health writes
-- Community library, theme packs, premium/donation gate
+- Swift: barcode scan + review, AI lookup, Apple Health sync, community foods, themes, premium, Apple sign-in, nutrient library in Advanced, Apple-style settings, week strip + 2-column macro cards, instant settings save
+
+## Swift app next steps
+- Build in Xcode on a Mac and test on iPhone (cannot be done here)
+- Community photo upload, theme textures, recipe builder
 
 ## Open (waiting on a decision)
 - "Buy me a coffee": link change vs. new button vs. restyle
