@@ -58,7 +58,7 @@ struct CommunityView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(food.name)
+                        Text(food.name).lineLimit(1)
                         Text("\(Int(food.nutrients["energy-kcal"] ?? 0)) kcal / 100 g · \(food.approval_count)/2 approvals")
                             .font(.caption).foregroundStyle(.secondary)
                     }

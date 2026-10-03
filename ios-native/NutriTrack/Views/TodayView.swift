@@ -62,7 +62,7 @@ struct TodayView: View {
                     }
                     ForEach(log.foods) { entry in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(entry.name)
+                            Text(entry.name).lineLimit(1)
                             Text("\(Int(entry.grams)) g · \(Int(entry.nutrients.energyKcal ?? 0)) kcal")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)

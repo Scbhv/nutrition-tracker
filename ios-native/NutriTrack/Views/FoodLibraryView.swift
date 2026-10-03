@@ -127,10 +127,12 @@ struct PortionSheet: View {
                             }
                         }
                     }
-                    HStack {
-                        ForEach([50.0, 100, 150, 200], id: \.self) { preset in
-                            Button("\(Int(preset)) g") { grams = preset }
-                                .buttonStyle(.bordered)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach([50.0, 100, 150, 200], id: \.self) { preset in
+                                Button("\(Int(preset)) g") { grams = preset }
+                                    .buttonStyle(.bordered)
+                            }
                         }
                     }
                 }
