@@ -739,7 +739,6 @@ export default function Index() {
                   onShowDonationGate={() => setShowDonationGate(true)}
                   query={q}
                 />
-                <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
               </SettingsSection>
             )}
 
@@ -788,16 +787,19 @@ export default function Index() {
             )}
 
             {/* ---------- Advanced / diagnostics ---------- */}
-            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity') && (
+            {settingsMatches('advanced', 'backup', 'restore', 'export', 'import', 'offline', 'simulation', 'error', 'log', 'debug', 'test', 'checklist', 'diagnostics', 'developer', 'history', 'undo', 'activity', 'nutrient library', 'json', 'library') && (
               <SettingsSection
                 key={q ? 'advanced-open' : 'advanced-closed'}
                 title={<HighlightText text="Advanced" query={q} />}
                 icon={Wrench}
-                description={<HighlightText text="Diagnostics, backups and developer tools." query={q} />}
+                description={<HighlightText text="Nutrient library, backups and developer tools." query={q} />}
                 collapsible={!q}
                 defaultOpen={!!q}
               >
                 <SettingsGroup>
+                  {settingsMatches('advanced', 'nutrient library', 'library', 'json', 'import', 'export') && (
+                    <NutrientLibraryCard foods={foods} mergeFoods={mergeFoods} highlightQuery={q} />
+                  )}
                   {settingsMatches('advanced', 'backup', 'restore', 'export', 'import') && (
                     <BackupCard
                       exportDatabase={exportDatabase}
