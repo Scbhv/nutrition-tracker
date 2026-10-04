@@ -37,6 +37,7 @@ import { OfflineSimulationCard } from '@/components/OfflineSimulationCard';
 import { ErrorLogCard } from '@/components/ErrorLogCard';
 import { ThemePackCard } from '@/components/ThemePackCard';
 import { NutrientLibraryCard } from '@/components/NutrientLibraryCard';
+import { NutrientGapsCard } from '@/components/NutrientGapsCard';
 import { SettingsSection } from '@/components/SettingsSection';
 import { SettingsEditorCard } from '@/components/SettingsEditorCard';
 import { recordSearch, recordHistory, registerUndoHandler } from '@/lib/settingsHistory';
