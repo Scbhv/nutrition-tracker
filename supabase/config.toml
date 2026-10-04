@@ -8,3 +8,5 @@ verify_jwt = false
 
 [functions.admin-codes]
 verify_jwt = false
+[functions.nutrient-gaps]
+verify_jwt = false
