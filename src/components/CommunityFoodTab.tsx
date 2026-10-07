@@ -108,6 +108,7 @@ export function CommunityFoodTab({ onImportToLibrary }: Props) {
       servingSize: food.serving_size,
       servingUnit: food.serving_unit,
       nutrients: food.nutrients ?? {},
+      source: 'community',
     });
     toast({ title: 'Added to your library', description: food.name });
   };

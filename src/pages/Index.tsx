@@ -170,6 +170,7 @@ export default function Index() {
       const seed = (mod.default as { foods: any[] }).foods;
       const items = seed.map(f => ({
         ...f,
+        source: 'library',
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -391,7 +392,7 @@ export default function Index() {
   };
 
   const handleAddFood = (foodData: { name: string; barcode?: string; brand?: string; servingSize: number; servingUnit: string; nutrients: NutrientData }) => {
-    addFood(foodData);
+    addFood({ ...foodData, source: foodData.barcode ? 'barcode' : 'manual' });
     toast({ title: 'Saved', description: foodData.name });
   };
 
@@ -625,6 +626,7 @@ export default function Index() {
             logs={logs}
             settings={settings}
             onAddFood={() => setShowAddFood(true)}
+            onFlagFood={(id, flag) => updateFood(id, { flag })}
             onEditFood={(food) => {
               setEditingFood(food);
               setShowAddFood(true);
@@ -1041,7 +1043,7 @@ export default function Index() {
             updateFood(editingRecipe.id, fields);
             toast({ title: 'Recipe updated', description: name });
           } else {
-            addFood(fields);
+            addFood({ ...fields, source: 'recipe' });
             toast({ title: 'Recipe created', description: name });
           }
         }}
@@ -1059,7 +1061,7 @@ export default function Index() {
         onClose={() => setShowAILookup(false)}
         localFoods={foods}
         onResult={(data) => {
-          addFood({ ...data, servingSize: 100, servingUnit: 'g' });
+          addFood({ ...data, servingSize: 100, servingUnit: 'g', source: 'ai' });
           setShowAILookup(false);
         }}
       />
