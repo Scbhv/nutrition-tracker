@@ -740,6 +740,7 @@ export default function Index() {
                   onShowDonationGate={() => setShowDonationGate(true)}
                   query={q}
                 />
+                <NutrientGapsCard logs={logs} foods={foods} goals={dailyGoals} />
               </SettingsSection>
             )}
 

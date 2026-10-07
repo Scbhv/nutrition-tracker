@@ -46,9 +46,9 @@ Deno.serve(async (req) => {
       req,
       { baseURL: "https://ai.gateway.lovable.dev/v1", apiKey, model: "openai/gpt-6-astra" },
       [
-        { role: "system", content: SYSTEM },
         { role: "user", content: `Here is my data:\n${data}` },
       ],
+      SYSTEM,
     );
     const text = await result.text;
     if (!text.trim()) return json({ error: "The AI didn't return an answer. Please try again later." }, 502);
