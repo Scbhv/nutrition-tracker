@@ -65,7 +65,19 @@ export interface NutrientData {
   [key: string]: number | undefined;
 }
 
+export type FoodSource = 'barcode' | 'ai' | 'manual' | 'community' | 'library' | 'recipe';
+
+export interface FoodFlag {
+  reason: string;
+  note?: string;
+  flaggedAt: string;
+}
+
 export interface FoodItem {
+  /** Where this food's nutrient data came from. Older items have none. */
+  source?: FoodSource;
+  /** Set when the user marked the nutrient data as incorrect. */
+  flag?: FoodFlag;
   id: string;
   name: string;
   barcode?: string;

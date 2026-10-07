@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson, ChefHat, Clock, Users } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Download, Upload, FolderOpen, FolderSync, Check, X, FileJson, ChefHat, Clock, Users, Flag, AlertTriangle } from 'lucide-react';
 import { CommunityFoodTab } from './CommunityFoodTab';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { FoodItem, DailyLog, UserSettings } from '@/types/nutrients';
+import { FoodItem, DailyLog, UserSettings, FoodFlag } from '@/types/nutrients';
+import { FoodSourceBadge, FlagFoodDialog } from './FoodSourceBadge';
 import { useFileSystemSync } from '@/hooks/useFileSystemSync';
 import { getWholeUnitPresets } from '@/lib/wholeUnitPresets';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ interface FoodDatabaseViewProps {
   settings: UserSettings;
   onAddFood: () => void;
   onEditFood: (food: FoodItem) => void;
+  onFlagFood: (id: string, flag: FoodFlag | undefined) => void;
   onDeleteFood: (id: string) => void;
   onLogFood: (foodId: string, portionGrams: number) => void;
   onExport: () => void;
@@ -34,6 +36,7 @@ export function FoodDatabaseView({
   settings,
   onAddFood,
   onEditFood,
+  onFlagFood,
   onDeleteFood,
   onLogFood,
   onExport,
@@ -205,6 +208,7 @@ export function FoodDatabaseView({
                     key={food.id}
                     food={food}
                     onEdit={() => onEditFood(food)}
+                    onFlag={(flag) => onFlagFood(food.id, flag)}
                     onDelete={() => onDeleteFood(food.id)}
                     onLog={() => openPortionDialog(food)}
                   />
@@ -511,12 +515,15 @@ function FoodDatabaseCard({
   onEdit,
   onDelete,
   onLog,
+  onFlag,
 }: {
   food: FoodItem;
   onEdit: () => void;
   onDelete: () => void;
   onLog: () => void;
+  onFlag: (flag: FoodFlag | undefined) => void;
 }) {
+  const [flagOpen, setFlagOpen] = useState(false);
   return (
     <div className="glass-card rounded-2xl p-4 group">
       <div className="flex items-start justify-between gap-4">
@@ -530,11 +537,22 @@ function FoodDatabaseCard({
             <span className="text-primary">{food.nutrients['energy-kcal'] || 0} kcal</span>
             <span className="text-nutrient-protein">{food.nutrients['proteins'] || 0}g P</span>
           </div>
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            <FoodSourceBadge source={food.source} />
+            {food.flag && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 text-destructive px-2 py-0.5 text-[10px] font-medium">
+                <AlertTriangle className="h-3 w-3" /> Flagged: {food.flag.reason}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button variant="ghost" size="icon" onClick={onLog} className="rounded-full">
             <Plus className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setFlagOpen(true)} className={cn('rounded-full', food.flag && 'text-destructive')} aria-label="Flag incorrect nutrient data">
+            <Flag className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" onClick={onEdit} className="rounded-full">
             <Edit className="h-4 w-4" />
@@ -544,6 +562,7 @@ function FoodDatabaseCard({
           </Button>
         </div>
       </div>
+      <FlagFoodDialog food={food} open={flagOpen} onOpenChange={setFlagOpen} onSave={onFlag} />
     </div>
   );
 }
