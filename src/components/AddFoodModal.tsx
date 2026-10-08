@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, Beaker, Camera, Loader2, RotateCw, ScanBarcode } from 'lucide-react';
+import { ChevronDown, ChevronUp, Beaker, Camera, Loader2, RotateCw, ScanBarcode, Sparkles, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
-import { readNutritionLabel, retryBarcodeLookup } from '@/lib/labelScan';
+import { readNutritionLabel, retryBarcodeLookup, estimateMeal } from '@/lib/labelScan';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,13 +36,22 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, f
   const [retrying, setRetrying] = useState(false);
   const [lookupFailed, setLookupFailed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const mealFileRef = useRef<HTMLInputElement>(null);
+  const [mealOpen, setMealOpen] = useState(false);
+  const [mealText, setMealText] = useState('');
+  const [mealPhoto, setMealPhoto] = useState<File | null>(null);
+  const [estimating, setEstimating] = useState(false);
+  const [mealInfo, setMealInfo] = useState<{ items: string[]; confidence: string } | null>(null);
 
   useEffect(() => {
     if (open && failedBarcode) {
       setBarcode(failedBarcode);
       setLookupFailed(true);
     }
-    if (!open) setLookupFailed(false);
+    if (!open) {
+      setLookupFailed(false);
+      setMealOpen(false); setMealText(''); setMealPhoto(null); setMealInfo(null);
+    }
   }, [open, failedBarcode]);
 
   const applyResult = (r: { name?: string | null; brand?: string | null; servingSize?: number | null; servingUnit?: string | null; nutrients: NutrientData }) => {
@@ -71,6 +81,23 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, f
     } finally {
       setScanning(false);
       if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const onEstimate = async () => {
+    setEstimating(true);
+    try {
+      const fields: Record<string, string> = {};
+      Object.values(NUTRIENT_CATEGORIES).flat().forEach(k => { fields[k] = NUTRIENT_UNITS[k] ?? 'g'; });
+      const res = await estimateMeal(mealText, mealPhoto, fields);
+      applyResult(res);
+      setMealInfo({ items: res.items ?? [], confidence: res.confidence });
+      toast.success('Meal estimated — please double-check the values');
+      if (res.notes) toast.message(res.notes);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setEstimating(false);
     }
   };
 
@@ -195,6 +222,45 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, f
               >
                 {scanning ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading label…</> : <><Camera className="h-4 w-4 mr-2" />Photograph nutrition label</>}
               </Button>
+              {!mealOpen ? (
+                <Button type="button" variant="outline" onClick={() => setMealOpen(true)} className="w-full h-12 rounded-xl">
+                  <Sparkles className="h-4 w-4 mr-2" />Estimate a meal with AI
+                </Button>
+              ) : (
+                <div className="rounded-2xl bg-secondary p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Estimate a meal</p>
+                    <button type="button" onClick={() => setMealOpen(false)} className="text-xs text-muted-foreground">Close</button>
+                  </div>
+                  <Textarea
+                    value={mealText}
+                    onChange={e => setMealText(e.target.value.slice(0, 1000))}
+                    placeholder="e.g. Plate of spaghetti bolognese with parmesan, about a fist of pasta"
+                    className="bg-background border-0 rounded-xl min-h-[72px]"
+                  />
+                  <input ref={mealFileRef} type="file" accept="image/*" capture="environment" className="hidden"
+                    onChange={e => setMealPhoto(e.target.files?.[0] ?? null)} />
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" className="rounded-full flex-1 min-w-0" onClick={() => mealFileRef.current?.click()}>
+                      <ImagePlus className="h-4 w-4 mr-1 shrink-0" /><span className="truncate">{mealPhoto ? mealPhoto.name : 'Add photo'}</span>
+                    </Button>
+                    {mealPhoto && (
+                      <Button type="button" variant="ghost" size="sm" className="rounded-full" onClick={() => { setMealPhoto(null); if (mealFileRef.current) mealFileRef.current.value = ''; }}>Remove</Button>
+                    )}
+                  </div>
+                  <Button type="button" onClick={onEstimate} disabled={estimating || (!mealPhoto && mealText.trim().length < 3)} className="w-full rounded-xl">
+                    {estimating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Estimating…</> : 'Estimate serving & nutrients'}
+                  </Button>
+                  {mealInfo && (
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>Confidence: <span className="font-medium text-foreground">{mealInfo.confidence}</span></p>
+                      {mealInfo.items.length > 0 && <p>{mealInfo.items.join(' · ')}</p>}
+                      <p>Values below are per 100 g; serving size is the whole meal. Check and edit before saving.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Basic Info */}
               <div className="space-y-4">
                 <div className="space-y-2">

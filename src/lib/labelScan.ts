@@ -49,6 +49,28 @@ export async function readNutritionLabel(file: File, fields: Record<string, stri
   return data as LabelResult;
 }
 
+export interface MealEstimate extends LabelResult {
+  items: string[];
+  confidence: 'low' | 'medium' | 'high';
+}
+
+/** Estimate a whole meal's weight and per-100 g nutrients from a description and/or photo. */
+export async function estimateMeal(
+  description: string,
+  file: File | null,
+  fields: Record<string, string>,
+): Promise<MealEstimate> {
+  if (file && !file.type.startsWith('image/')) throw new Error('Please choose a photo.');
+  if (!file && description.trim().length < 3) throw new Error('Describe the meal or add a photo.');
+  const image = file ? await toDataUrl(file) : undefined;
+  const { data, error } = await supabase.functions.invoke('meal-estimate', {
+    body: { image, description: description.trim(), fields },
+  });
+  if (error) throw new Error(await errorMessage(error, 'Meal estimate failed. Please try again.'));
+  if (data?.error) throw new Error(data.error);
+  return data as MealEstimate;
+}
+
 /** Re-run the online barcode lookup. Returns null when the product still isn't found. */
 export async function retryBarcodeLookup(code: string) {
   const { data, error } = await supabase.functions.invoke('food-lookup', { body: { query: code, useAI: false } });
