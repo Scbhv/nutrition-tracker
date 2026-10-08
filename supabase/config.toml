@@ -13,3 +13,6 @@ verify_jwt = false
 
 [functions.nutrition-label]
 verify_jwt = false
+
+[functions.meal-estimate]
+verify_jwt = false
