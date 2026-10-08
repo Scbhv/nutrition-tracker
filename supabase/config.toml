@@ -10,3 +10,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.nutrient-gaps]
 verify_jwt = false
+
+[functions.nutrition-label]
+verify_jwt = false
