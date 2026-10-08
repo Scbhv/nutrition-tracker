@@ -84,6 +84,7 @@ export default function Index() {
 
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
+  const [failedBarcode, setFailedBarcode] = useState<string | undefined>();
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<FoodItem | null>(null);
   const [showScanner, setShowScanner] = useState(false);
@@ -244,9 +245,10 @@ export default function Index() {
     } else {
       toast({
         title: 'Not found',
-        description: `Barcode ${barcode} not in database`,
+        description: `Barcode ${barcode} kept — retry or enter the details`,
         variant: 'destructive',
       });
+      setFailedBarcode(barcode);
       setShowAddFood(true);
     }
   };
@@ -1025,7 +1027,9 @@ export default function Index() {
         onClose={() => {
           setShowAddFood(false);
           setEditingFood(null);
+          setFailedBarcode(undefined);
         }}
+        failedBarcode={failedBarcode}
         onAdd={handleAddFood}
         initialData={editingFood?.nutrients}
         initialName={editingFood?.name}
