@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Beaker } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Beaker, Camera, Loader2, RotateCw, ScanBarcode } from 'lucide-react';
+import { toast } from 'sonner';
+import { readNutritionLabel, retryBarcodeLookup } from '@/lib/labelScan';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,10 +16,12 @@ interface AddFoodModalProps {
   onAdd: (food: { name: string; barcode?: string; brand?: string; servingSize: number; servingUnit: string; nutrients: NutrientData }) => void;
   initialData?: Partial<NutrientData>;
   initialName?: string;
+  /** Barcode from a scan whose lookup failed — kept so it can be retried. */
+  failedBarcode?: string;
   customNutrients?: CustomNutrient[];
 }
 
-export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, customNutrients = [] }: AddFoodModalProps) {
+export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, failedBarcode, customNutrients = [] }: AddFoodModalProps) {
   const [name, setName] = useState(initialName || '');
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
@@ -27,6 +31,68 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, c
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['macros']);
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [scanning, setScanning] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [lookupFailed, setLookupFailed] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open && failedBarcode) {
+      setBarcode(failedBarcode);
+      setLookupFailed(true);
+    }
+    if (!open) setLookupFailed(false);
+  }, [open, failedBarcode]);
+
+  const applyResult = (r: { name?: string | null; brand?: string | null; servingSize?: number | null; servingUnit?: string | null; nutrients: NutrientData }) => {
+    if (r.name && !name.trim()) setName(r.name);
+    if (r.brand && !brand.trim()) setBrand(r.brand);
+    if (r.servingSize) setServingSize(String(r.servingSize));
+    if (r.servingUnit) setServingUnit(r.servingUnit);
+    setNutrients(prev => ({ ...prev, ...r.nutrients }));
+    const cats = Object.entries(NUTRIENT_CATEGORIES)
+      .filter(([, keys]) => (keys as readonly string[]).some(k => r.nutrients[k] !== undefined))
+      .map(([c]) => c);
+    setExpandedCategories(prev => Array.from(new Set([...prev, ...cats])));
+  };
+
+  const onPhoto = async (file?: File) => {
+    if (!file) return;
+    setScanning(true);
+    try {
+      const fields: Record<string, string> = {};
+      Object.values(NUTRIENT_CATEGORIES).flat().forEach(k => { fields[k] = NUTRIENT_UNITS[k] ?? 'g'; });
+      const res = await readNutritionLabel(file, fields);
+      applyResult(res);
+      toast.success(`Read ${Object.keys(res.nutrients).length} values from the label — please double-check them`);
+      if (res.notes) toast.message(res.notes);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setScanning(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const onRetry = async () => {
+    const code = barcode.trim();
+    if (!code) return;
+    setRetrying(true);
+    try {
+      const res = await retryBarcodeLookup(code);
+      if (res) {
+        applyResult(res);
+        setLookupFailed(false);
+        toast.success('Found it — details filled in');
+      } else {
+        toast.error('Still not found. Enter the details or photograph the label.');
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +166,35 @@ export function AddFoodModal({ open, onClose, onAdd, initialData, initialName, c
         <form onSubmit={handleSubmit}>
           <ScrollArea className="h-[55vh] px-6">
             <div className="space-y-5 pb-4">
+              {lookupFailed && barcode.trim() && (
+                <div className="rounded-2xl bg-secondary p-3 flex items-center gap-3">
+                  <ScanBarcode className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Barcode not found</p>
+                    <p className="text-xs text-muted-foreground truncate">{barcode} is kept — fill in the rest or try again.</p>
+                  </div>
+                  <Button type="button" size="sm" variant="outline" onClick={onRetry} disabled={retrying} className="rounded-full shrink-0">
+                    {retrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <><RotateCw className="h-4 w-4 mr-1" />Retry</>}
+                  </Button>
+                </div>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={e => onPhoto(e.target.files?.[0])}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileRef.current?.click()}
+                disabled={scanning}
+                className="w-full h-12 rounded-xl"
+              >
+                {scanning ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading label…</> : <><Camera className="h-4 w-4 mr-2" />Photograph nutrition label</>}
+              </Button>
               {/* Basic Info */}
               <div className="space-y-4">
                 <div className="space-y-2">
